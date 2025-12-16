@@ -1,0 +1,279 @@
+{% extends "base.html" %}
+
+{% block title %}{{ journalist.name }} - AI Journalist Manager{% endblock %}
+
+{% block content %}
+<div class="mb-6">
+    <a href="/" class="text-indigo-600 hover:text-indigo-800">
+        <i class="fas fa-arrow-left mr-2"></i>Retour au tableau de bord
+    </a>
+</div>
+
+<div class="bg-white rounded-xl shadow-md p-6 mb-6">
+    <div class="flex justify-between items-start mb-6">
+        <div>
+            <h1 class="text-3xl font-bold text-gray-800 mb-2">{{ journalist.name }}</h1>
+            <span class="px-3 py-1 rounded-full text-sm {% if journalist.is_active %}bg-green-100 text-green-700{% else %}bg-red-100 text-red-700{% endif %}">
+                {% if journalist.is_active %}Actif{% else %}Inactif{% endif %}
+            </span>
+        </div>
+        <div class="flex gap-2">
+            <a href="{{ url_for('edit_journalist', journalist_id=journalist.id) }}" 
+               class="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition">
+                <i class="fas fa-edit mr-2"></i>Modifier
+            </a>
+            <form action="{{ url_for('delete_journalist', journalist_id=journalist.id) }}" method="POST" 
+                  onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer ce journaliste ?')">
+                <button type="submit" class="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition">
+                    <i class="fas fa-trash mr-2"></i>Supprimer
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <div class="grid md:grid-cols-3 gap-6">
+        <div class="bg-gray-50 p-4 rounded-lg">
+            <h3 class="font-semibold text-gray-700 mb-2">Personnalité</h3>
+            <p class="text-sm text-gray-600">{{ journalist.personality }}</p>
+        </div>
+        <div class="bg-gray-50 p-4 rounded-lg">
+            <h3 class="font-semibold text-gray-700 mb-2">Style d'écriture</h3>
+            <p class="text-sm text-gray-600">{{ journalist.writing_style }}</p>
+        </div>
+        <div class="bg-gray-50 p-4 rounded-lg">
+            <h3 class="font-semibold text-gray-700 mb-2">Configuration</h3>
+            <p class="text-sm text-gray-600">
+                <strong>Ton:</strong> {{ journalist.tone }}<br>
+                <strong>Langue:</strong> {{ journalist.language.upper() }}<br>
+                <strong>Audio:</strong> {% if journalist.eleven_labs_voice_id %}Activé{% else %}Non configuré{% endif %}
+            </p>
+        </div>
+    </div>
+</div>
+
+<div class="grid lg:grid-cols-2 gap-6 mb-6">
+    <div class="bg-white rounded-xl shadow-md p-6">
+        <div class="flex justify-between items-center mb-4">
+            <h2 class="text-xl font-bold text-gray-800">Sources ({{ sources|length }})</h2>
+            <button onclick="document.getElementById('addSourceModal').classList.remove('hidden')" 
+                    class="bg-green-600 text-white px-3 py-1 rounded-lg text-sm hover:bg-green-700 transition">
+                <i class="fas fa-plus mr-1"></i>Ajouter
+            </button>
+        </div>
+
+        {% if sources %}
+        <div class="space-y-3">
+            {% for source in sources %}
+            <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                <div class="flex items-center gap-3">
+                    <span class="px-2 py-1 rounded text-xs font-medium
+                        {% if source.source_type == 'rss' %}bg-orange-100 text-orange-700
+                        {% elif source.source_type == 'website' %}bg-blue-100 text-blue-700
+                        {% else %}bg-purple-100 text-purple-700{% endif %}">
+                        {{ source.source_type.upper() }}
+                    </span>
+                    <div>
+                        <p class="font-medium text-gray-800">{{ source.name or source.url[:40] }}</p>
+                        <p class="text-xs text-gray-500">{{ source.url[:50] }}{% if source.url|length > 50 %}...{% endif %}</p>
+                    </div>
+                </div>
+                <form action="{{ url_for('delete_source', source_id=source.id) }}" method="POST">
+                    <button type="submit" class="text-red-600 hover:text-red-800">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </form>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <p class="text-gray-500 text-center py-8">Aucune source configurée</p>
+        {% endif %}
+    </div>
+
+    <div class="bg-white rounded-xl shadow-md p-6">
+        <h2 class="text-xl font-bold text-gray-800 mb-4">Abonnés ({{ subscribers|length }})</h2>
+
+        {% if subscribers %}
+        <div class="space-y-3 max-h-96 overflow-y-auto">
+            {% for subscriber in subscribers %}
+            <div class="p-3 bg-gray-50 rounded-lg">
+                <div class="flex items-center justify-between mb-2">
+                    <div>
+                        <p class="font-medium text-gray-800">
+                            {{ subscriber.first_name or 'Utilisateur' }}
+                            {% if subscriber.telegram_username %}(@{{ subscriber.telegram_username }}){% endif %}
+                        </p>
+                        <p class="text-xs text-gray-500">ID: {{ subscriber.telegram_user_id }}</p>
+                    </div>
+                    <span class="px-2 py-1 rounded text-xs
+                        {% if subscriber.is_approved %}bg-green-100 text-green-700
+                        {% elif subscriber.trial_end and subscriber.trial_end > now() %}bg-yellow-100 text-yellow-700
+                        {% else %}bg-red-100 text-red-700{% endif %}">
+                        {% if subscriber.is_approved %}Approuvé
+                        {% elif subscriber.trial_end and subscriber.trial_end > now() %}Essai
+                        {% else %}Expiré{% endif %}
+                    </span>
+                </div>
+                
+                {% if subscriber.trial_end %}
+                <p class="text-xs text-gray-500 mb-2">
+                    Fin essai: {{ subscriber.trial_end.strftime('%d/%m/%Y') }}
+                </p>
+                {% endif %}
+                
+                <div class="flex gap-2">
+                    {% if not subscriber.is_approved %}
+                    <form action="{{ url_for('approve_subscriber', subscriber_id=subscriber.id) }}" method="POST">
+                        <button type="submit" class="text-xs bg-green-600 text-white px-2 py-1 rounded hover:bg-green-700">
+                            Approuver
+                        </button>
+                    </form>
+                    {% else %}
+                    <form action="{{ url_for('revoke_subscriber', subscriber_id=subscriber.id) }}" method="POST">
+                        <button type="submit" class="text-xs bg-red-600 text-white px-2 py-1 rounded hover:bg-red-700">
+                            Révoquer
+                        </button>
+                    </form>
+                    {% endif %}
+                    <form action="{{ url_for('extend_trial', subscriber_id=subscriber.id) }}" method="POST" class="flex gap-1">
+                        <input type="number" name="days" value="7" min="1" max="365" 
+                               class="w-16 text-xs px-2 py-1 border rounded">
+                        <button type="submit" class="text-xs bg-indigo-600 text-white px-2 py-1 rounded hover:bg-indigo-700">
+                            +jours
+                        </button>
+                    </form>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <p class="text-gray-500 text-center py-8">Aucun abonné pour le moment</p>
+        {% endif %}
+    </div>
+</div>
+
+<div class="bg-white rounded-xl shadow-md p-6 mb-6">
+    <div class="flex justify-between items-center mb-4">
+        <h2 class="text-xl font-bold text-gray-800">Actions rapides</h2>
+    </div>
+    <div class="flex gap-4">
+        <button onclick="triggerFetch()" id="fetchBtn"
+                class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition">
+            <i class="fas fa-download mr-2"></i>Collecter les sources maintenant
+        </button>
+        <button onclick="triggerSummary()" id="summaryBtn"
+                class="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition">
+            <i class="fas fa-file-alt mr-2"></i>Générer un résumé maintenant
+        </button>
+    </div>
+    <div id="actionResult" class="mt-4 hidden p-4 rounded-lg"></div>
+</div>
+
+<div class="bg-white rounded-xl shadow-md p-6">
+    <h2 class="text-xl font-bold text-gray-800 mb-4">Articles récents ({{ recent_articles|length }})</h2>
+    
+    {% if recent_articles %}
+    <div class="space-y-3 max-h-96 overflow-y-auto">
+        {% for article in recent_articles %}
+        <div class="p-3 bg-gray-50 rounded-lg">
+            <h3 class="font-medium text-gray-800 mb-1">{{ article.title[:100] }}{% if article.title|length > 100 %}...{% endif %}</h3>
+            <p class="text-sm text-gray-600 mb-2">{{ article.content[:200] if article.content else '' }}{% if article.content and article.content|length > 200 %}...{% endif %}</p>
+            <div class="flex justify-between items-center text-xs text-gray-500">
+                <span>{{ article.source.name if article.source else 'Source inconnue' }}</span>
+                <span>{{ article.fetched_at.strftime('%d/%m/%Y %H:%M') }}</span>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <p class="text-gray-500 text-center py-8">Aucun article collecté</p>
+    {% endif %}
+</div>
+
+<div id="addSourceModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+    <div class="bg-white rounded-xl p-6 w-full max-w-md mx-4">
+        <h3 class="text-xl font-bold text-gray-800 mb-4">Ajouter une source</h3>
+        <form action="{{ url_for('add_source', journalist_id=journalist.id) }}" method="POST" class="space-y-4">
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Type de source</label>
+                <select name="source_type" required class="w-full px-4 py-2 border border-gray-300 rounded-lg">
+                    <option value="rss">Flux RSS</option>
+                    <option value="website">Site Web</option>
+                    <option value="twitter">Twitter/X</option>
+                </select>
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">URL</label>
+                <input type="url" name="url" required
+                       class="w-full px-4 py-2 border border-gray-300 rounded-lg"
+                       placeholder="https://example.com/rss">
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Nom (optionnel)</label>
+                <input type="text" name="name"
+                       class="w-full px-4 py-2 border border-gray-300 rounded-lg"
+                       placeholder="Le Monde">
+            </div>
+            <div class="flex gap-4">
+                <button type="submit" class="flex-1 bg-green-600 text-white py-2 rounded-lg hover:bg-green-700">
+                    Ajouter
+                </button>
+                <button type="button" onclick="document.getElementById('addSourceModal').classList.add('hidden')"
+                        class="flex-1 bg-gray-200 text-gray-700 py-2 rounded-lg hover:bg-gray-300">
+                    Annuler
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+const journalistId = {{ journalist.id }};
+
+async function triggerFetch() {
+    const btn = document.getElementById('fetchBtn');
+    const result = document.getElementById('actionResult');
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Collecte en cours...';
+    
+    try {
+        const response = await fetch(`/api/journalist/${journalistId}/fetch`, { method: 'POST' });
+        const data = await response.json();
+        result.classList.remove('hidden', 'bg-red-100', 'text-red-700');
+        result.classList.add('bg-green-100', 'text-green-700');
+        result.textContent = data.message || data.error;
+    } catch (error) {
+        result.classList.remove('hidden', 'bg-green-100', 'text-green-700');
+        result.classList.add('bg-red-100', 'text-red-700');
+        result.textContent = 'Erreur lors de la collecte';
+    }
+    
+    btn.disabled = false;
+    btn.innerHTML = '<i class="fas fa-download mr-2"></i>Collecter les sources maintenant';
+}
+
+async function triggerSummary() {
+    const btn = document.getElementById('summaryBtn');
+    const result = document.getElementById('actionResult');
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Génération en cours...';
+    
+    try {
+        const response = await fetch(`/api/journalist/${journalistId}/summary`, { method: 'POST' });
+        const data = await response.json();
+        result.classList.remove('hidden', 'bg-red-100', 'text-red-700');
+        result.classList.add('bg-green-100', 'text-green-700');
+        result.textContent = data.message || data.error;
+    } catch (error) {
+        result.classList.remove('hidden', 'bg-green-100', 'text-green-700');
+        result.classList.add('bg-red-100', 'text-red-700');
+        result.textContent = 'Erreur lors de la génération';
+    }
+    
+    btn.disabled = false;
+    btn.innerHTML = '<i class="fas fa-file-alt mr-2"></i>Générer un résumé maintenant';
+}
+</script>
+{% endblock %}
