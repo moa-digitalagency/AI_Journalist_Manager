@@ -56,14 +56,32 @@ Tables: users, roles, journalists, sources, articles, subscribers, subscription_
 1. **Authentification admin** avec rôles (Admin, Editor, Viewer)
 2. **Dashboard** avec statistiques et graphiques
 3. **Gestion journalistes IA** - Création avec personnalité, style, ton, langue
-4. **Gestion sources** - RSS, sites web, Twitter/X, Telegram
-5. **Collecte automatique** des actualités (scheduler)
-6. **Génération résumés** avec Gemini AI
-7. **Audio TTS** via Eleven Labs (optionnel)
-8. **Envoi Telegram** aux abonnés
-9. **Gestion abonnés** avec forfaits et périodes d'essai
-10. **Logs** d'activité et de sécurité
-11. **Paramètres** configurables par catégorie
+4. **Gestion sources** - RSS, sites web, Twitter/X (via nitter)
+5. **Collecte automatique** des actualités toutes les 24h (2:00 AM)
+6. **Génération résumés** avec Gemini AI chaque matin (8:00 AM)
+7. **Audio TTS** via Eleven Labs (génération automatique si configuré)
+8. **Envoi Telegram** automatique aux abonnés actifs
+9. **Conversation IA** - Les utilisateurs peuvent poser des questions, le bot recherche dans les articles
+10. **Gestion abonnés** avec forfaits et périodes d'essai (7 jours par défaut)
+11. **Logs** d'activité et de sécurité
+12. **Paramètres** configurables par catégorie
+
+## Services automatiques
+
+- **Scheduler** : Démarre automatiquement au lancement de l'application
+  - Collecte des sources à 2:00 AM
+  - Génération et envoi des résumés à 8:00 AM
+- **Bots Telegram** : Démarrent automatiquement pour chaque journaliste actif
+  - Commandes : /start, /help, /status, /latest
+  - Réponses en langage naturel avec recherche dans les articles
+
+## API de contrôle
+
+- `POST /api/services/fetch` - Déclencher manuellement la collecte
+- `POST /api/services/summary` - Déclencher manuellement les résumés
+- `POST /api/services/bot/<id>/start` - Démarrer un bot
+- `POST /api/services/bot/<id>/stop` - Arrêter un bot
+- `GET /api/services/status` - État des services
 
 ## Variables d'environnement
 
