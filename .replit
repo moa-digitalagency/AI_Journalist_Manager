@@ -1,10 +1,11 @@
-modules = ["python-3.11"]
+modules = ["web", "python-3.11"]
 [agent]
 expertMode = true
 integrations = ["python_gemini:1.0.0"]
 
 [nix]
 channel = "stable-25_05"
+packages = ["openssl", "postgresql"]
 
 [workflows]
 runButton = "Project"
@@ -22,14 +23,18 @@ args = "AI Journalist Manager"
 name = "AI Journalist Manager"
 author = "agent"
 
+[workflows.workflow.metadata]
+outputType = "webview"
+
 [[workflows.workflow.tasks]]
 task = "shell.exec"
 args = "python app.py"
 waitForPort = 5000
 
-[workflows.workflow.metadata]
-outputType = "webview"
-
 [[ports]]
 localPort = 5000
 externalPort = 80
+
+[deployment]
+deploymentTarget = "autoscale"
+run = ["gunicorn", "--bind", "0.0.0.0:5000", "main:app"]
