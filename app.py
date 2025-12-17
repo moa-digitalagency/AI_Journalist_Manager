@@ -1,9 +1,14 @@
 import os
+import logging
+import atexit
 from datetime import datetime
 from flask import Flask
 from models import db, User, Role, SubscriptionPlan
 from routes import register_blueprints
 from utils.helpers import format_datetime, time_ago, truncate
+
+logging.basicConfig(level=logging.DEBUG)
+logger = logging.getLogger(__name__)
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'dev-secret-key-change-in-production')
@@ -84,7 +89,30 @@ def init_db():
 
 init_db()
 
+def start_services():
+    """Initialize background services (scheduler and Telegram bots)."""
+    try:
+        from services.scheduler_service import SchedulerService
+        from services.telegram_service import TelegramService
+        
+        # Start the scheduler for automatic article collection and summary generation
+        SchedulerService.init(fetch_hour=2, summary_hour=8)
+        logger.info("Scheduler service started")
+        
+        # Start Telegram bots for all active journalists
+        TelegramService.start_all_bots()
+        logger.info("Telegram bots started")
+        
+        # Register cleanup on exit
+        atexit.register(SchedulerService.shutdown)
+        atexit.register(TelegramService.stop_all_bots)
+        
+    except Exception as e:
+        logger.error(f"Error starting services: {e}")
+
+# Start services when not in reloader child process
+if os.environ.get('WERKZEUG_RUN_MAIN') == 'true' or not app.debug:
+    start_services()
+
 if __name__ == '__main__':
-    from services.scheduler_service import SchedulerService
-    SchedulerService.init()
     app.run(host='0.0.0.0', port=5000, debug=True)

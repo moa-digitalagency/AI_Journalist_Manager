@@ -130,6 +130,10 @@ class SchedulerService:
     
     @classmethod
     def init(cls, fetch_hour=2, summary_hour=8):
+        if scheduler.running:
+            logger.info("Scheduler already running, skipping init")
+            return
+        
         scheduler.add_job(
             cls.fetch_all_sources,
             'cron',
