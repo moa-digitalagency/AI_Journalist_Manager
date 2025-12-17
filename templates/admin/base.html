@@ -6,26 +6,12 @@
     <title>{% block title %}{{ _('dashboard') }}{% endblock %} - {{ _('app_name') }}</title>
     <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='favicon.svg') }}">
     <link rel="shortcut icon" type="image/svg+xml" href="{{ url_for('static', filename='favicon.svg') }}">
+    <link rel="apple-touch-icon" href="{{ url_for('static', filename='favicon.svg') }}">
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="{{ url_for('static', filename='js/tailwind.config.js') }}"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        primary: { 50: '#eff6ff', 100: '#dbeafe', 200: '#bfdbfe', 300: '#93c5fd', 400: '#60a5fa', 500: '#3b82f6', 600: '#2563eb', 700: '#1d4ed8', 800: '#1e40af', 900: '#1e3a8a', 950: '#172554' }
-                    }
-                }
-            }
-        }
-    </script>
-    <style>
-        .sidebar { transition: width 0.3s ease; }
-        .sidebar-collapsed { width: 80px; }
-        .sidebar-collapsed .nav-text { display: none; }
-        .sidebar-collapsed .logo-text { display: none; }
-    </style>
 </head>
 <body class="bg-gray-50 min-h-screen">
     <div class="flex">
@@ -124,6 +110,7 @@
         </main>
     </div>
     
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
     {% block scripts %}{% endblock %}
 </body>
 </html>

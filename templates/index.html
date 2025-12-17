@@ -5,7 +5,7 @@
 {% block content %}
 <div class="mb-8">
     <h1 class="text-3xl font-bold text-gray-800 mb-2">{{ _('dashboard') }}</h1>
-    <p class="text-gray-600">{% if current_lang == 'fr' %}Gérez vos journalistes IA et leurs sources d'actualités{% else %}Manage your AI journalists and their news sources{% endif %}</p>
+    <p class="text-gray-600">{{ _('manage_journalists_desc') }}</p>
 </div>
 
 {% if journalists %}
@@ -22,7 +22,7 @@
             
             <div class="space-y-2 text-sm text-gray-600 mb-4">
                 <p><i class="fas fa-language mr-2"></i>{{ _('language') }}: {{ journalist.language.upper() }}</p>
-                <p><i class="fas fa-palette mr-2"></i>{% if current_lang == 'fr' %}Ton{% else %}Tone{% endif %}: {{ journalist.tone }}</p>
+                <p><i class="fas fa-palette mr-2"></i>{{ _('tone') }}: {{ journalist.tone }}</p>
                 <p><i class="fas fa-rss mr-2"></i>{{ journalist.sources|length }} {{ _('sources') | lower }}</p>
                 <p><i class="fas fa-users mr-2"></i>{{ journalist.subscribers|length }} {{ _('subscribers') | lower }}</p>
             </div>
@@ -30,13 +30,13 @@
             {% if journalist.last_summary_at %}
             <p class="text-xs text-gray-500 mb-4">
                 <i class="fas fa-clock mr-1"></i>
-                {% if current_lang == 'fr' %}Dernier résumé{% else %}Last summary{% endif %}: {{ journalist.last_summary_at.strftime('%d/%m/%Y %H:%M') }}
+                {{ _('last_summary') }}: {{ journalist.last_summary_at.strftime('%d/%m/%Y %H:%M') }}
             </p>
             {% endif %}
             
             <a href="{{ url_for('view_journalist', journalist_id=journalist.id) }}" 
                class="block w-full text-center bg-indigo-600 text-white py-2 rounded-lg hover:bg-indigo-700 transition">
-                {% if current_lang == 'fr' %}Gérer{% else %}Manage{% endif %} <i class="fas fa-arrow-right ml-2"></i>
+                {{ _('manage') }} <i class="fas fa-arrow-right ml-2"></i>
             </a>
         </div>
     </div>
@@ -48,7 +48,7 @@
         <i class="fas fa-robot"></i>
     </div>
     <h2 class="text-2xl font-bold text-gray-700 mb-2">{{ _('no_journalists') }}</h2>
-    <p class="text-gray-500 mb-6">{% if current_lang == 'fr' %}Créez votre premier journaliste IA pour commencer{% else %}Create your first AI journalist to get started{% endif %}</p>
+    <p class="text-gray-500 mb-6">{{ _('create_first_journalist') }}</p>
     <a href="{{ url_for('create_journalist') }}" 
        class="inline-block bg-indigo-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-indigo-700 transition">
         <i class="fas fa-plus mr-2"></i>{{ _('create_journalist') }}
