@@ -1,3 +1,5 @@
+window.translations = window.translations || {};
+
 document.addEventListener('DOMContentLoaded', function() {
     initSourceManager();
     initConfirmDelete();
@@ -25,24 +27,31 @@ function initSourceManager() {
 }
 
 function createSourceItem(index) {
+    const t = window.translations;
+    const sourceLabel = t.source || 'Source';
+    const urlLabel = t.url || 'URL';
+    const typeLabel = t.type || 'Type';
+    const rssFeed = t.rss_feed || 'RSS Feed';
+    const website = t.website || 'Website';
+    
     return `
         <div class="source-item bg-gray-50 p-4 rounded-xl border border-gray-200">
             <div class="flex justify-between items-start mb-3">
-                <span class="text-sm font-medium text-gray-600">Source ${index + 1}</span>
+                <span class="text-sm font-medium text-gray-600">${sourceLabel} ${index + 1}</span>
                 <button type="button" class="remove-source text-red-500 hover:text-red-700">
                     <i class="fas fa-times"></i>
                 </button>
             </div>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                    <label class="form-label">URL</label>
+                    <label class="form-label">${urlLabel}</label>
                     <input type="url" name="source_url_${index}" class="form-input" placeholder="https://...">
                 </div>
                 <div>
-                    <label class="form-label">Type</label>
+                    <label class="form-label">${typeLabel}</label>
                     <select name="source_type_${index}" class="form-input">
-                        <option value="rss">RSS Feed</option>
-                        <option value="website">Website</option>
+                        <option value="rss">${rssFeed}</option>
+                        <option value="website">${website}</option>
                     </select>
                 </div>
             </div>
@@ -51,11 +60,14 @@ function createSourceItem(index) {
 }
 
 function updateSourceIndices() {
+    const t = window.translations;
+    const sourceLabel = t.source || 'Source';
+    
     const sources = document.querySelectorAll('.source-item');
     sources.forEach((source, index) => {
         const label = source.querySelector('span');
         if (label) {
-            label.textContent = `Source ${index + 1}`;
+            label.textContent = `${sourceLabel} ${index + 1}`;
         }
         const urlInput = source.querySelector('input[type="url"]');
         const typeSelect = source.querySelector('select');
@@ -65,9 +77,12 @@ function updateSourceIndices() {
 }
 
 function initConfirmDelete() {
+    const t = window.translations;
+    const defaultConfirm = t.confirm_delete || 'Are you sure?';
+    
     document.querySelectorAll('[data-confirm]').forEach(function(element) {
         element.addEventListener('click', function(e) {
-            const message = this.getAttribute('data-confirm') || 'Are you sure?';
+            const message = this.getAttribute('data-confirm') || defaultConfirm;
             if (!confirm(message)) {
                 e.preventDefault();
             }

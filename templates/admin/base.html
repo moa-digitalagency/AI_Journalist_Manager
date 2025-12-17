@@ -110,6 +110,16 @@
         </main>
     </div>
     
+    <script>
+        window.translations = {
+            source: "{{ _('source') }}",
+            url: "{{ _('url') }}",
+            type: "{{ _('type') }}",
+            rss_feed: "{{ _('rss_feed') }}",
+            website: "{{ _('website') }}",
+            confirm_delete: "{{ _('confirm_delete') }}"
+        };
+    </script>
     <script src="{{ url_for('static', filename='js/main.js') }}"></script>
     {% block scripts %}{% endblock %}
 </body>

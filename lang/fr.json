@@ -217,5 +217,8 @@
   "fetch_error": "Erreur lors de la collecte",
   "generate_error": "Erreur lors de la génération",
   "last_summary": "Dernier résumé",
-  "example": "Ex"
+  "example": "Ex",
+  "source": "Source",
+  "url": "URL",
+  "type": "Type"
 }

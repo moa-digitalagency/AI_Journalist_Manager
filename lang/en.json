@@ -217,5 +217,8 @@
   "fetch_error": "Error during fetch",
   "generate_error": "Error during generation",
   "last_summary": "Last summary",
-  "example": "e.g."
+  "example": "e.g.",
+  "source": "Source",
+  "url": "URL",
+  "type": "Type"
 }
