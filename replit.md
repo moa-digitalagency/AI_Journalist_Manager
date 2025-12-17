@@ -56,7 +56,7 @@ Tables: users, roles, journalists, sources, articles, subscribers, subscription_
 1. **Authentification admin** avec rôles (Admin, Editor, Viewer)
 2. **Dashboard** avec statistiques et graphiques
 3. **Gestion journalistes IA** - Création avec personnalité, style, ton, langue
-4. **Gestion sources** - RSS, sites web, Twitter/X (via nitter)
+4. **Gestion sources** - RSS, sites web, Twitter/X (via nitter), YouTube (avec transcription automatique)
 5. **Collecte automatique** des actualités toutes les 24h (2:00 AM)
 6. **Génération résumés** avec Gemini AI chaque matin (8:00 AM)
 7. **Audio TTS** via Eleven Labs (génération automatique si configuré)
