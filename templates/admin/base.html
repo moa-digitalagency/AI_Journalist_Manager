@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Admin{% endblock %} - AI Journalist Manager</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: { 50: '#eff6ff', 100: '#dbeafe', 200: '#bfdbfe', 300: '#93c5fd', 400: '#60a5fa', 500: '#3b82f6', 600: '#2563eb', 700: '#1d4ed8', 800: '#1e40af', 900: '#1e3a8a', 950: '#172554' }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .sidebar { transition: width 0.3s ease; }
+        .sidebar-collapsed { width: 80px; }
+        .sidebar-collapsed .nav-text { display: none; }
+        .sidebar-collapsed .logo-text { display: none; }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <div class="flex">
+        <aside id="sidebar" class="sidebar fixed left-0 top-0 h-full w-64 bg-primary-950 text-white z-50">
+            <div class="p-6 border-b border-primary-800">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-lg bg-primary-600 flex items-center justify-center">
+                        <i class="fas fa-robot text-lg"></i>
+                    </div>
+                    <span class="logo-text font-bold text-lg">AI Journalist</span>
+                </div>
+            </div>
+            
+            <nav class="p-4 space-y-2">
+                <a href="{{ url_for('admin.dashboard') }}" class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-primary-800 transition {% if request.endpoint == 'admin.dashboard' %}bg-primary-800{% endif %}">
+                    <i class="fas fa-chart-pie w-5 text-center"></i>
+                    <span class="nav-text">Dashboard</span>
+                </a>
+                <a href="{{ url_for('journalists.index') }}" class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-primary-800 transition {% if 'journalists' in request.endpoint %}bg-primary-800{% endif %}">
+                    <i class="fas fa-robot w-5 text-center"></i>
+                    <span class="nav-text">Journalistes</span>
+                </a>
+                <a href="{{ url_for('subscribers.index') }}" class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-primary-800 transition {% if 'subscribers' in request.endpoint %}bg-primary-800{% endif %}">
+                    <i class="fas fa-users w-5 text-center"></i>
+                    <span class="nav-text">Abonnés</span>
+                </a>
+                <a href="{{ url_for('plans.index') }}" class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-primary-800 transition {% if 'plans' in request.endpoint %}bg-primary-800{% endif %}">
+                    <i class="fas fa-tags w-5 text-center"></i>
+                    <span class="nav-text">Forfaits</span>
+                </a>
+                
+                <div class="pt-4 mt-4 border-t border-primary-800">
+                    <p class="px-4 text-xs text-primary-400 uppercase tracking-wider mb-2 nav-text">Système</p>
+                </div>
+                
+                <a href="{{ url_for('logs.index') }}" class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-primary-800 transition {% if 'logs' in request.endpoint %}bg-primary-800{% endif %}">
+                    <i class="fas fa-history w-5 text-center"></i>
+                    <span class="nav-text">Logs</span>
+                </a>
+                <a href="{{ url_for('users.index') }}" class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-primary-800 transition {% if 'users' in request.endpoint %}bg-primary-800{% endif %}">
+                    <i class="fas fa-user-shield w-5 text-center"></i>
+                    <span class="nav-text">Utilisateurs</span>
+                </a>
+                <a href="{{ url_for('settings.index') }}" class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-primary-800 transition {% if 'settings' in request.endpoint %}bg-primary-800{% endif %}">
+                    <i class="fas fa-cog w-5 text-center"></i>
+                    <span class="nav-text">Paramètres</span>
+                </a>
+            </nav>
+            
+            <div class="absolute bottom-0 left-0 right-0 p-4 border-t border-primary-800">
+                <a href="{{ url_for('auth.logout') }}" class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-red-600/20 text-red-400 transition">
+                    <i class="fas fa-sign-out-alt w-5 text-center"></i>
+                    <span class="nav-text">Déconnexion</span>
+                </a>
+            </div>
+        </aside>
+        
+        <main class="flex-1 ml-64">
+            <header class="bg-white border-b border-gray-200 px-8 py-4">
+                <div class="flex justify-between items-center">
+                    <div>
+                        <h1 class="text-2xl font-bold text-gray-800">{% block header %}Dashboard{% endblock %}</h1>
+                        <p class="text-sm text-gray-500">{% block subheader %}{% endblock %}</p>
+                    </div>
+                    <div class="flex items-center gap-4">
+                        <span class="text-sm text-gray-600">
+                            <i class="fas fa-user-circle mr-1"></i>
+                            {{ session.username }}
+                        </span>
+                    </div>
+                </div>
+            </header>
+            
+            <div class="p-8">
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                        {% for category, message in messages %}
+                            <div class="mb-6 p-4 rounded-xl {% if category == 'error' %}bg-red-50 text-red-600 border border-red-200{% else %}bg-green-50 text-green-600 border border-green-200{% endif %}">
+                                <i class="fas {% if category == 'error' %}fa-exclamation-circle{% else %}fa-check-circle{% endif %} mr-2"></i>
+                                {{ message }}
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+                {% endwith %}
+                
+                {% block content %}{% endblock %}
+            </div>
+        </main>
+    </div>
+    
+    {% block scripts %}{% endblock %}
+</body>
+</html>

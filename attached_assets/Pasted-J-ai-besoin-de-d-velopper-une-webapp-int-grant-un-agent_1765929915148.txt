@@ -1,0 +1,34 @@
+J’ai besoin de développer une webapp intégrant un agent IA capable de créer des « journalistes IA » pour la production de résumés d’actualités.
+
+L’administrateur se connecte, crée un journaliste en liant avec un bot Telegram, puis charge les sources souhaitées (liens de sites web pour la veille médiatique ainsi que les comptes X/Twitter et flux RSS). Le journaliste IA collecte automatiquement, toutes les 24 heures, les nouvelles publications des sources, les stocke dans sa base de données avec leurs métadonnées, puis génère un résumé. Ce résumé est ensuite envoyé automatiquement chaque matin sur la conversation Telegram (dans un premier temps) relié au journaliste concerné.
+
+Le journaliste IA produit un résumé court et concis, en version texte et audio, grâce à l’API Eleven Labs.  
+Chaque journaliste IA dispose d’une personnalité, d’un style d’écriture, d’une orthographe spécifique et d’un ton de réponse configurables. Ces paramètres déterminent le style du résumé, ainsi que la manière dont le journaliste interagit avec les utilisateurs. En effet, il peut discuter en langage naturel avec toute personne connectée à lui.
+
+Les utilisateurs peuvent lui demander une information précise : le journaliste analyse alors sa base de données, détecte les mots-clés correspondants et renvoie l’information pertinente en mentionnant toujours la source.
+
+Chaque nouvelle personne qui engage une conversation est considérée comme un abonné potentiel.  
+Depuis l’interface administrateur, l’accès aux fonctionnalités du bot peut être validé et limité dans le temps : par exemple, un essai d’une semaine pendant laquelle l’utilisateur reçoit les résumés quotidiens et peut interagir avec le journaliste. Une fois cette période expirée, tous les services sont suspendus jusqu’à réactivation.
+
+Le panel administrateurs sera complet pour permettre de mieux gerer les journalistes, avec un menu a gauche ou un retrouve :
+- Dashboard avec les stats 
+- Une menu pour gerer et configurer les bots
+- Un menu pour gerer les abonnées qui commence la conversation avec un bot et valider ou assigner les forfaits
+- Un menu pour gerer les forfaits
+- Un menu pour statistiques plus developper
+- Un menu pour voir les logs activités et securités
+- Un menu pour gerer les utilisateurs de la plateformes, creerun autres admin avec gestion de role
+- Un menu parametre pour gerer les parametres de la plateforme, seo, configurer les d'autres parametres de l'app
+
+Stocke toute les infirmations critique dans env et aussi les identifiants superdamin dans env
+un design super professionnelle, moderne, stylé et tres epurés couleur bleu foncé
+
+**Stack technique :**  
+- Backend : Python  
+- Frontend : HTML, CSS, Tailwind, JavaScript
+- Base de donnée : PostgreSQL
+- IA : Gemini  
+- Text-to-Speech : Eleven Labs (voix IA personnalisée)  
+- Interface de communication : Telegram (un bot par journaliste, utilisant le token généré du bot)
+
+Structure des dossiers : les fichiers doivent être regrouper en dossier (routes, models, services, security, utilis, log, lang, etc.) pour chaque type des fichiers s'y referent

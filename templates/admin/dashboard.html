@@ -1,0 +1,181 @@
+{% extends "admin/base.html" %}
+
+{% block title %}Dashboard{% endblock %}
+{% block header %}Dashboard{% endblock %}
+{% block subheader %}Vue d'ensemble de votre plateforme{% endblock %}
+
+{% block content %}
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+    <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+        <div class="flex items-center justify-between">
+            <div>
+                <p class="text-sm text-gray-500">Journalistes</p>
+                <p class="text-3xl font-bold text-gray-800 mt-1">{{ stats.journalists }}</p>
+                <p class="text-xs text-green-600 mt-2"><i class="fas fa-circle text-xs mr-1"></i>{{ stats.active_journalists }} actifs</p>
+            </div>
+            <div class="w-14 h-14 rounded-2xl bg-primary-100 flex items-center justify-center">
+                <i class="fas fa-robot text-2xl text-primary-600"></i>
+            </div>
+        </div>
+    </div>
+    
+    <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+        <div class="flex items-center justify-between">
+            <div>
+                <p class="text-sm text-gray-500">Abonnés</p>
+                <p class="text-3xl font-bold text-gray-800 mt-1">{{ stats.subscribers }}</p>
+                <p class="text-xs text-green-600 mt-2"><i class="fas fa-arrow-up mr-1"></i>+{{ stats.new_subscribers_week }} cette semaine</p>
+            </div>
+            <div class="w-14 h-14 rounded-2xl bg-green-100 flex items-center justify-center">
+                <i class="fas fa-users text-2xl text-green-600"></i>
+            </div>
+        </div>
+    </div>
+    
+    <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+        <div class="flex items-center justify-between">
+            <div>
+                <p class="text-sm text-gray-500">Articles</p>
+                <p class="text-3xl font-bold text-gray-800 mt-1">{{ stats.articles }}</p>
+                <p class="text-xs text-blue-600 mt-2"><i class="fas fa-plus mr-1"></i>+{{ stats.articles_week }} cette semaine</p>
+            </div>
+            <div class="w-14 h-14 rounded-2xl bg-blue-100 flex items-center justify-center">
+                <i class="fas fa-newspaper text-2xl text-blue-600"></i>
+            </div>
+        </div>
+    </div>
+    
+    <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+        <div class="flex items-center justify-between">
+            <div>
+                <p class="text-sm text-gray-500">Résumés</p>
+                <p class="text-3xl font-bold text-gray-800 mt-1">{{ stats.summaries_week }}</p>
+                <p class="text-xs text-purple-600 mt-2"><i class="fas fa-paper-plane mr-1"></i>Cette semaine</p>
+            </div>
+            <div class="w-14 h-14 rounded-2xl bg-purple-100 flex items-center justify-center">
+                <i class="fas fa-file-alt text-2xl text-purple-600"></i>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="grid lg:grid-cols-3 gap-6">
+    <div class="lg:col-span-2 bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+        <h3 class="font-semibold text-gray-800 mb-4">Activité (7 jours)</h3>
+        <canvas id="activityChart" height="120"></canvas>
+    </div>
+    
+    <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+        <h3 class="font-semibold text-gray-800 mb-4">Activités récentes</h3>
+        <div class="space-y-4 max-h-80 overflow-y-auto">
+            {% for log in recent_activities %}
+            <div class="flex items-start gap-3 text-sm">
+                <div class="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center flex-shrink-0">
+                    <i class="fas fa-circle-dot text-xs text-gray-400"></i>
+                </div>
+                <div>
+                    <p class="text-gray-700">{{ log.action }}</p>
+                    <p class="text-xs text-gray-400">{{ time_ago(log.created_at) }}</p>
+                </div>
+            </div>
+            {% else %}
+            <p class="text-gray-500 text-sm">Aucune activité récente</p>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+<div class="grid lg:grid-cols-2 gap-6 mt-6">
+    <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+        <div class="flex justify-between items-center mb-4">
+            <h3 class="font-semibold text-gray-800">Journalistes récents</h3>
+            <a href="{{ url_for('journalists.index') }}" class="text-sm text-primary-600 hover:underline">Voir tout</a>
+        </div>
+        <div class="space-y-3">
+            {% for j in recent_journalists %}
+            <div class="flex items-center justify-between p-3 bg-gray-50 rounded-xl">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-primary-100 flex items-center justify-center">
+                        <i class="fas fa-robot text-primary-600"></i>
+                    </div>
+                    <div>
+                        <p class="font-medium text-gray-800">{{ j.name }}</p>
+                        <p class="text-xs text-gray-500">{{ j.sources|length }} sources</p>
+                    </div>
+                </div>
+                <span class="px-2 py-1 rounded-full text-xs {% if j.is_active %}bg-green-100 text-green-600{% else %}bg-gray-100 text-gray-600{% endif %}">
+                    {% if j.is_active %}Actif{% else %}Inactif{% endif %}
+                </span>
+            </div>
+            {% else %}
+            <p class="text-gray-500 text-sm text-center py-4">Aucun journaliste</p>
+            {% endfor %}
+        </div>
+    </div>
+    
+    <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+        <div class="flex justify-between items-center mb-4">
+            <h3 class="font-semibold text-gray-800">Nouveaux abonnés</h3>
+            <a href="{{ url_for('subscribers.index') }}" class="text-sm text-primary-600 hover:underline">Voir tout</a>
+        </div>
+        <div class="space-y-3">
+            {% for s in recent_subscribers %}
+            <div class="flex items-center justify-between p-3 bg-gray-50 rounded-xl">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-green-100 flex items-center justify-center">
+                        <i class="fas fa-user text-green-600"></i>
+                    </div>
+                    <div>
+                        <p class="font-medium text-gray-800">{{ s.first_name or 'Utilisateur' }}</p>
+                        <p class="text-xs text-gray-500">@{{ s.telegram_username or s.telegram_user_id }}</p>
+                    </div>
+                </div>
+                <span class="px-2 py-1 rounded-full text-xs {% if s.is_approved %}bg-green-100 text-green-600{% else %}bg-yellow-100 text-yellow-600{% endif %}">
+                    {% if s.is_approved %}Approuvé{% else %}En attente{% endif %}
+                </span>
+            </div>
+            {% else %}
+            <p class="text-gray-500 text-sm text-center py-4">Aucun abonné</p>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+fetch('/api/stats/chart')
+    .then(r => r.json())
+    .then(data => {
+        new Chart(document.getElementById('activityChart'), {
+            type: 'line',
+            data: {
+                labels: data.dates,
+                datasets: [
+                    {
+                        label: 'Articles',
+                        data: data.articles,
+                        borderColor: '#3b82f6',
+                        backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                        fill: true,
+                        tension: 0.4
+                    },
+                    {
+                        label: 'Abonnés',
+                        data: data.subscribers,
+                        borderColor: '#10b981',
+                        backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                        fill: true,
+                        tension: 0.4
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                plugins: { legend: { position: 'bottom' } },
+                scales: { y: { beginAtZero: true } }
+            }
+        });
+    });
+</script>
+{% endblock %}

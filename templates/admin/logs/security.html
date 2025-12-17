@@ -1,0 +1,124 @@
+{% extends "admin/base.html" %}
+
+{% block title %}Logs de sécurité{% endblock %}
+{% block header %}Logs de sécurité{% endblock %}
+{% block subheader %}Événements de sécurité et tentatives de connexion{% endblock %}
+
+{% block content %}
+<div class="flex justify-between items-center mb-6">
+    <a href="{{ url_for('logs.index') }}" class="text-gray-600 hover:text-gray-800">
+        <i class="fas fa-arrow-left mr-2"></i>Retour aux logs
+    </a>
+    
+    <select onchange="changeDays(this.value)" class="px-4 py-2 border border-gray-200 rounded-xl bg-white">
+        <option value="7" {% if days == 7 %}selected{% endif %}>7 derniers jours</option>
+        <option value="30" {% if days == 30 %}selected{% endif %}>30 derniers jours</option>
+        <option value="90" {% if days == 90 %}selected{% endif %}>3 derniers mois</option>
+    </select>
+</div>
+
+<div class="grid md:grid-cols-4 gap-4 mb-6">
+    <div class="bg-white rounded-2xl p-4 shadow-sm border border-gray-100">
+        <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-xl bg-green-100 flex items-center justify-center">
+                <i class="fas fa-sign-in-alt text-green-600"></i>
+            </div>
+            <div>
+                <p class="text-2xl font-bold text-gray-800">{{ logs|selectattr('action', 'equalto', 'login_success')|list|length }}</p>
+                <p class="text-xs text-gray-500">Connexions réussies</p>
+            </div>
+        </div>
+    </div>
+    <div class="bg-white rounded-2xl p-4 shadow-sm border border-gray-100">
+        <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-xl bg-red-100 flex items-center justify-center">
+                <i class="fas fa-times-circle text-red-600"></i>
+            </div>
+            <div>
+                <p class="text-2xl font-bold text-gray-800">{{ logs|selectattr('action', 'equalto', 'login_failed')|list|length }}</p>
+                <p class="text-xs text-gray-500">Échecs de connexion</p>
+            </div>
+        </div>
+    </div>
+    <div class="bg-white rounded-2xl p-4 shadow-sm border border-gray-100">
+        <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-xl bg-yellow-100 flex items-center justify-center">
+                <i class="fas fa-exclamation-triangle text-yellow-600"></i>
+            </div>
+            <div>
+                <p class="text-2xl font-bold text-gray-800">{{ logs|selectattr('action', 'equalto', 'unauthorized_access')|list|length }}</p>
+                <p class="text-xs text-gray-500">Accès non autorisés</p>
+            </div>
+        </div>
+    </div>
+    <div class="bg-white rounded-2xl p-4 shadow-sm border border-gray-100">
+        <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-xl bg-blue-100 flex items-center justify-center">
+                <i class="fas fa-sign-out-alt text-blue-600"></i>
+            </div>
+            <div>
+                <p class="text-2xl font-bold text-gray-800">{{ logs|selectattr('action', 'equalto', 'logout')|list|length }}</p>
+                <p class="text-xs text-gray-500">Déconnexions</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+    <table class="w-full">
+        <thead class="bg-gray-50">
+            <tr>
+                <th class="text-left py-4 px-6 text-sm font-medium text-gray-600">Date</th>
+                <th class="text-left py-4 px-6 text-sm font-medium text-gray-600">Événement</th>
+                <th class="text-left py-4 px-6 text-sm font-medium text-gray-600">Utilisateur</th>
+                <th class="text-left py-4 px-6 text-sm font-medium text-gray-600">IP</th>
+                <th class="text-left py-4 px-6 text-sm font-medium text-gray-600">Détails</th>
+            </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-100">
+            {% for log in logs %}
+            <tr class="hover:bg-gray-50">
+                <td class="py-4 px-6">
+                    <span class="text-sm text-gray-600">{{ format_datetime(log.created_at) }}</span>
+                </td>
+                <td class="py-4 px-6">
+                    <span class="px-3 py-1 rounded-full text-xs font-medium 
+                        {% if 'success' in log.action %}bg-green-100 text-green-600
+                        {% elif 'failed' in log.action %}bg-red-100 text-red-600
+                        {% elif 'unauthorized' in log.action %}bg-yellow-100 text-yellow-600
+                        {% else %}bg-gray-100 text-gray-600{% endif %}">
+                        {{ log.action }}
+                    </span>
+                </td>
+                <td class="py-4 px-6">
+                    <span class="text-sm text-gray-800">{{ log.user.username if log.user else 'Inconnu' }}</span>
+                </td>
+                <td class="py-4 px-6">
+                    <span class="text-sm text-gray-600 font-mono">{{ log.ip_address or '-' }}</span>
+                </td>
+                <td class="py-4 px-6">
+                    <span class="text-sm text-gray-500">{{ log.details or '-' }}</span>
+                </td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="5" class="py-12 text-center text-gray-500">
+                    <i class="fas fa-shield-alt text-4xl text-gray-300 mb-4 block"></i>
+                    Aucun événement de sécurité
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function changeDays(days) {
+    const url = new URL(window.location);
+    url.searchParams.set('days', days);
+    window.location = url;
+}
+</script>
+{% endblock %}

@@ -1,0 +1,92 @@
+{% extends "admin/base.html" %}
+
+{% block title %}Logs{% endblock %}
+{% block header %}Journal d'activité{% endblock %}
+{% block subheader %}Historique des actions sur la plateforme{% endblock %}
+
+{% block content %}
+<div class="flex flex-wrap gap-4 mb-6">
+    <div class="flex gap-2">
+        <a href="{{ url_for('logs.index', type='all', days=days) }}" class="px-4 py-2 rounded-xl {% if log_type == 'all' %}bg-primary-600 text-white{% else %}bg-white text-gray-700 border border-gray-200{% endif %}">
+            Tous
+        </a>
+        <a href="{{ url_for('logs.index', type='activity', days=days) }}" class="px-4 py-2 rounded-xl {% if log_type == 'activity' %}bg-primary-600 text-white{% else %}bg-white text-gray-700 border border-gray-200{% endif %}">
+            Activité
+        </a>
+        <a href="{{ url_for('logs.index', type='security', days=days) }}" class="px-4 py-2 rounded-xl {% if log_type == 'security' %}bg-primary-600 text-white{% else %}bg-white text-gray-700 border border-gray-200{% endif %}">
+            Sécurité
+        </a>
+        <a href="{{ url_for('logs.index', type='error', days=days) }}" class="px-4 py-2 rounded-xl {% if log_type == 'error' %}bg-primary-600 text-white{% else %}bg-white text-gray-700 border border-gray-200{% endif %}">
+            Erreurs
+        </a>
+    </div>
+    
+    <select onchange="changeDays(this.value)" class="px-4 py-2 border border-gray-200 rounded-xl bg-white">
+        <option value="1" {% if days == 1 %}selected{% endif %}>Dernières 24h</option>
+        <option value="7" {% if days == 7 %}selected{% endif %}>7 derniers jours</option>
+        <option value="30" {% if days == 30 %}selected{% endif %}>30 derniers jours</option>
+        <option value="90" {% if days == 90 %}selected{% endif %}>3 derniers mois</option>
+    </select>
+    
+    <a href="{{ url_for('logs.security') }}" class="px-4 py-2 bg-red-50 text-red-600 rounded-xl hover:bg-red-100 transition ml-auto">
+        <i class="fas fa-shield-alt mr-2"></i>Logs de sécurité
+    </a>
+</div>
+
+<div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+    <table class="w-full">
+        <thead class="bg-gray-50">
+            <tr>
+                <th class="text-left py-4 px-6 text-sm font-medium text-gray-600">Date</th>
+                <th class="text-left py-4 px-6 text-sm font-medium text-gray-600">Type</th>
+                <th class="text-left py-4 px-6 text-sm font-medium text-gray-600">Action</th>
+                <th class="text-left py-4 px-6 text-sm font-medium text-gray-600">Utilisateur</th>
+                <th class="text-left py-4 px-6 text-sm font-medium text-gray-600">Détails</th>
+            </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-100">
+            {% for log in logs %}
+            <tr class="hover:bg-gray-50">
+                <td class="py-4 px-6">
+                    <span class="text-sm text-gray-600">{{ format_datetime(log.created_at) }}</span>
+                </td>
+                <td class="py-4 px-6">
+                    <span class="px-3 py-1 rounded-full text-xs font-medium 
+                        {% if log.log_type == 'security' %}bg-red-100 text-red-600
+                        {% elif log.log_type == 'error' %}bg-orange-100 text-orange-600
+                        {% else %}bg-blue-100 text-blue-600{% endif %}">
+                        {{ log.log_type }}
+                    </span>
+                </td>
+                <td class="py-4 px-6">
+                    <span class="text-sm text-gray-800">{{ log.action }}</span>
+                </td>
+                <td class="py-4 px-6">
+                    <span class="text-sm text-gray-600">{{ log.user.username if log.user else 'Système' }}</span>
+                </td>
+                <td class="py-4 px-6">
+                    <span class="text-sm text-gray-500 truncate max-w-xs block">{{ log.details or '-' }}</span>
+                </td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="5" class="py-12 text-center text-gray-500">
+                    <i class="fas fa-history text-4xl text-gray-300 mb-4 block"></i>
+                    Aucun log trouvé
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function changeDays(days) {
+    const url = new URL(window.location);
+    url.searchParams.set('days', days);
+    window.location = url;
+}
+</script>
+{% endblock %}

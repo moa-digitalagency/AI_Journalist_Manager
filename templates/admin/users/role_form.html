@@ -1,0 +1,115 @@
+{% extends "admin/base.html" %}
+
+{% block title %}{% if role %}Modifier{% else %}Nouveau{% endif %} Rôle{% endblock %}
+{% block header %}{% if role %}Modifier {{ role.name }}{% else %}Nouveau Rôle{% endif %}{% endblock %}
+{% block subheader %}{% if role %}Modifiez les permissions du rôle{% else %}Créez un nouveau rôle{% endif %}{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl">
+    <a href="{{ url_for('users.roles') }}" class="inline-flex items-center text-gray-600 hover:text-gray-800 mb-6">
+        <i class="fas fa-arrow-left mr-2"></i>Retour aux rôles
+    </a>
+    
+    <form action="{{ url_for('users.create_role') }}" method="POST" class="space-y-6">
+        <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+            <h3 class="font-semibold text-gray-800 mb-4">Informations du rôle</h3>
+            
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Nom du rôle *</label>
+                    <input type="text" name="name" required value="{{ role.name if role else '' }}" 
+                           class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500" 
+                           placeholder="Ex: Éditeur, Modérateur...">
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Permissions</label>
+                    <p class="text-xs text-gray-500 mb-2">Séparez les permissions par des virgules ou utilisez "all" pour toutes les permissions</p>
+                    <input type="text" name="permissions" value="{{ role.permissions if role else '' }}" 
+                           class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500" 
+                           placeholder="journalists,subscribers,plans">
+                </div>
+            </div>
+        </div>
+        
+        <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+            <h3 class="font-semibold text-gray-800 mb-4">Permissions disponibles</h3>
+            
+            <div class="grid grid-cols-2 gap-3">
+                <label class="flex items-center gap-2 p-3 bg-gray-50 rounded-xl cursor-pointer hover:bg-gray-100">
+                    <input type="checkbox" class="perm-checkbox" value="journalists">
+                    <span class="text-sm text-gray-700">Journalistes</span>
+                </label>
+                <label class="flex items-center gap-2 p-3 bg-gray-50 rounded-xl cursor-pointer hover:bg-gray-100">
+                    <input type="checkbox" class="perm-checkbox" value="subscribers">
+                    <span class="text-sm text-gray-700">Abonnés</span>
+                </label>
+                <label class="flex items-center gap-2 p-3 bg-gray-50 rounded-xl cursor-pointer hover:bg-gray-100">
+                    <input type="checkbox" class="perm-checkbox" value="plans">
+                    <span class="text-sm text-gray-700">Forfaits</span>
+                </label>
+                <label class="flex items-center gap-2 p-3 bg-gray-50 rounded-xl cursor-pointer hover:bg-gray-100">
+                    <input type="checkbox" class="perm-checkbox" value="logs">
+                    <span class="text-sm text-gray-700">Logs</span>
+                </label>
+                <label class="flex items-center gap-2 p-3 bg-gray-50 rounded-xl cursor-pointer hover:bg-gray-100">
+                    <input type="checkbox" class="perm-checkbox" value="users">
+                    <span class="text-sm text-gray-700">Utilisateurs</span>
+                </label>
+                <label class="flex items-center gap-2 p-3 bg-gray-50 rounded-xl cursor-pointer hover:bg-gray-100">
+                    <input type="checkbox" class="perm-checkbox" value="settings">
+                    <span class="text-sm text-gray-700">Paramètres</span>
+                </label>
+                <label class="flex items-center gap-2 p-3 bg-gray-50 rounded-xl cursor-pointer hover:bg-gray-100">
+                    <input type="checkbox" class="perm-checkbox" value="view">
+                    <span class="text-sm text-gray-700">Lecture seule</span>
+                </label>
+                <label class="flex items-center gap-2 p-3 bg-primary-50 rounded-xl cursor-pointer hover:bg-primary-100">
+                    <input type="checkbox" id="allPerms" onchange="toggleAll()">
+                    <span class="text-sm text-primary-700 font-medium">Toutes les permissions</span>
+                </label>
+            </div>
+        </div>
+        
+        <button type="submit" class="w-full py-3 bg-primary-600 text-white rounded-xl hover:bg-primary-700 transition font-medium">
+            <i class="fas fa-save mr-2"></i>
+            {% if role %}Enregistrer{% else %}Créer le rôle{% endif %}
+        </button>
+    </form>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+const permInput = document.querySelector('input[name="permissions"]');
+const checkboxes = document.querySelectorAll('.perm-checkbox');
+
+checkboxes.forEach(cb => {
+    cb.addEventListener('change', updatePermissions);
+});
+
+function updatePermissions() {
+    const selected = Array.from(checkboxes).filter(cb => cb.checked).map(cb => cb.value);
+    permInput.value = selected.join(',');
+}
+
+function toggleAll() {
+    const allChecked = document.getElementById('allPerms').checked;
+    if (allChecked) {
+        permInput.value = 'all';
+        checkboxes.forEach(cb => cb.checked = false);
+    } else {
+        permInput.value = '';
+    }
+}
+
+if (permInput.value === 'all') {
+    document.getElementById('allPerms').checked = true;
+} else if (permInput.value) {
+    const perms = permInput.value.split(',');
+    checkboxes.forEach(cb => {
+        cb.checked = perms.includes(cb.value);
+    });
+}
+</script>
+{% endblock %}
