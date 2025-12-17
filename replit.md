@@ -36,7 +36,16 @@ Application complète de gestion de journalistes IA avec panneau d'administratio
 - `security/` - Sécurité
   - `auth.py` - Décorateurs d'authentification
   - `logging.py` - Journalisation activités
-- `translations.py` - Système de traduction (FR/EN)
+- `translations.py` - Système de traduction (charge depuis JSON)
+- `lang/` - Fichiers de traduction JSON
+  - `fr.json` - Traductions françaises
+  - `en.json` - Traductions anglaises
+
+### Static Assets
+- `static/css/main.css` - Styles CSS personnalisés
+- `static/js/main.js` - JavaScript utilitaire (gestion sources, sidebar, etc.)
+- `static/js/tailwind.config.js` - Configuration Tailwind
+- `static/favicon.svg` - Favicon SVG
 
 ### Frontend (HTML/Tailwind)
 - `templates/admin/` - Interface d'administration
