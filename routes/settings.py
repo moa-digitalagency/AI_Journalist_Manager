@@ -1,20 +1,106 @@
-from flask import Blueprint, render_template, request, redirect, url_for, flash
+import os
+from flask import Blueprint, render_template, request, redirect, url_for, flash, jsonify
 from security.auth import admin_required
 from security.logging import log_activity
 from models import db, Settings
 
 settings_bp = Blueprint('settings', __name__)
 
+DEFAULT_SETTINGS = {
+    'general': [
+        {'key': 'app_name', 'value': 'AI Journalist Manager', 'description': 'Nom de l\'application'},
+        {'key': 'default_language', 'value': 'fr', 'description': 'Langue par défaut (fr, en, es, de)'},
+        {'key': 'trial_days', 'value': '7', 'description': 'Durée de la période d\'essai en jours'},
+        {'key': 'fetch_hour', 'value': '2', 'description': 'Heure de collecte automatique (0-23)'},
+        {'key': 'summary_hour', 'value': '8', 'description': 'Heure d\'envoi des résumés (0-23)'},
+    ],
+    'api': [
+        {'key': 'gemini_model', 'value': 'gemini-2.5-flash', 'description': 'Modèle Gemini à utiliser'},
+        {'key': 'eleven_labs_default_voice', 'value': '21m00Tcm4TlvDq8ikWAM', 'description': 'Voice ID Eleven Labs par défaut'},
+        {'key': 'summary_max_length', 'value': '2000', 'description': 'Longueur maximale des résumés (caractères)'},
+        {'key': 'youtube_transcript_languages', 'value': 'fr,en,es,de', 'description': 'Langues de transcription YouTube (priorité)'},
+    ],
+    'notifications': [
+        {'key': 'enable_email_notifications', 'value': 'false', 'description': 'Activer les notifications par email'},
+        {'key': 'admin_email', 'value': '', 'description': 'Email de l\'administrateur'},
+        {'key': 'notify_on_new_subscriber', 'value': 'true', 'description': 'Notification lors d\'un nouvel abonné'},
+        {'key': 'notify_on_error', 'value': 'true', 'description': 'Notification en cas d\'erreur'},
+    ],
+    'security': [
+        {'key': 'max_login_attempts', 'value': '5', 'description': 'Nombre maximum de tentatives de connexion'},
+        {'key': 'session_timeout', 'value': '60', 'description': 'Timeout de session en minutes'},
+        {'key': 'require_email_verification', 'value': 'false', 'description': 'Exiger la vérification email'},
+        {'key': 'log_all_activities', 'value': 'true', 'description': 'Journaliser toutes les activités'},
+    ],
+    'seo': [
+        {'key': 'meta_title', 'value': 'AI Journalist Manager', 'description': 'Titre meta pour le SEO'},
+        {'key': 'meta_description', 'value': 'Plateforme de gestion de journalistes IA', 'description': 'Description meta'},
+        {'key': 'meta_keywords', 'value': 'ia, journaliste, actualités, telegram, bot', 'description': 'Mots-clés meta'},
+    ],
+}
+
+def get_api_status():
+    """Check the status of configured APIs."""
+    status = {
+        'gemini': {
+            'configured': bool(os.environ.get('GEMINI_API_KEY')),
+            'name': 'Google Gemini',
+            'description': 'IA pour la génération de résumés',
+            'required': True
+        },
+        'eleven_labs': {
+            'configured': bool(os.environ.get('ELEVEN_LABS_API_KEY')),
+            'name': 'Eleven Labs',
+            'description': 'Synthèse vocale (Text-to-Speech)',
+            'required': False
+        },
+        'database': {
+            'configured': bool(os.environ.get('DATABASE_URL')),
+            'name': 'PostgreSQL',
+            'description': 'Base de données',
+            'required': True
+        }
+    }
+    return status
+
 @settings_bp.route('/')
 @admin_required
 def index():
-    categories = ['general', 'seo', 'notifications', 'api', 'security']
+    categories = ['general', 'api', 'notifications', 'security', 'seo']
     all_settings = {}
     
     for cat in categories:
         all_settings[cat] = Settings.query.filter_by(category=cat).all()
     
-    return render_template('admin/settings/index.html', settings=all_settings)
+    api_status = get_api_status()
+    
+    return render_template('admin/settings/index.html', 
+                         settings=all_settings,
+                         api_status=api_status,
+                         default_settings=DEFAULT_SETTINGS)
+
+@settings_bp.route('/initialize', methods=['POST'])
+@admin_required
+def initialize():
+    """Initialize default settings if they don't exist."""
+    count = 0
+    for category, settings_list in DEFAULT_SETTINGS.items():
+        for setting_data in settings_list:
+            existing = Settings.query.filter_by(key=setting_data['key']).first()
+            if not existing:
+                setting = Settings(
+                    key=setting_data['key'],
+                    value=setting_data['value'],
+                    category=category,
+                    description=setting_data.get('description')
+                )
+                db.session.add(setting)
+                count += 1
+    
+    db.session.commit()
+    log_activity('initialize_settings', details=f'Initialized {count} default settings')
+    flash(f'{count} paramètres par défaut initialisés', 'success')
+    return redirect(url_for('settings.index'))
 
 @settings_bp.route('/update', methods=['POST'])
 @admin_required
@@ -51,3 +137,57 @@ def delete(id):
     db.session.commit()
     flash('Paramètre supprimé', 'success')
     return redirect(url_for('settings.index'))
+
+@settings_bp.route('/api-status')
+@admin_required
+def api_status():
+    """Return API status as JSON."""
+    return jsonify(get_api_status())
+
+@settings_bp.route('/test-gemini', methods=['POST'])
+@admin_required
+def test_gemini():
+    """Test Gemini API connection."""
+    from services.ai_service import AIService
+    
+    if not AIService.is_available():
+        return jsonify({'success': False, 'message': 'Clé API Gemini non configurée'})
+    
+    try:
+        client = AIService.get_client()
+        response = client.models.generate_content(
+            model="gemini-2.5-flash",
+            contents="Dis bonjour en une phrase."
+        )
+        if response.text:
+            return jsonify({'success': True, 'message': 'Connexion Gemini réussie', 'response': response.text[:100]})
+        return jsonify({'success': False, 'message': 'Réponse vide de Gemini'})
+    except Exception as e:
+        return jsonify({'success': False, 'message': str(e)})
+
+@settings_bp.route('/test-elevenlabs', methods=['POST'])
+@admin_required
+def test_elevenlabs():
+    """Test Eleven Labs API connection."""
+    from services.audio_service import AudioService
+    
+    if not AudioService.is_available():
+        return jsonify({'success': False, 'message': 'Clé API Eleven Labs non configurée'})
+    
+    try:
+        import requests
+        api_key = os.environ.get('ELEVEN_LABS_API_KEY')
+        response = requests.get(
+            "https://api.elevenlabs.io/v1/voices",
+            headers={"xi-api-key": api_key},
+            timeout=10
+        )
+        if response.status_code == 200:
+            voices = response.json().get('voices', [])
+            return jsonify({
+                'success': True, 
+                'message': f'Connexion réussie - {len(voices)} voix disponibles'
+            })
+        return jsonify({'success': False, 'message': f'Erreur: {response.status_code}'})
+    except Exception as e:
+        return jsonify({'success': False, 'message': str(e)})

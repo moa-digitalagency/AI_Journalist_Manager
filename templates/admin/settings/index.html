@@ -2,38 +2,99 @@
 
 {% block title %}Paramètres{% endblock %}
 {% block header %}Paramètres de la plateforme{% endblock %}
-{% block subheader %}Configurez les options générales{% endblock %}
+{% block subheader %}Configurez les options générales et les APIs{% endblock %}
 
 {% block content %}
 <div class="grid lg:grid-cols-4 gap-6">
     <div class="lg:col-span-1">
         <nav class="bg-white rounded-2xl p-4 shadow-sm border border-gray-100 space-y-1 sticky top-4">
+            <a href="#api-status" class="block px-4 py-2 rounded-xl text-gray-700 hover:bg-gray-50 transition">
+                <i class="fas fa-plug w-5 mr-2"></i>Statut APIs
+            </a>
             <a href="#general" class="block px-4 py-2 rounded-xl text-gray-700 hover:bg-gray-50 transition">
                 <i class="fas fa-cog w-5 mr-2"></i>Général
             </a>
-            <a href="#seo" class="block px-4 py-2 rounded-xl text-gray-700 hover:bg-gray-50 transition">
-                <i class="fas fa-search w-5 mr-2"></i>SEO
+            <a href="#api" class="block px-4 py-2 rounded-xl text-gray-700 hover:bg-gray-50 transition">
+                <i class="fas fa-key w-5 mr-2"></i>Configuration API
             </a>
             <a href="#notifications" class="block px-4 py-2 rounded-xl text-gray-700 hover:bg-gray-50 transition">
                 <i class="fas fa-bell w-5 mr-2"></i>Notifications
             </a>
-            <a href="#api" class="block px-4 py-2 rounded-xl text-gray-700 hover:bg-gray-50 transition">
-                <i class="fas fa-key w-5 mr-2"></i>API
-            </a>
             <a href="#security" class="block px-4 py-2 rounded-xl text-gray-700 hover:bg-gray-50 transition">
                 <i class="fas fa-shield-alt w-5 mr-2"></i>Sécurité
             </a>
+            <a href="#seo" class="block px-4 py-2 rounded-xl text-gray-700 hover:bg-gray-50 transition">
+                <i class="fas fa-search w-5 mr-2"></i>SEO
+            </a>
+            <hr class="my-2 border-gray-200">
+            <form action="{{ url_for('settings.initialize') }}" method="POST">
+                <button type="submit" class="w-full px-4 py-2 text-left rounded-xl text-blue-600 hover:bg-blue-50 transition">
+                    <i class="fas fa-magic w-5 mr-2"></i>Initialiser défauts
+                </button>
+            </form>
         </nav>
     </div>
     
-    <div class="lg:col-span-3">
+    <div class="lg:col-span-3 space-y-6">
+        
+        <div id="api-status" class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+            <h3 class="font-semibold text-gray-800 mb-4 flex items-center gap-2">
+                <i class="fas fa-plug text-primary-600"></i>Statut des APIs externes
+            </h3>
+            <p class="text-sm text-gray-500 mb-4">Les clés API doivent être configurées dans les variables d'environnement (Secrets)</p>
+            
+            <div class="grid md:grid-cols-3 gap-4">
+                {% for key, api in api_status.items() %}
+                <div class="p-4 rounded-xl border {% if api.configured %}border-green-200 bg-green-50{% else %}border-{% if api.required %}red{% else %}yellow{% endif %}-200 bg-{% if api.required %}red{% else %}yellow{% endif %}-50{% endif %}">
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="font-medium text-gray-800">{{ api.name }}</span>
+                        {% if api.configured %}
+                        <span class="px-2 py-1 bg-green-100 text-green-700 rounded-full text-xs">Configuré</span>
+                        {% else %}
+                        <span class="px-2 py-1 bg-{% if api.required %}red{% else %}yellow{% endif %}-100 text-{% if api.required %}red{% else %}yellow{% endif %}-700 rounded-full text-xs">
+                            {% if api.required %}Requis{% else %}Optionnel{% endif %}
+                        </span>
+                        {% endif %}
+                    </div>
+                    <p class="text-xs text-gray-600">{{ api.description }}</p>
+                    
+                    {% if api.configured and key in ['gemini', 'eleven_labs'] %}
+                    <button onclick="testApi('{{ key }}')" class="mt-3 px-3 py-1 bg-white border border-gray-200 rounded-lg text-xs hover:bg-gray-50 transition">
+                        <i class="fas fa-vial mr-1"></i>Tester
+                    </button>
+                    {% endif %}
+                </div>
+                {% endfor %}
+            </div>
+            
+            <div class="mt-4 p-4 bg-blue-50 rounded-xl">
+                <h4 class="font-medium text-blue-800 mb-2"><i class="fas fa-info-circle mr-2"></i>Comment configurer les APIs</h4>
+                <ul class="text-sm text-blue-700 space-y-1">
+                    <li><strong>GEMINI_API_KEY</strong> : Obtenez votre clé sur <a href="https://aistudio.google.com/apikey" target="_blank" class="underline">Google AI Studio</a></li>
+                    <li><strong>ELEVEN_LABS_API_KEY</strong> : Obtenez votre clé sur <a href="https://elevenlabs.io/api" target="_blank" class="underline">Eleven Labs</a></li>
+                </ul>
+                <p class="text-xs text-blue-600 mt-2">Ajoutez ces clés dans l'onglet "Secrets" de Replit</p>
+            </div>
+        </div>
+        
+        <div id="testResult" class="hidden bg-white rounded-2xl p-4 shadow-sm border border-gray-100">
+            <div class="flex items-center gap-3">
+                <div id="testIcon" class="w-10 h-10 rounded-full flex items-center justify-center"></div>
+                <div>
+                    <p id="testMessage" class="font-medium"></p>
+                    <p id="testDetails" class="text-sm text-gray-500"></p>
+                </div>
+            </div>
+        </div>
+        
         <form action="{{ url_for('settings.update') }}" method="POST" class="space-y-6">
+            
             <div id="general" class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
                 <h3 class="font-semibold text-gray-800 mb-4 flex items-center gap-2">
                     <i class="fas fa-cog text-primary-600"></i>Paramètres généraux
                 </h3>
                 
-                <div class="space-y-4">
+                <div class="grid md:grid-cols-2 gap-4">
                     {% for setting in settings.general %}
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">{{ setting.key }}</label>
@@ -45,7 +106,95 @@
                         {% endif %}
                     </div>
                     {% else %}
-                    <p class="text-gray-500 text-sm">Aucun paramètre général configuré</p>
+                    <div class="col-span-2">
+                        <p class="text-gray-500 text-sm py-4 text-center">Aucun paramètre général. <button type="button" onclick="document.querySelector('form[action*=initialize]').submit()" class="text-blue-600 hover:underline">Initialiser les paramètres par défaut</button></p>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            
+            <div id="api" class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+                <h3 class="font-semibold text-gray-800 mb-4 flex items-center gap-2">
+                    <i class="fas fa-key text-primary-600"></i>Configuration API
+                </h3>
+                
+                <div class="grid md:grid-cols-2 gap-4">
+                    {% for setting in settings.api %}
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">{{ setting.key }}</label>
+                        <input type="text" name="setting_{{ setting.key }}" value="{{ setting.value }}" 
+                               class="w-full px-4 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500">
+                        <input type="hidden" name="category_{{ setting.key }}" value="api">
+                        {% if setting.description %}
+                        <p class="text-xs text-gray-500 mt-1">{{ setting.description }}</p>
+                        {% endif %}
+                    </div>
+                    {% else %}
+                    <div class="col-span-2">
+                        <p class="text-gray-500 text-sm py-4 text-center">Aucun paramètre API. <button type="button" onclick="document.querySelector('form[action*=initialize]').submit()" class="text-blue-600 hover:underline">Initialiser les paramètres par défaut</button></p>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            
+            <div id="notifications" class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+                <h3 class="font-semibold text-gray-800 mb-4 flex items-center gap-2">
+                    <i class="fas fa-bell text-primary-600"></i>Notifications
+                </h3>
+                
+                <div class="grid md:grid-cols-2 gap-4">
+                    {% for setting in settings.notifications %}
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">{{ setting.key }}</label>
+                        {% if setting.value in ['true', 'false'] %}
+                        <select name="setting_{{ setting.key }}" class="w-full px-4 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500">
+                            <option value="true" {% if setting.value == 'true' %}selected{% endif %}>Activé</option>
+                            <option value="false" {% if setting.value == 'false' %}selected{% endif %}>Désactivé</option>
+                        </select>
+                        {% else %}
+                        <input type="text" name="setting_{{ setting.key }}" value="{{ setting.value }}" 
+                               class="w-full px-4 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500">
+                        {% endif %}
+                        <input type="hidden" name="category_{{ setting.key }}" value="notifications">
+                        {% if setting.description %}
+                        <p class="text-xs text-gray-500 mt-1">{{ setting.description }}</p>
+                        {% endif %}
+                    </div>
+                    {% else %}
+                    <div class="col-span-2">
+                        <p class="text-gray-500 text-sm py-4 text-center">Aucun paramètre de notification. <button type="button" onclick="document.querySelector('form[action*=initialize]').submit()" class="text-blue-600 hover:underline">Initialiser les paramètres par défaut</button></p>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            
+            <div id="security" class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+                <h3 class="font-semibold text-gray-800 mb-4 flex items-center gap-2">
+                    <i class="fas fa-shield-alt text-primary-600"></i>Sécurité
+                </h3>
+                
+                <div class="grid md:grid-cols-2 gap-4">
+                    {% for setting in settings.security %}
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">{{ setting.key }}</label>
+                        {% if setting.value in ['true', 'false'] %}
+                        <select name="setting_{{ setting.key }}" class="w-full px-4 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500">
+                            <option value="true" {% if setting.value == 'true' %}selected{% endif %}>Activé</option>
+                            <option value="false" {% if setting.value == 'false' %}selected{% endif %}>Désactivé</option>
+                        </select>
+                        {% else %}
+                        <input type="text" name="setting_{{ setting.key }}" value="{{ setting.value }}" 
+                               class="w-full px-4 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500">
+                        {% endif %}
+                        <input type="hidden" name="category_{{ setting.key }}" value="security">
+                        {% if setting.description %}
+                        <p class="text-xs text-gray-500 mt-1">{{ setting.description }}</p>
+                        {% endif %}
+                    </div>
+                    {% else %}
+                    <div class="col-span-2">
+                        <p class="text-gray-500 text-sm py-4 text-center">Aucun paramètre de sécurité. <button type="button" onclick="document.querySelector('form[action*=initialize]').submit()" class="text-blue-600 hover:underline">Initialiser les paramètres par défaut</button></p>
+                    </div>
                     {% endfor %}
                 </div>
             </div>
@@ -59,69 +208,19 @@
                     {% for setting in settings.seo %}
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">{{ setting.key }}</label>
+                        {% if 'description' in setting.key or 'keywords' in setting.key %}
+                        <textarea name="setting_{{ setting.key }}" rows="2" class="w-full px-4 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500">{{ setting.value }}</textarea>
+                        {% else %}
                         <input type="text" name="setting_{{ setting.key }}" value="{{ setting.value }}" 
                                class="w-full px-4 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500">
+                        {% endif %}
                         <input type="hidden" name="category_{{ setting.key }}" value="seo">
+                        {% if setting.description %}
+                        <p class="text-xs text-gray-500 mt-1">{{ setting.description }}</p>
+                        {% endif %}
                     </div>
                     {% else %}
-                    <p class="text-gray-500 text-sm">Aucun paramètre SEO configuré</p>
-                    {% endfor %}
-                </div>
-            </div>
-            
-            <div id="notifications" class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
-                <h3 class="font-semibold text-gray-800 mb-4 flex items-center gap-2">
-                    <i class="fas fa-bell text-primary-600"></i>Notifications
-                </h3>
-                
-                <div class="space-y-4">
-                    {% for setting in settings.notifications %}
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">{{ setting.key }}</label>
-                        <input type="text" name="setting_{{ setting.key }}" value="{{ setting.value }}" 
-                               class="w-full px-4 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500">
-                        <input type="hidden" name="category_{{ setting.key }}" value="notifications">
-                    </div>
-                    {% else %}
-                    <p class="text-gray-500 text-sm">Aucun paramètre de notification configuré</p>
-                    {% endfor %}
-                </div>
-            </div>
-            
-            <div id="api" class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
-                <h3 class="font-semibold text-gray-800 mb-4 flex items-center gap-2">
-                    <i class="fas fa-key text-primary-600"></i>Configuration API
-                </h3>
-                
-                <div class="space-y-4">
-                    {% for setting in settings.api %}
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">{{ setting.key }}</label>
-                        <input type="text" name="setting_{{ setting.key }}" value="{{ setting.value }}" 
-                               class="w-full px-4 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500">
-                        <input type="hidden" name="category_{{ setting.key }}" value="api">
-                    </div>
-                    {% else %}
-                    <p class="text-gray-500 text-sm">Aucun paramètre API configuré</p>
-                    {% endfor %}
-                </div>
-            </div>
-            
-            <div id="security" class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
-                <h3 class="font-semibold text-gray-800 mb-4 flex items-center gap-2">
-                    <i class="fas fa-shield-alt text-primary-600"></i>Sécurité
-                </h3>
-                
-                <div class="space-y-4">
-                    {% for setting in settings.security %}
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">{{ setting.key }}</label>
-                        <input type="text" name="setting_{{ setting.key }}" value="{{ setting.value }}" 
-                               class="w-full px-4 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500">
-                        <input type="hidden" name="category_{{ setting.key }}" value="security">
-                    </div>
-                    {% else %}
-                    <p class="text-gray-500 text-sm">Aucun paramètre de sécurité configuré</p>
+                    <p class="text-gray-500 text-sm py-4 text-center">Aucun paramètre SEO. <button type="button" onclick="document.querySelector('form[action*=initialize]').submit()" class="text-blue-600 hover:underline">Initialiser les paramètres par défaut</button></p>
                     {% endfor %}
                 </div>
             </div>
@@ -133,9 +232,9 @@
             </div>
         </form>
         
-        <div class="mt-6 bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
-            <h3 class="font-semibold text-gray-800 mb-4">Ajouter un nouveau paramètre</h3>
-            <form action="{{ url_for('settings.create') }}" method="POST" class="grid md:grid-cols-4 gap-4">
+        <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+            <h3 class="font-semibold text-gray-800 mb-4">Ajouter un paramètre personnalisé</h3>
+            <form action="{{ url_for('settings.create') }}" method="POST" class="grid md:grid-cols-5 gap-4">
                 <div>
                     <input type="text" name="key" required placeholder="Clé" 
                            class="w-full px-4 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500">
@@ -147,11 +246,15 @@
                 <div>
                     <select name="category" class="w-full px-4 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500">
                         <option value="general">Général</option>
-                        <option value="seo">SEO</option>
-                        <option value="notifications">Notifications</option>
                         <option value="api">API</option>
+                        <option value="notifications">Notifications</option>
                         <option value="security">Sécurité</option>
+                        <option value="seo">SEO</option>
                     </select>
+                </div>
+                <div>
+                    <input type="text" name="description" placeholder="Description" 
+                           class="w-full px-4 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500">
                 </div>
                 <div>
                     <button type="submit" class="w-full py-2 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200 transition">
@@ -160,6 +263,86 @@
                 </div>
             </form>
         </div>
+        
+        {% set all_settings_list = settings.general + settings.api + settings.notifications + settings.security + settings.seo %}
+        {% if all_settings_list %}
+        <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+            <h3 class="font-semibold text-gray-800 mb-4">Gérer les paramètres existants</h3>
+            <div class="overflow-x-auto">
+                <table class="w-full text-sm">
+                    <thead>
+                        <tr class="border-b border-gray-100">
+                            <th class="text-left py-3 px-4 font-medium text-gray-600">Clé</th>
+                            <th class="text-left py-3 px-4 font-medium text-gray-600">Valeur</th>
+                            <th class="text-left py-3 px-4 font-medium text-gray-600">Catégorie</th>
+                            <th class="text-right py-3 px-4 font-medium text-gray-600">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for setting in all_settings_list %}
+                        <tr class="border-b border-gray-50 hover:bg-gray-50">
+                            <td class="py-3 px-4 font-medium">{{ setting.key }}</td>
+                            <td class="py-3 px-4 text-gray-600">{{ setting.value[:50] }}{% if setting.value|length > 50 %}...{% endif %}</td>
+                            <td class="py-3 px-4">
+                                <span class="px-2 py-1 bg-gray-100 rounded-full text-xs">{{ setting.category }}</span>
+                            </td>
+                            <td class="py-3 px-4 text-right">
+                                <form action="{{ url_for('settings.delete', id=setting.id) }}" method="POST" class="inline">
+                                    <button type="submit" onclick="return confirm('Supprimer ce paramètre?')" class="text-red-500 hover:text-red-700">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        {% endif %}
     </div>
 </div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function testApi(apiType) {
+    const resultDiv = document.getElementById('testResult');
+    const icon = document.getElementById('testIcon');
+    const message = document.getElementById('testMessage');
+    const details = document.getElementById('testDetails');
+    
+    resultDiv.classList.remove('hidden');
+    icon.innerHTML = '<i class="fas fa-spinner fa-spin text-blue-500"></i>';
+    icon.className = 'w-10 h-10 rounded-full flex items-center justify-center bg-blue-100';
+    message.textContent = 'Test en cours...';
+    details.textContent = '';
+    
+    const url = apiType === 'gemini' ? '{{ url_for("settings.test_gemini") }}' : '{{ url_for("settings.test_elevenlabs") }}';
+    
+    fetch(url, { method: 'POST' })
+        .then(r => r.json())
+        .then(data => {
+            if (data.success) {
+                icon.innerHTML = '<i class="fas fa-check text-green-500"></i>';
+                icon.className = 'w-10 h-10 rounded-full flex items-center justify-center bg-green-100';
+                message.textContent = data.message;
+                if (data.response) {
+                    details.textContent = data.response;
+                }
+            } else {
+                icon.innerHTML = '<i class="fas fa-times text-red-500"></i>';
+                icon.className = 'w-10 h-10 rounded-full flex items-center justify-center bg-red-100';
+                message.textContent = 'Erreur';
+                details.textContent = data.message;
+            }
+        })
+        .catch(err => {
+            icon.innerHTML = '<i class="fas fa-times text-red-500"></i>';
+            icon.className = 'w-10 h-10 rounded-full flex items-center justify-center bg-red-100';
+            message.textContent = 'Erreur de connexion';
+            details.textContent = err.message;
+        });
+}
+</script>
 {% endblock %}
