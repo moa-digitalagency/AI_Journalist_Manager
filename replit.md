@@ -1,45 +1,88 @@
 # AI Journalist Manager
 
 ## Overview
-Application de gestion de journalistes IA qui collectent des actualités, génèrent des résumés et les envoient via Telegram.
+Application complète de gestion de journalistes IA avec panneau d'administration professionnel. Permet de créer des bots Telegram qui collectent des actualités, génèrent des résumés avec IA et les envoient aux abonnés.
 
 ## Architecture
 
 ### Backend (Python/Flask)
-- `app.py` - Application Flask principale avec API REST
-- `models.py` - Modèles SQLAlchemy (Journalist, Source, Article, Subscriber, DailySummary)
-- `config.py` - Configuration de l'application
-- `ai_service.py` - Intégration Gemini pour génération de résumés
-- `scraper.py` - Collecte des sources (RSS, websites)
-- `audio_service.py` - Intégration Eleven Labs pour audio
-- `telegram_bot.py` - Gestion des bots Telegram
-- `scheduler.py` - Tâches automatiques (collecte + résumés)
+- `app.py` - Application Flask principale
+- `models/` - Modèles SQLAlchemy
+  - `user.py` - Utilisateurs et rôles admin
+  - `journalist.py` - Journalistes IA
+  - `source.py` - Sources d'actualités
+  - `article.py` - Articles collectés
+  - `subscriber.py` - Abonnés Telegram
+  - `subscription_plan.py` - Forfaits d'abonnement
+  - `daily_summary.py` - Résumés générés
+  - `activity_log.py` - Logs d'activité
+  - `settings.py` - Paramètres plateforme
+- `routes/` - Blueprints Flask
+  - `auth.py` - Authentification
+  - `admin.py` - Dashboard
+  - `journalists.py` - CRUD journalistes
+  - `subscribers.py` - Gestion abonnés
+  - `plans.py` - Forfaits
+  - `logs.py` - Journaux
+  - `users.py` - Utilisateurs admin
+  - `settings.py` - Paramètres
+  - `api.py` - API REST
+- `services/` - Services métier
+  - `ai_service.py` - Intégration Gemini
+  - `scraper_service.py` - Collecte sources
+  - `audio_service.py` - Eleven Labs TTS
+  - `telegram_service.py` - Bot Telegram
+  - `scheduler_service.py` - Tâches planifiées
+- `security/` - Sécurité
+  - `auth.py` - Décorateurs d'authentification
+  - `logging.py` - Journalisation activités
 
 ### Frontend (HTML/Tailwind)
-- `templates/` - Templates Jinja2
-  - `base.html` - Layout de base
-  - `index.html` - Tableau de bord
-  - `journalist_form.html` - Formulaire création/édition journaliste
-  - `journalist_detail.html` - Détails et gestion d'un journaliste
+- `templates/admin/` - Interface d'administration
+  - `base.html` - Layout avec sidebar bleu foncé
+  - `dashboard.html` - Tableau de bord
+  - `journalists/` - Gestion bots
+  - `subscribers/` - Gestion abonnés
+  - `plans/` - Forfaits
+  - `logs/` - Journaux
+  - `users/` - Utilisateurs admin
+  - `settings/` - Paramètres
 
 ### Base de données PostgreSQL
-Tables: journalists, sources, articles, subscribers, daily_summaries
+Tables: users, roles, journalists, sources, articles, subscribers, subscription_plans, daily_summaries, activity_logs, settings
 
 ## Fonctionnalités
 
-1. **Création de journalistes IA** avec personnalité, style et ton configurables
-2. **Gestion des sources** (RSS, sites web, Twitter/X)
-3. **Collecte automatique** des actualités toutes les 24h
-4. **Génération de résumés** avec Gemini AI
-5. **Audio TTS** via Eleven Labs (optionnel)
-6. **Envoi via Telegram** aux abonnés
-7. **Gestion des abonnés** avec période d'essai
+1. **Authentification admin** avec rôles (Admin, Editor, Viewer)
+2. **Dashboard** avec statistiques et graphiques
+3. **Gestion journalistes IA** - Création avec personnalité, style, ton, langue
+4. **Gestion sources** - RSS, sites web, Twitter/X, Telegram
+5. **Collecte automatique** des actualités (scheduler)
+6. **Génération résumés** avec Gemini AI
+7. **Audio TTS** via Eleven Labs (optionnel)
+8. **Envoi Telegram** aux abonnés
+9. **Gestion abonnés** avec forfaits et périodes d'essai
+10. **Logs** d'activité et de sécurité
+11. **Paramètres** configurables par catégorie
 
-## Variables d'environnement requises
+## Variables d'environnement
 
-- `DATABASE_URL` - URL PostgreSQL (automatique)
-- `GEMINI_API_KEY` - Clé API Google Gemini
+- `DATABASE_URL` - URL PostgreSQL (automatique sur Replit)
+- `GEMINI_API_KEY` - Clé API Google Gemini (requis)
 - `ELEVEN_LABS_API_KEY` - Clé API Eleven Labs (optionnel)
+
+## Compte admin par défaut
+
+- Username: `admin`
+- Email: `admin@example.com`
+- Password: `admin123`
+
+## Design
+
+- Couleur principale: Bleu foncé (#172554 à #1e3a8a)
+- Framework CSS: Tailwind via CDN
+- Icônes: Font Awesome
+- Graphiques: Chart.js
 
 ## Démarrage
 
