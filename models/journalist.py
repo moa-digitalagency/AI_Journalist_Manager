@@ -1,6 +1,31 @@
 from models import db
 from datetime import datetime
 
+TIMEZONES = [
+    ('UTC', 'UTC (Temps universel)'),
+    ('Europe/Paris', 'Paris (France)'),
+    ('Europe/London', 'Londres (Royaume-Uni)'),
+    ('Europe/Brussels', 'Bruxelles (Belgique)'),
+    ('Europe/Berlin', 'Berlin (Allemagne)'),
+    ('Europe/Madrid', 'Madrid (Espagne)'),
+    ('Europe/Rome', 'Rome (Italie)'),
+    ('Europe/Zurich', 'Zurich (Suisse)'),
+    ('America/New_York', 'New York (USA Est)'),
+    ('America/Los_Angeles', 'Los Angeles (USA Ouest)'),
+    ('America/Chicago', 'Chicago (USA Centre)'),
+    ('America/Toronto', 'Toronto (Canada)'),
+    ('America/Montreal', 'Montréal (Canada)'),
+    ('Africa/Casablanca', 'Casablanca (Maroc)'),
+    ('Africa/Tunis', 'Tunis (Tunisie)'),
+    ('Africa/Algiers', 'Alger (Algérie)'),
+    ('Africa/Dakar', 'Dakar (Sénégal)'),
+    ('Africa/Abidjan', 'Abidjan (Côte d\'Ivoire)'),
+    ('Asia/Tokyo', 'Tokyo (Japon)'),
+    ('Asia/Shanghai', 'Shanghai (Chine)'),
+    ('Asia/Dubai', 'Dubaï (EAU)'),
+    ('Australia/Sydney', 'Sydney (Australie)'),
+]
+
 class Journalist(db.Model):
     __tablename__ = 'journalists'
     
@@ -13,6 +38,7 @@ class Journalist(db.Model):
     spelling_style = db.Column(db.String(50), default="standard")
     tone = db.Column(db.String(50), default="neutral")
     language = db.Column(db.String(10), default="fr")
+    timezone = db.Column(db.String(50), default="Europe/Paris")
     eleven_labs_voice_id = db.Column(db.String(100))
     is_active = db.Column(db.Boolean, default=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)

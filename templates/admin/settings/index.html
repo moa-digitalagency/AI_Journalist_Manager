@@ -63,6 +63,12 @@
                         <i class="fas fa-vial mr-1"></i>Tester
                     </button>
                     {% endif %}
+                    
+                    {% if key == 'database' and api.configured %}
+                    <button onclick="testApi('telegram')" class="mt-3 px-3 py-1 bg-white border border-gray-200 rounded-lg text-xs hover:bg-gray-50 transition">
+                        <i class="fab fa-telegram mr-1"></i>Tester Bots Telegram
+                    </button>
+                    {% endif %}
                 </div>
                 {% endfor %}
             </div>
@@ -318,7 +324,14 @@ function testApi(apiType) {
     message.textContent = 'Test en cours...';
     details.textContent = '';
     
-    const url = apiType === 'gemini' ? '{{ url_for("settings.test_gemini") }}' : '{{ url_for("settings.test_elevenlabs") }}';
+    let url;
+    if (apiType === 'gemini') {
+        url = '{{ url_for("settings.test_gemini") }}';
+    } else if (apiType === 'eleven_labs') {
+        url = '{{ url_for("settings.test_elevenlabs") }}';
+    } else if (apiType === 'telegram') {
+        url = '{{ url_for("settings.test_telegram") }}';
+    }
     
     fetch(url, { method: 'POST' })
         .then(r => r.json())

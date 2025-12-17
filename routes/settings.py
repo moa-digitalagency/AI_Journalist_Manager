@@ -191,3 +191,55 @@ def test_elevenlabs():
         return jsonify({'success': False, 'message': f'Erreur: {response.status_code}'})
     except Exception as e:
         return jsonify({'success': False, 'message': str(e)})
+
+@settings_bp.route('/test-telegram', methods=['POST'])
+@admin_required
+def test_telegram():
+    """Test Telegram Bot API with all active journalists."""
+    from models import Journalist
+    import requests
+    
+    journalists = Journalist.query.filter_by(is_active=True).all()
+    
+    if not journalists:
+        return jsonify({'success': False, 'message': 'Aucun journaliste actif configuré'})
+    
+    results = []
+    for journalist in journalists:
+        try:
+            response = requests.get(
+                f"https://api.telegram.org/bot{journalist.telegram_token}/getMe",
+                timeout=10
+            )
+            if response.status_code == 200:
+                data = response.json()
+                if data.get('ok'):
+                    bot_name = data.get('result', {}).get('username', 'Unknown')
+                    results.append({'name': journalist.name, 'bot': bot_name, 'status': 'ok'})
+                else:
+                    results.append({'name': journalist.name, 'status': 'error', 'message': data.get('description', 'Erreur')})
+            else:
+                results.append({'name': journalist.name, 'status': 'error', 'message': f'HTTP {response.status_code}'})
+        except Exception as e:
+            results.append({'name': journalist.name, 'status': 'error', 'message': str(e)})
+    
+    ok_count = len([r for r in results if r['status'] == 'ok'])
+    
+    if ok_count == len(results):
+        return jsonify({
+            'success': True,
+            'message': f'{ok_count} bot(s) Telegram connecté(s)',
+            'details': results
+        })
+    elif ok_count > 0:
+        return jsonify({
+            'success': True,
+            'message': f'{ok_count}/{len(results)} bot(s) fonctionnel(s)',
+            'details': results
+        })
+    else:
+        return jsonify({
+            'success': False,
+            'message': 'Aucun bot Telegram fonctionnel',
+            'details': results
+        })

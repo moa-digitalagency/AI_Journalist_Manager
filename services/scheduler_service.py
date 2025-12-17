@@ -1,6 +1,7 @@
 import logging
 import asyncio
 from datetime import datetime, timedelta
+from zoneinfo import ZoneInfo
 from apscheduler.schedulers.background import BackgroundScheduler
 
 logger = logging.getLogger(__name__)
@@ -8,6 +9,24 @@ logger = logging.getLogger(__name__)
 scheduler = BackgroundScheduler()
 
 class SchedulerService:
+    
+    @staticmethod
+    def get_journalist_local_time(journalist):
+        """Get current time in journalist's timezone."""
+        try:
+            tz = ZoneInfo(journalist.timezone or 'Europe/Paris')
+            return datetime.now(tz)
+        except Exception:
+            return datetime.now(ZoneInfo('Europe/Paris'))
+    
+    @staticmethod
+    def should_send_summary(journalist):
+        """Check if it's time to send summary based on journalist's timezone."""
+        local_time = SchedulerService.get_journalist_local_time(journalist)
+        summary_hour = int(journalist.summary_time.split(':')[0]) if journalist.summary_time else 8
+        summary_minute = int(journalist.summary_time.split(':')[1]) if journalist.summary_time and ':' in journalist.summary_time else 0
+        
+        return local_time.hour == summary_hour and local_time.minute < 30
     
     @staticmethod
     def fetch_all_sources():
@@ -62,6 +81,7 @@ class SchedulerService:
     
     @staticmethod
     def generate_summaries():
+        """Generate summaries respecting each journalist's local timezone."""
         from app import app
         from models import db, Journalist, Article, DailySummary
         from services.ai_service import AIService
@@ -73,6 +93,12 @@ class SchedulerService:
             
             for journalist in journalists:
                 try:
+                    if not SchedulerService.should_send_summary(journalist):
+                        continue
+                    
+                    local_time = SchedulerService.get_journalist_local_time(journalist)
+                    logger.info(f"Generating summary for {journalist.name} (local time: {local_time.strftime('%H:%M')} {journalist.timezone})")
+                    
                     yesterday = datetime.utcnow() - timedelta(days=1)
                     articles = Article.query.filter(
                         Article.journalist_id == journalist.id,
@@ -145,13 +171,13 @@ class SchedulerService:
         scheduler.add_job(
             cls.generate_summaries,
             'cron',
-            hour=summary_hour,
+            minute=0,
             id='generate_summaries',
             replace_existing=True
         )
         
         scheduler.start()
-        logger.info(f"Scheduler: fetch at {fetch_hour}:00, summaries at {summary_hour}:00")
+        logger.info(f"Scheduler: fetch at {fetch_hour}:00, summaries checked every hour (respects journalist timezones)")
     
     @classmethod
     def shutdown(cls):

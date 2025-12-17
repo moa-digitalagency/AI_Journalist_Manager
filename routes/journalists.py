@@ -40,6 +40,7 @@ def create():
             spelling_style=request.form.get('spelling_style', 'standard'),
             tone=request.form.get('tone', 'neutral'),
             language=request.form.get('language', 'fr'),
+            timezone=request.form.get('timezone', 'Europe/Paris'),
             eleven_labs_voice_id=request.form.get('eleven_labs_voice_id'),
             summary_time=request.form.get('summary_time', '08:00')
         )
@@ -79,6 +80,7 @@ def edit(id):
         journalist.spelling_style = request.form.get('spelling_style', journalist.spelling_style)
         journalist.tone = request.form.get('tone', journalist.tone)
         journalist.language = request.form.get('language', journalist.language)
+        journalist.timezone = request.form.get('timezone', journalist.timezone)
         journalist.eleven_labs_voice_id = request.form.get('eleven_labs_voice_id')
         journalist.summary_time = request.form.get('summary_time', journalist.summary_time)
         journalist.is_active = 'is_active' in request.form
