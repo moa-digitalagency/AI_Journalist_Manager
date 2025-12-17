@@ -11,14 +11,23 @@ def get_client():
     global _client
     api_key = os.environ.get("GEMINI_API_KEY")
     if not api_key:
-        raise ValueError("GEMINI_API_KEY is not set. Please configure it in your environment.")
+        return None
     if _client is None:
         _client = genai.Client(api_key=api_key)
     return _client
 
+def is_ai_available():
+    return os.environ.get("GEMINI_API_KEY") is not None
+
 def generate_news_summary(articles: list, personality: str, writing_style: str, tone: str, language: str = "fr") -> str:
     if not articles:
         return "Aucune nouvelle actualité à résumer aujourd'hui."
+    
+    client = get_client()
+    if client is None:
+        logger.warning("GEMINI_API_KEY not configured - returning basic summary")
+        titles = [a.get('title', 'Article') for a in articles[:10]]
+        return "Résumé des actualités:\n\n" + "\n".join([f"- {t}" for t in titles])
     
     articles_text = "\n\n".join([
         f"Source: {a.get('source', 'Unknown')}\nTitre: {a.get('title', 'Sans titre')}\nContenu: {a.get('content', '')[:1000]}"
@@ -43,7 +52,7 @@ Articles à résumer:
 Résumé:"""
 
     try:
-        response = get_client().models.generate_content(
+        response = client.models.generate_content(
             model="gemini-2.5-flash",
             contents=prompt
         )
@@ -53,6 +62,10 @@ Résumé:"""
         return f"Erreur lors de la génération du résumé: {str(e)}"
 
 def answer_user_question(question: str, articles: list, personality: str, writing_style: str, tone: str, language: str = "fr") -> str:
+    client = get_client()
+    if client is None:
+        return "Le service IA n'est pas configuré. Contactez l'administrateur."
+    
     articles_context = "\n\n".join([
         f"[{a.get('source', 'Unknown')}] {a.get('title', '')}: {a.get('content', '')[:500]}"
         for a in articles[:10]
@@ -75,7 +88,7 @@ Question de l'utilisateur: {question}
 Réponse:"""
 
     try:
-        response = get_client().models.generate_content(
+        response = client.models.generate_content(
             model="gemini-2.5-flash",
             contents=prompt
         )
@@ -85,6 +98,10 @@ Réponse:"""
         return f"Erreur: {str(e)}"
 
 def extract_keywords(text: str) -> list:
+    client = get_client()
+    if client is None:
+        return []
+    
     prompt = f"""Extrais les mots-clés principaux du texte suivant.
 Retourne uniquement une liste de mots-clés séparés par des virgules.
 
@@ -93,7 +110,7 @@ Texte: {text[:2000]}
 Mots-clés:"""
 
     try:
-        response = get_client().models.generate_content(
+        response = client.models.generate_content(
             model="gemini-2.5-flash",
             contents=prompt
         )
