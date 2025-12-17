@@ -2,10 +2,11 @@ import os
 import logging
 import atexit
 from datetime import datetime
-from flask import Flask
+from flask import Flask, session, request, redirect, url_for
 from models import db, User, Role, SubscriptionPlan
 from routes import register_blueprints
 from utils.helpers import format_datetime, time_ago, truncate
+from translations import TranslationHelper, get_translation
 
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
@@ -14,16 +15,35 @@ app = Flask(__name__)
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'dev-secret-key-change-in-production')
 app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL', 'sqlite:///app.db')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+app.config['LANGUAGES'] = ['fr', 'en']
+app.config['DEFAULT_LANGUAGE'] = 'fr'
 
 db.init_app(app)
 
+@app.before_request
+def before_request():
+    if 'lang' not in session:
+        session['lang'] = app.config['DEFAULT_LANGUAGE']
+
+@app.route('/set-language/<lang>')
+def set_language(lang):
+    if lang in app.config['LANGUAGES']:
+        session['lang'] = lang
+    return redirect(request.referrer or url_for('admin.dashboard'))
+
 @app.context_processor
 def utility_processor():
+    lang = session.get('lang', app.config['DEFAULT_LANGUAGE'])
+    _ = TranslationHelper(lang)
     return {
         'now': datetime.utcnow,
         'format_datetime': format_datetime,
         'time_ago': time_ago,
-        'truncate': truncate
+        'truncate': truncate,
+        '_': _,
+        't': _,
+        'current_lang': lang,
+        'available_languages': app.config['LANGUAGES']
     }
 
 register_blueprints(app)

@@ -36,6 +36,7 @@ Application complète de gestion de journalistes IA avec panneau d'administratio
 - `security/` - Sécurité
   - `auth.py` - Décorateurs d'authentification
   - `logging.py` - Journalisation activités
+- `translations.py` - Système de traduction (FR/EN)
 
 ### Frontend (HTML/Tailwind)
 - `templates/admin/` - Interface d'administration
@@ -54,18 +55,19 @@ Tables: users, roles, journalists, sources, articles, subscribers, subscription_
 ## Fonctionnalités
 
 1. **Authentification admin** avec rôles (Admin, Editor, Viewer)
-2. **Dashboard** avec statistiques et graphiques
-3. **Gestion journalistes IA** - Création avec personnalité, style, ton, langue, fuseau horaire
-4. **Gestion sources** - RSS, sites web, Twitter/X (via nitter), YouTube (avec transcription automatique)
-5. **Collecte automatique** des actualités toutes les 24h (2:00 AM)
-6. **Génération résumés** avec Gemini AI - respect du fuseau horaire de chaque journaliste
-7. **Audio TTS** via Eleven Labs (génération automatique si configuré)
-8. **Envoi Telegram** automatique aux abonnés actifs
-9. **Conversation IA** - Les utilisateurs peuvent poser des questions, le bot recherche dans les articles
-10. **Gestion abonnés** avec forfaits et périodes d'essai (7 jours par défaut)
-11. **Logs** d'activité et de sécurité
-12. **Paramètres** configurables par catégorie avec tests API intégrés
-13. **Fuseau horaire personnalisé** - Chaque journaliste peut avoir son propre fuseau horaire
+2. **Support multilingue** (Français/English) - Switcher dans l'interface
+3. **Dashboard** avec statistiques et graphiques
+4. **Gestion journalistes IA** - Création avec personnalité, style, ton, langue, fuseau horaire
+5. **Gestion sources** - RSS, sites web, Twitter/X (via nitter), YouTube (avec transcription automatique)
+6. **Collecte automatique** des actualités toutes les 24h (2:00 AM)
+7. **Génération résumés** avec Gemini AI - respect du fuseau horaire de chaque journaliste
+8. **Audio TTS** via Eleven Labs (génération automatique si configuré)
+9. **Envoi Telegram** automatique aux abonnés actifs
+10. **Conversation IA** - Les utilisateurs peuvent poser des questions, le bot recherche dans les articles
+11. **Gestion abonnés** avec forfaits et périodes d'essai (7 jours par défaut)
+12. **Logs** d'activité et de sécurité
+13. **Paramètres** configurables par catégorie avec tests API intégrés
+14. **Fuseau horaire personnalisé** - Chaque journaliste peut avoir son propre fuseau horaire
 
 ## Services automatiques
 
@@ -103,6 +105,8 @@ Tables: users, roles, journalists, sources, articles, subscribers, subscription_
 - Framework CSS: Tailwind via CDN
 - Icônes: Font Awesome
 - Graphiques: Chart.js
+- Favicon: SVG favicon sur toutes les pages
+- Multilingual: Switcher FR/EN dans le header de toutes les pages
 
 ## Démarrage
 

@@ -1,28 +1,28 @@
 {% extends "admin/base.html" %}
 
-{% block title %}{% if journalist %}Modifier{% else %}Nouveau{% endif %} Journaliste{% endblock %}
-{% block header %}{% if journalist %}Modifier {{ journalist.name }}{% else %}Nouveau Journaliste{% endif %}{% endblock %}
-{% block subheader %}{% if journalist %}Modifiez les paramètres du journaliste{% else %}Créez un nouveau journaliste IA{% endif %}{% endblock %}
+{% block title %}{% if journalist %}{{ _('edit') }}{% else %}{{ _('create') }}{% endif %} {{ _('journalist') }}{% endblock %}
+{% block header %}{% if journalist %}{{ _('edit_journalist') }}{% else %}{{ _('create_journalist') }}{% endif %}{% endblock %}
+{% block subheader %}{% if journalist %}{% if current_lang == 'fr' %}Modifiez les paramètres du journaliste{% else %}Edit journalist settings{% endif %}{% else %}{% if current_lang == 'fr' %}Créez un nouveau journaliste IA{% else %}Create a new AI journalist{% endif %}{% endif %}{% endblock %}
 
 {% block content %}
 <div class="max-w-3xl">
     <a href="{{ url_for('journalists.index') }}" class="inline-flex items-center text-gray-600 hover:text-gray-800 mb-6">
-        <i class="fas fa-arrow-left mr-2"></i>Retour à la liste
+        <i class="fas fa-arrow-left mr-2"></i>{{ _('back') }}
     </a>
     
     <form action="{{ url_for('journalists.edit', id=journalist.id) if journalist else url_for('journalists.create') }}" method="POST" class="space-y-6">
         <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
-            <h3 class="font-semibold text-gray-800 mb-4">Informations générales</h3>
+            <h3 class="font-semibold text-gray-800 mb-4">{% if current_lang == 'fr' %}Informations générales{% else %}General Information{% endif %}</h3>
             
             <div class="grid md:grid-cols-2 gap-4">
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Nom du journaliste *</label>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">{{ _('journalist_name') }} *</label>
                     <input type="text" name="name" required value="{{ journalist.name if journalist else '' }}" 
                            class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-transparent" 
-                           placeholder="Ex: TechBot, NewsAI...">
+                           placeholder="{% if current_lang == 'fr' %}Ex: TechBot, NewsAI...{% else %}e.g., TechBot, NewsAI...{% endif %}">
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Token Telegram *</label>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">{{ _('telegram_bot_token') }} *</label>
                     <input type="text" name="telegram_token" required value="{{ journalist.telegram_token if journalist else '' }}" 
                            class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-transparent" 
                            placeholder="123456:ABC-DEF...">
@@ -31,84 +31,82 @@
             
             <div class="grid md:grid-cols-2 gap-4 mt-4">
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Langue</label>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">{{ _('language') }}</label>
                     <select name="language" class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500">
-                        <option value="fr" {% if journalist and journalist.language == 'fr' %}selected{% endif %}>Français</option>
-                        <option value="en" {% if journalist and journalist.language == 'en' %}selected{% endif %}>English</option>
+                        <option value="fr" {% if journalist and journalist.language == 'fr' %}selected{% endif %}>{{ _('french') }}</option>
+                        <option value="en" {% if journalist and journalist.language == 'en' %}selected{% endif %}>{{ _('english') }}</option>
                         <option value="es" {% if journalist and journalist.language == 'es' %}selected{% endif %}>Español</option>
                         <option value="de" {% if journalist and journalist.language == 'de' %}selected{% endif %}>Deutsch</option>
                     </select>
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Fuseau horaire</label>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">{{ _('journalist_timezone') }}</label>
                     <select name="timezone" class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500">
-                        <option value="UTC" {% if journalist and journalist.timezone == 'UTC' %}selected{% endif %}>UTC (Temps universel)</option>
+                        <option value="UTC" {% if journalist and journalist.timezone == 'UTC' %}selected{% endif %}>UTC</option>
                         <option value="Europe/Paris" {% if (not journalist) or (journalist and journalist.timezone == 'Europe/Paris') %}selected{% endif %}>Paris (France)</option>
-                        <option value="Europe/London" {% if journalist and journalist.timezone == 'Europe/London' %}selected{% endif %}>Londres (Royaume-Uni)</option>
-                        <option value="Europe/Brussels" {% if journalist and journalist.timezone == 'Europe/Brussels' %}selected{% endif %}>Bruxelles (Belgique)</option>
-                        <option value="Europe/Berlin" {% if journalist and journalist.timezone == 'Europe/Berlin' %}selected{% endif %}>Berlin (Allemagne)</option>
-                        <option value="Europe/Madrid" {% if journalist and journalist.timezone == 'Europe/Madrid' %}selected{% endif %}>Madrid (Espagne)</option>
-                        <option value="Europe/Rome" {% if journalist and journalist.timezone == 'Europe/Rome' %}selected{% endif %}>Rome (Italie)</option>
-                        <option value="Europe/Zurich" {% if journalist and journalist.timezone == 'Europe/Zurich' %}selected{% endif %}>Zurich (Suisse)</option>
-                        <option value="America/New_York" {% if journalist and journalist.timezone == 'America/New_York' %}selected{% endif %}>New York (USA Est)</option>
-                        <option value="America/Los_Angeles" {% if journalist and journalist.timezone == 'America/Los_Angeles' %}selected{% endif %}>Los Angeles (USA Ouest)</option>
+                        <option value="Europe/London" {% if journalist and journalist.timezone == 'Europe/London' %}selected{% endif %}>London (UK)</option>
+                        <option value="Europe/Brussels" {% if journalist and journalist.timezone == 'Europe/Brussels' %}selected{% endif %}>Brussels (Belgium)</option>
+                        <option value="Europe/Berlin" {% if journalist and journalist.timezone == 'Europe/Berlin' %}selected{% endif %}>Berlin (Germany)</option>
+                        <option value="Europe/Madrid" {% if journalist and journalist.timezone == 'Europe/Madrid' %}selected{% endif %}>Madrid (Spain)</option>
+                        <option value="Europe/Rome" {% if journalist and journalist.timezone == 'Europe/Rome' %}selected{% endif %}>Rome (Italy)</option>
+                        <option value="Europe/Zurich" {% if journalist and journalist.timezone == 'Europe/Zurich' %}selected{% endif %}>Zurich (Switzerland)</option>
+                        <option value="America/New_York" {% if journalist and journalist.timezone == 'America/New_York' %}selected{% endif %}>New York (USA East)</option>
+                        <option value="America/Los_Angeles" {% if journalist and journalist.timezone == 'America/Los_Angeles' %}selected{% endif %}>Los Angeles (USA West)</option>
                         <option value="America/Toronto" {% if journalist and journalist.timezone == 'America/Toronto' %}selected{% endif %}>Toronto (Canada)</option>
-                        <option value="America/Montreal" {% if journalist and journalist.timezone == 'America/Montreal' %}selected{% endif %}>Montréal (Canada)</option>
-                        <option value="Africa/Casablanca" {% if journalist and journalist.timezone == 'Africa/Casablanca' %}selected{% endif %}>Casablanca (Maroc)</option>
-                        <option value="Africa/Tunis" {% if journalist and journalist.timezone == 'Africa/Tunis' %}selected{% endif %}>Tunis (Tunisie)</option>
-                        <option value="Africa/Algiers" {% if journalist and journalist.timezone == 'Africa/Algiers' %}selected{% endif %}>Alger (Algérie)</option>
-                        <option value="Africa/Dakar" {% if journalist and journalist.timezone == 'Africa/Dakar' %}selected{% endif %}>Dakar (Sénégal)</option>
-                        <option value="Asia/Tokyo" {% if journalist and journalist.timezone == 'Asia/Tokyo' %}selected{% endif %}>Tokyo (Japon)</option>
-                        <option value="Asia/Shanghai" {% if journalist and journalist.timezone == 'Asia/Shanghai' %}selected{% endif %}>Shanghai (Chine)</option>
-                        <option value="Asia/Dubai" {% if journalist and journalist.timezone == 'Asia/Dubai' %}selected{% endif %}>Dubaï (EAU)</option>
-                        <option value="Australia/Sydney" {% if journalist and journalist.timezone == 'Australia/Sydney' %}selected{% endif %}>Sydney (Australie)</option>
+                        <option value="America/Montreal" {% if journalist and journalist.timezone == 'America/Montreal' %}selected{% endif %}>Montreal (Canada)</option>
+                        <option value="Africa/Casablanca" {% if journalist and journalist.timezone == 'Africa/Casablanca' %}selected{% endif %}>Casablanca (Morocco)</option>
+                        <option value="Africa/Tunis" {% if journalist and journalist.timezone == 'Africa/Tunis' %}selected{% endif %}>Tunis (Tunisia)</option>
+                        <option value="Africa/Algiers" {% if journalist and journalist.timezone == 'Africa/Algiers' %}selected{% endif %}>Algiers (Algeria)</option>
+                        <option value="Africa/Dakar" {% if journalist and journalist.timezone == 'Africa/Dakar' %}selected{% endif %}>Dakar (Senegal)</option>
+                        <option value="Asia/Tokyo" {% if journalist and journalist.timezone == 'Asia/Tokyo' %}selected{% endif %}>Tokyo (Japan)</option>
+                        <option value="Asia/Shanghai" {% if journalist and journalist.timezone == 'Asia/Shanghai' %}selected{% endif %}>Shanghai (China)</option>
+                        <option value="Asia/Dubai" {% if journalist and journalist.timezone == 'Asia/Dubai' %}selected{% endif %}>Dubai (UAE)</option>
+                        <option value="Australia/Sydney" {% if journalist and journalist.timezone == 'Australia/Sydney' %}selected{% endif %}>Sydney (Australia)</option>
                     </select>
-                    <p class="text-xs text-gray-500 mt-1">L'heure du résumé sera calculée selon ce fuseau horaire</p>
                 </div>
             </div>
             
             <div class="grid md:grid-cols-2 gap-4 mt-4">
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Heure du résumé</label>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">{% if current_lang == 'fr' %}Heure du résumé{% else %}Summary Time{% endif %}</label>
                     <input type="time" name="summary_time" value="{{ journalist.summary_time if journalist else '08:00' }}" 
                            class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500">
-                    <p class="text-xs text-gray-500 mt-1">Heure locale selon le fuseau horaire sélectionné</p>
                 </div>
             </div>
         </div>
         
         <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
-            <h3 class="font-semibold text-gray-800 mb-4">Personnalité et style</h3>
+            <h3 class="font-semibold text-gray-800 mb-4">{% if current_lang == 'fr' %}Personnalité et style{% else %}Personality and Style{% endif %}</h3>
             
             <div class="space-y-4">
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Personnalité</label>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">{% if current_lang == 'fr' %}Personnalité{% else %}Personality{% endif %}</label>
                     <textarea name="personality" rows="3" class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500" 
-                              placeholder="Décrivez la personnalité du journaliste...">{{ journalist.personality if journalist else 'Journaliste professionnel et objectif' }}</textarea>
+                              placeholder="{% if current_lang == 'fr' %}Décrivez la personnalité du journaliste...{% else %}Describe the journalist's personality...{% endif %}">{{ journalist.personality if journalist else ('Journaliste professionnel et objectif' if current_lang == 'fr' else 'Professional and objective journalist') }}</textarea>
                 </div>
                 
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Style d'écriture</label>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">{% if current_lang == 'fr' %}Style d'écriture{% else %}Writing Style{% endif %}</label>
                     <textarea name="writing_style" rows="2" class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500" 
-                              placeholder="Décrivez le style d'écriture...">{{ journalist.writing_style if journalist else 'Clair, engageant et accessible' }}</textarea>
+                              placeholder="{% if current_lang == 'fr' %}Décrivez le style d'écriture...{% else %}Describe the writing style...{% endif %}">{{ journalist.writing_style if journalist else ('Clair, engageant et accessible' if current_lang == 'fr' else 'Clear, engaging and accessible') }}</textarea>
                 </div>
                 
                 <div class="grid md:grid-cols-2 gap-4">
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Style orthographique</label>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">{% if current_lang == 'fr' %}Style orthographique{% else %}Spelling Style{% endif %}</label>
                         <select name="spelling_style" class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500">
                             <option value="standard" {% if journalist and journalist.spelling_style == 'standard' %}selected{% endif %}>Standard</option>
-                            <option value="formal" {% if journalist and journalist.spelling_style == 'formal' %}selected{% endif %}>Formel</option>
-                            <option value="casual" {% if journalist and journalist.spelling_style == 'casual' %}selected{% endif %}>Décontracté</option>
+                            <option value="formal" {% if journalist and journalist.spelling_style == 'formal' %}selected{% endif %}>{% if current_lang == 'fr' %}Formel{% else %}Formal{% endif %}</option>
+                            <option value="casual" {% if journalist and journalist.spelling_style == 'casual' %}selected{% endif %}>{% if current_lang == 'fr' %}Décontracté{% else %}Casual{% endif %}</option>
                         </select>
                     </div>
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Ton</label>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">{% if current_lang == 'fr' %}Ton{% else %}Tone{% endif %}</label>
                         <select name="tone" class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500">
-                            <option value="neutral" {% if journalist and journalist.tone == 'neutral' %}selected{% endif %}>Neutre</option>
-                            <option value="friendly" {% if journalist and journalist.tone == 'friendly' %}selected{% endif %}>Amical</option>
-                            <option value="professional" {% if journalist and journalist.tone == 'professional' %}selected{% endif %}>Professionnel</option>
-                            <option value="enthusiastic" {% if journalist and journalist.tone == 'enthusiastic' %}selected{% endif %}>Enthousiaste</option>
+                            <option value="neutral" {% if journalist and journalist.tone == 'neutral' %}selected{% endif %}>{% if current_lang == 'fr' %}Neutre{% else %}Neutral{% endif %}</option>
+                            <option value="friendly" {% if journalist and journalist.tone == 'friendly' %}selected{% endif %}>{% if current_lang == 'fr' %}Amical{% else %}Friendly{% endif %}</option>
+                            <option value="professional" {% if journalist and journalist.tone == 'professional' %}selected{% endif %}>{% if current_lang == 'fr' %}Professionnel{% else %}Professional{% endif %}</option>
+                            <option value="enthusiastic" {% if journalist and journalist.tone == 'enthusiastic' %}selected{% endif %}>{% if current_lang == 'fr' %}Enthousiaste{% else %}Enthusiastic{% endif %}</option>
                         </select>
                     </div>
                 </div>
@@ -122,18 +120,17 @@
                 <label class="block text-sm font-medium text-gray-700 mb-1">Voice ID Eleven Labs</label>
                 <input type="text" name="eleven_labs_voice_id" value="{{ journalist.eleven_labs_voice_id if journalist else '' }}" 
                        class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500" 
-                       placeholder="Optionnel - pour générer des résumés audio">
-                <p class="text-xs text-gray-500 mt-1">Laissez vide pour désactiver la génération audio</p>
+                       placeholder="{% if current_lang == 'fr' %}Optionnel - pour générer des résumés audio{% else %}Optional - for audio summaries{% endif %}">
             </div>
         </div>
         
         {% if journalist %}
         <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
-            <h3 class="font-semibold text-gray-800 mb-4">Statut</h3>
+            <h3 class="font-semibold text-gray-800 mb-4">{{ _('status') }}</h3>
             <label class="flex items-center gap-3">
                 <input type="checkbox" name="is_active" {% if journalist.is_active %}checked{% endif %} 
                        class="w-5 h-5 rounded border-gray-300 text-primary-600 focus:ring-primary-500">
-                <span class="text-gray-700">Journaliste actif</span>
+                <span class="text-gray-700">{% if current_lang == 'fr' %}Journaliste actif{% else %}Active journalist{% endif %}</span>
             </label>
         </div>
         {% endif %}
@@ -141,7 +138,7 @@
         <div class="flex gap-4">
             <button type="submit" class="flex-1 py-3 bg-primary-600 text-white rounded-xl hover:bg-primary-700 transition font-medium">
                 <i class="fas fa-save mr-2"></i>
-                {% if journalist %}Enregistrer{% else %}Créer le journaliste{% endif %}
+                {% if journalist %}{{ _('save') }}{% else %}{{ _('create_journalist') }}{% endif %}
             </button>
             
             {% if journalist %}
@@ -157,7 +154,7 @@
 <form id="deleteForm" action="{{ url_for('journalists.delete', id=journalist.id) }}" method="POST" class="hidden"></form>
 <script>
 function confirmDelete() {
-    if (confirm('Êtes-vous sûr de vouloir supprimer ce journaliste? Cette action est irréversible.')) {
+    if (confirm('{{ _("confirm_delete") }}')) {
         document.getElementById('deleteForm').submit();
     }
 }

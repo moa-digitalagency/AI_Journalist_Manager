@@ -1,45 +1,45 @@
 {% extends "admin/base.html" %}
 
-{% block title %}{% if user %}Modifier{% else %}Nouvel{% endif %} Utilisateur{% endblock %}
-{% block header %}{% if user %}Modifier {{ user.username }}{% else %}Nouvel Utilisateur{% endif %}{% endblock %}
-{% block subheader %}{% if user %}Modifiez les informations de l'utilisateur{% else %}Créez un nouveau compte administrateur{% endif %}{% endblock %}
+{% block title %}{% if user %}{{ _('edit') }}{% else %}{{ _('create') }}{% endif %} {{ _('user') }}{% endblock %}
+{% block header %}{% if user %}{{ _('edit_user') }}{% else %}{{ _('create_user') }}{% endif %}{% endblock %}
+{% block subheader %}{% if user %}{% if current_lang == 'fr' %}Modifiez les informations de l'utilisateur{% else %}Edit user information{% endif %}{% else %}{% if current_lang == 'fr' %}Créez un nouveau compte administrateur{% else %}Create a new administrator account{% endif %}{% endif %}{% endblock %}
 
 {% block content %}
 <div class="max-w-2xl">
     <a href="{{ url_for('users.index') }}" class="inline-flex items-center text-gray-600 hover:text-gray-800 mb-6">
-        <i class="fas fa-arrow-left mr-2"></i>Retour à la liste
+        <i class="fas fa-arrow-left mr-2"></i>{{ _('back') }}
     </a>
     
     <form action="{{ url_for('users.edit', id=user.id) if user else url_for('users.create') }}" method="POST" class="space-y-6">
         <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
-            <h3 class="font-semibold text-gray-800 mb-4">Informations du compte</h3>
+            <h3 class="font-semibold text-gray-800 mb-4">{% if current_lang == 'fr' %}Informations du compte{% else %}Account Information{% endif %}</h3>
             
             <div class="space-y-4">
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Nom d'utilisateur *</label>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">{{ _('username') }} *</label>
                     <input type="text" name="username" required value="{{ user.username if user else '' }}" 
                            class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500">
                 </div>
                 
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Email *</label>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">{{ _('email') }} *</label>
                     <input type="email" name="email" required value="{{ user.email if user else '' }}" 
                            class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500">
                 </div>
                 
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">
-                        Mot de passe {% if not user %}*{% else %}(laisser vide pour conserver){% endif %}
+                        {{ _('password') }} {% if not user %}*{% else %}({% if current_lang == 'fr' %}laisser vide pour conserver{% else %}leave empty to keep{% endif %}){% endif %}
                     </label>
-                    <input type="password" name="password" {% if not user %}required{% endif %} 
+                    <input type="password" name="password" {% if not user %}required{% endif %} autocomplete="new-password"
                            class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500" 
                            placeholder="{% if user %}••••••••{% endif %}">
                 </div>
                 
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Rôle</label>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">{{ _('role') }}</label>
                     <select name="role_id" class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500">
-                        <option value="">Aucun rôle</option>
+                        <option value="">{% if current_lang == 'fr' %}Aucun rôle{% else %}No role{% endif %}</option>
                         {% for role in roles %}
                         <option value="{{ role.id }}" {% if user and user.role_id == role.id %}selected{% endif %}>{{ role.name }}</option>
                         {% endfor %}
@@ -49,14 +49,14 @@
         </div>
         
         <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
-            <h3 class="font-semibold text-gray-800 mb-4">Permissions</h3>
+            <h3 class="font-semibold text-gray-800 mb-4">{{ _('permissions') }}</h3>
             
             <div class="space-y-4">
                 {% if user %}
                 <label class="flex items-center gap-3">
                     <input type="checkbox" name="is_active" {% if user.is_active %}checked{% endif %} 
                            class="w-5 h-5 rounded border-gray-300 text-primary-600 focus:ring-primary-500">
-                    <span class="text-gray-700">Compte actif</span>
+                    <span class="text-gray-700">{% if current_lang == 'fr' %}Compte actif{% else %}Active account{% endif %}</span>
                 </label>
                 {% endif %}
                 
@@ -64,8 +64,8 @@
                     <input type="checkbox" name="is_superadmin" {% if user and user.is_superadmin %}checked{% endif %} 
                            class="w-5 h-5 rounded border-gray-300 text-primary-600 focus:ring-primary-500">
                     <div>
-                        <span class="text-gray-700">Super Administrateur</span>
-                        <p class="text-xs text-gray-500">Accès complet à toutes les fonctionnalités</p>
+                        <span class="text-gray-700">{{ _('superadmin') }}</span>
+                        <p class="text-xs text-gray-500">{% if current_lang == 'fr' %}Accès complet à toutes les fonctionnalités{% else %}Full access to all features{% endif %}</p>
                     </div>
                 </label>
             </div>
@@ -73,7 +73,7 @@
         
         <button type="submit" class="w-full py-3 bg-primary-600 text-white rounded-xl hover:bg-primary-700 transition font-medium">
             <i class="fas fa-save mr-2"></i>
-            {% if user %}Enregistrer{% else %}Créer l'utilisateur{% endif %}
+            {% if user %}{{ _('save') }}{% else %}{{ _('create_user') }}{% endif %}
         </button>
     </form>
 </div>

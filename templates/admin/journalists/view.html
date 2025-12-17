@@ -2,21 +2,21 @@
 
 {% block title %}{{ journalist.name }}{% endblock %}
 {% block header %}{{ journalist.name }}{% endblock %}
-{% block subheader %}Détails et gestion du journaliste{% endblock %}
+{% block subheader %}{% if current_lang == 'fr' %}Détails et gestion du journaliste{% else %}Journalist details and management{% endif %}{% endblock %}
 
 {% block content %}
 <div class="flex gap-4 mb-6">
     <a href="{{ url_for('journalists.index') }}" class="px-4 py-2 text-gray-600 hover:text-gray-800 transition">
-        <i class="fas fa-arrow-left mr-2"></i>Retour
+        <i class="fas fa-arrow-left mr-2"></i>{{ _('back') }}
     </a>
     <a href="{{ url_for('journalists.edit', id=journalist.id) }}" class="px-4 py-2 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200 transition">
-        <i class="fas fa-edit mr-2"></i>Modifier
+        <i class="fas fa-edit mr-2"></i>{{ _('edit') }}
     </a>
     <button onclick="fetchSources()" class="px-4 py-2 bg-blue-100 text-blue-700 rounded-xl hover:bg-blue-200 transition">
-        <i class="fas fa-sync mr-2"></i>Récupérer articles
+        <i class="fas fa-sync mr-2"></i>{{ _('fetch_articles') }}
     </button>
     <button onclick="generateSummary()" class="px-4 py-2 bg-green-100 text-green-700 rounded-xl hover:bg-green-200 transition">
-        <i class="fas fa-paper-plane mr-2"></i>Générer résumé
+        <i class="fas fa-paper-plane mr-2"></i>{{ _('generate_summary') }}
     </button>
 </div>
 
@@ -30,42 +30,42 @@
                 <div>
                     <h3 class="text-xl font-semibold text-gray-800">{{ journalist.name }}</h3>
                     <span class="px-3 py-1 rounded-full text-xs {% if journalist.is_active %}bg-green-100 text-green-600{% else %}bg-gray-100 text-gray-600{% endif %}">
-                        {% if journalist.is_active %}Actif{% else %}Inactif{% endif %}
+                        {{ _('active') if journalist.is_active else _('inactive') }}
                     </span>
                 </div>
             </div>
             
             <div class="space-y-4 text-sm">
                 <div class="flex justify-between py-2 border-b border-gray-100">
-                    <span class="text-gray-500">Langue</span>
+                    <span class="text-gray-500">{{ _('language') }}</span>
                     <span class="font-medium">{{ journalist.language|upper }}</span>
                 </div>
                 <div class="flex justify-between py-2 border-b border-gray-100">
-                    <span class="text-gray-500">Ton</span>
+                    <span class="text-gray-500">{% if current_lang == 'fr' %}Ton{% else %}Tone{% endif %}</span>
                     <span class="font-medium">{{ journalist.tone }}</span>
                 </div>
                 <div class="flex justify-between py-2 border-b border-gray-100">
-                    <span class="text-gray-500">Style</span>
+                    <span class="text-gray-500">{% if current_lang == 'fr' %}Style{% else %}Style{% endif %}</span>
                     <span class="font-medium">{{ journalist.spelling_style }}</span>
                 </div>
                 <div class="flex justify-between py-2 border-b border-gray-100">
-                    <span class="text-gray-500">Heure résumé</span>
+                    <span class="text-gray-500">{% if current_lang == 'fr' %}Heure résumé{% else %}Summary time{% endif %}</span>
                     <span class="font-medium">{{ journalist.summary_time }}</span>
                 </div>
                 <div class="flex justify-between py-2">
-                    <span class="text-gray-500">Créé le</span>
+                    <span class="text-gray-500">{% if current_lang == 'fr' %}Créé le{% else %}Created{% endif %}</span>
                     <span class="font-medium">{{ format_datetime(journalist.created_at) }}</span>
                 </div>
             </div>
         </div>
         
         <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
-            <h4 class="font-semibold text-gray-800 mb-2">Personnalité</h4>
+            <h4 class="font-semibold text-gray-800 mb-2">{% if current_lang == 'fr' %}Personnalité{% else %}Personality{% endif %}</h4>
             <p class="text-sm text-gray-600">{{ journalist.personality }}</p>
         </div>
         
         <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
-            <h4 class="font-semibold text-gray-800 mb-2">Style d'écriture</h4>
+            <h4 class="font-semibold text-gray-800 mb-2">{% if current_lang == 'fr' %}Style d'écriture{% else %}Writing Style{% endif %}</h4>
             <p class="text-sm text-gray-600">{{ journalist.writing_style }}</p>
         </div>
     </div>
@@ -73,9 +73,9 @@
     <div class="lg:col-span-2 space-y-6">
         <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
             <div class="flex justify-between items-center mb-4">
-                <h4 class="font-semibold text-gray-800">Sources ({{ sources|length }})</h4>
+                <h4 class="font-semibold text-gray-800">{{ _('sources') }} ({{ sources|length }})</h4>
                 <button onclick="document.getElementById('addSourceModal').classList.remove('hidden')" class="px-4 py-2 bg-primary-600 text-white rounded-xl hover:bg-primary-700 transition text-sm">
-                    <i class="fas fa-plus mr-1"></i> Ajouter
+                    <i class="fas fa-plus mr-1"></i> {{ _('add') }}
                 </button>
             </div>
             
@@ -88,52 +88,52 @@
                         </div>
                         <div>
                             <p class="font-medium text-gray-800">{{ source.name }}</p>
-                            <p class="text-xs text-gray-500">{{ source.source_type|upper }} - {{ source.fetch_count }} récupérations</p>
+                            <p class="text-xs text-gray-500">{{ source.source_type|upper }} - {{ source.fetch_count }} {% if current_lang == 'fr' %}récupérations{% else %}fetches{% endif %}</p>
                         </div>
                     </div>
                     <div class="flex items-center gap-2">
                         <span class="px-2 py-1 rounded-full text-xs {% if source.is_active %}bg-green-100 text-green-600{% else %}bg-gray-200 text-gray-600{% endif %}">
-                            {% if source.is_active %}Actif{% else %}Inactif{% endif %}
+                            {{ _('active') if source.is_active else _('inactive') }}
                         </span>
                         <form action="{{ url_for('journalists.delete_source', source_id=source.id) }}" method="POST" class="inline">
-                            <button type="submit" class="p-2 text-red-500 hover:bg-red-50 rounded-lg transition" onclick="return confirm('Supprimer cette source?')">
+                            <button type="submit" class="p-2 text-red-500 hover:bg-red-50 rounded-lg transition" onclick="return confirm('{{ _('confirm_delete') }}')">
                                 <i class="fas fa-trash"></i>
                             </button>
                         </form>
                     </div>
                 </div>
                 {% else %}
-                <p class="text-center text-gray-500 py-8">Aucune source configurée</p>
+                <p class="text-center text-gray-500 py-8">{% if current_lang == 'fr' %}Aucune source configurée{% else %}No sources configured{% endif %}</p>
                 {% endfor %}
             </div>
         </div>
         
         <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
-            <h4 class="font-semibold text-gray-800 mb-4">Articles récents ({{ recent_articles|length }})</h4>
+            <h4 class="font-semibold text-gray-800 mb-4">{% if current_lang == 'fr' %}Articles récents{% else %}Recent Articles{% endif %} ({{ recent_articles|length }})</h4>
             <div class="space-y-3 max-h-96 overflow-y-auto">
                 {% for article in recent_articles %}
                 <div class="p-4 bg-gray-50 rounded-xl">
                     <h5 class="font-medium text-gray-800 mb-1">{{ article.title }}</h5>
                     <p class="text-sm text-gray-600 line-clamp-2">{{ truncate(article.content, 150) }}</p>
                     <div class="flex justify-between items-center mt-2 text-xs text-gray-500">
-                        <span>{{ article.source.name if article.source else 'Source inconnue' }}</span>
+                        <span>{{ article.source.name if article.source else (_('article_source') if current_lang == 'en' else 'Source inconnue') }}</span>
                         <span>{{ time_ago(article.fetched_at) }}</span>
                     </div>
                 </div>
                 {% else %}
-                <p class="text-center text-gray-500 py-8">Aucun article récupéré</p>
+                <p class="text-center text-gray-500 py-8">{% if current_lang == 'fr' %}Aucun article récupéré{% else %}No articles fetched{% endif %}</p>
                 {% endfor %}
             </div>
         </div>
         
         <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
-            <h4 class="font-semibold text-gray-800 mb-4">Résumés récents</h4>
+            <h4 class="font-semibold text-gray-800 mb-4">{% if current_lang == 'fr' %}Résumés récents{% else %}Recent Summaries{% endif %}</h4>
             <div class="space-y-4">
                 {% for summary in recent_summaries %}
                 <div class="p-4 bg-gray-50 rounded-xl">
                     <div class="flex justify-between items-start mb-2">
                         <span class="text-xs text-gray-500">{{ format_datetime(summary.created_at) }}</span>
-                        <span class="px-2 py-1 bg-blue-100 text-blue-600 rounded-full text-xs">{{ summary.articles_count }} articles</span>
+                        <span class="px-2 py-1 bg-blue-100 text-blue-600 rounded-full text-xs">{{ summary.articles_count }} {{ _('articles') | lower }}</span>
                     </div>
                     <p class="text-sm text-gray-700 line-clamp-3">{{ truncate(summary.summary_text, 200) }}</p>
                     {% if summary.audio_url %}
@@ -143,10 +143,10 @@
                         </audio>
                     </div>
                     {% endif %}
-                    <p class="text-xs text-gray-500 mt-2">Envoyé à {{ summary.sent_count }} abonnés</p>
+                    <p class="text-xs text-gray-500 mt-2">{% if current_lang == 'fr' %}Envoyé à{% else %}Sent to{% endif %} {{ summary.sent_count }} {{ _('subscribers') | lower }}</p>
                 </div>
                 {% else %}
-                <p class="text-center text-gray-500 py-8">Aucun résumé généré</p>
+                <p class="text-center text-gray-500 py-8">{% if current_lang == 'fr' %}Aucun résumé généré{% else %}No summaries generated{% endif %}</p>
                 {% endfor %}
             </div>
         </div>
@@ -156,31 +156,31 @@
 <div id="addSourceModal" class="hidden fixed inset-0 bg-black/50 flex items-center justify-center z-50">
     <div class="bg-white rounded-2xl p-6 w-full max-w-md">
         <div class="flex justify-between items-center mb-6">
-            <h3 class="text-lg font-semibold">Ajouter une source</h3>
+            <h3 class="text-lg font-semibold">{{ _('add_source') }}</h3>
             <button onclick="document.getElementById('addSourceModal').classList.add('hidden')" class="text-gray-400 hover:text-gray-600">
                 <i class="fas fa-times"></i>
             </button>
         </div>
         <form action="{{ url_for('journalists.add_source', id=journalist.id) }}" method="POST" class="space-y-4">
             <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Type</label>
+                <label class="block text-sm font-medium text-gray-700 mb-1">{% if current_lang == 'fr' %}Type{% else %}Type{% endif %}</label>
                 <select name="source_type" class="w-full px-4 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500">
-                    <option value="rss">RSS Feed</option>
-                    <option value="website">Page Web</option>
+                    <option value="rss">{{ _('rss_feed') }}</option>
+                    <option value="website">{{ _('website') }}</option>
                     <option value="twitter">Twitter/X</option>
                     <option value="youtube">YouTube</option>
                 </select>
             </div>
             <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Nom</label>
-                <input type="text" name="name" class="w-full px-4 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500" placeholder="Nom de la source">
+                <label class="block text-sm font-medium text-gray-700 mb-1">{% if current_lang == 'fr' %}Nom{% else %}Name{% endif %}</label>
+                <input type="text" name="name" class="w-full px-4 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500" placeholder="{% if current_lang == 'fr' %}Nom de la source{% else %}Source name{% endif %}">
             </div>
             <div>
                 <label class="block text-sm font-medium text-gray-700 mb-1">URL</label>
                 <input type="url" name="url" required class="w-full px-4 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500" placeholder="https://...">
             </div>
             <button type="submit" class="w-full py-3 bg-primary-600 text-white rounded-xl hover:bg-primary-700 transition">
-                Ajouter
+                {{ _('add') }}
             </button>
         </form>
     </div>
@@ -189,7 +189,7 @@
 <div id="resultModal" class="hidden fixed inset-0 bg-black/50 flex items-center justify-center z-50">
     <div class="bg-white rounded-2xl p-6 w-full max-w-lg">
         <div class="flex justify-between items-center mb-4">
-            <h3 class="text-lg font-semibold" id="resultTitle">Résultat</h3>
+            <h3 class="text-lg font-semibold" id="resultTitle">{% if current_lang == 'fr' %}Résultat{% else %}Result{% endif %}</h3>
             <button onclick="document.getElementById('resultModal').classList.add('hidden')" class="text-gray-400 hover:text-gray-600">
                 <i class="fas fa-times"></i>
             </button>
@@ -205,7 +205,7 @@ function fetchSources() {
     fetch('{{ url_for("journalists.fetch_sources", id=journalist.id) }}', { method: 'POST' })
         .then(r => r.json())
         .then(data => {
-            document.getElementById('resultTitle').textContent = 'Récupération terminée';
+            document.getElementById('resultTitle').textContent = '{% if current_lang == "fr" %}Récupération terminée{% else %}Fetch Complete{% endif %}';
             document.getElementById('resultContent').textContent = data.message;
             document.getElementById('resultModal').classList.remove('hidden');
         });
@@ -215,7 +215,7 @@ function generateSummary() {
     fetch('{{ url_for("journalists.generate_summary", id=journalist.id) }}', { method: 'POST' })
         .then(r => r.json())
         .then(data => {
-            document.getElementById('resultTitle').textContent = 'Résumé généré';
+            document.getElementById('resultTitle').textContent = '{% if current_lang == "fr" %}Résumé généré{% else %}Summary Generated{% endif %}';
             document.getElementById('resultContent').innerHTML = '<p class="mb-2">' + data.message + '</p>' + 
                 (data.summary ? '<div class="p-4 bg-gray-50 rounded-xl text-sm max-h-64 overflow-y-auto">' + data.summary + '</div>' : '');
             document.getElementById('resultModal').classList.remove('hidden');

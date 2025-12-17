@@ -1,9 +1,11 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="{{ current_lang }}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Connexion - AI Journalist Manager</title>
+    <title>{{ _('login') }} - {{ _('app_name') }}</title>
+    <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='favicon.svg') }}">
+    <link rel="shortcut icon" type="image/svg+xml" href="{{ url_for('static', filename='favicon.svg') }}">
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script>
@@ -20,12 +22,21 @@
 </head>
 <body class="min-h-screen bg-gradient-to-br from-primary-900 via-primary-800 to-primary-950 flex items-center justify-center p-4">
     <div class="w-full max-w-md">
+        <div class="absolute top-4 right-4 flex gap-2">
+            {% for lang in available_languages %}
+                <a href="{{ url_for('set_language', lang=lang) }}" 
+                   class="px-3 py-1 rounded text-sm {% if current_lang == lang %}bg-white text-primary-600 font-bold{% else %}text-white/70 hover:text-white{% endif %}">
+                    {{ lang.upper() }}
+                </a>
+            {% endfor %}
+        </div>
+        
         <div class="text-center mb-8">
             <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-white/10 mb-4">
                 <i class="fas fa-robot text-3xl text-white"></i>
             </div>
-            <h1 class="text-3xl font-bold text-white">AI Journalist Manager</h1>
-            <p class="text-primary-200 mt-2">Panneau d'administration</p>
+            <h1 class="text-3xl font-bold text-white">{{ _('app_name') }}</h1>
+            <p class="text-primary-200 mt-2">{{ _('admin_panel') }}</p>
         </div>
         
         <div class="bg-white rounded-2xl shadow-2xl p-8">
@@ -41,38 +52,38 @@
             
             <form method="POST" class="space-y-6">
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Identifiant</label>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">{{ _('username') }}</label>
                     <div class="relative">
                         <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-400">
                             <i class="fas fa-user"></i>
                         </span>
-                        <input type="text" name="username" required
+                        <input type="text" name="username" required autocomplete="username"
                                class="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-transparent transition"
-                               placeholder="Nom d'utilisateur ou email">
+                               placeholder="{{ _('username_or_email') }}">
                     </div>
                 </div>
                 
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Mot de passe</label>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">{{ _('password') }}</label>
                     <div class="relative">
                         <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-400">
                             <i class="fas fa-lock"></i>
                         </span>
-                        <input type="password" name="password" required
+                        <input type="password" name="password" required autocomplete="current-password"
                                class="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-transparent transition"
-                               placeholder="Mot de passe">
+                               placeholder="{{ _('password') }}">
                     </div>
                 </div>
                 
                 <button type="submit" 
                         class="w-full bg-primary-600 text-white py-3 rounded-xl font-semibold hover:bg-primary-700 transition shadow-lg shadow-primary-600/30">
-                    <i class="fas fa-sign-in-alt mr-2"></i>Se connecter
+                    <i class="fas fa-sign-in-alt mr-2"></i>{{ _('login') }}
                 </button>
             </form>
         </div>
         
         <p class="text-center text-primary-300 text-sm mt-6">
-            Powered by Gemini AI & Telegram
+            {{ _('powered_by') }}
         </p>
     </div>
 </body>

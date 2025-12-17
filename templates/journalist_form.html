@@ -1,70 +1,70 @@
 {% extends "base.html" %}
 
-{% block title %}{% if journalist %}Modifier{% else %}Nouveau{% endif %} Journaliste - AI Journalist Manager{% endblock %}
+{% block title %}{% if journalist %}{{ _('edit') }}{% else %}{{ _('create') }}{% endif %} {{ _('journalist') }} - {{ _('app_name') }}{% endblock %}
 
 {% block content %}
 <div class="max-w-2xl mx-auto">
     <div class="mb-8">
         <a href="{% if journalist %}{{ url_for('view_journalist', journalist_id=journalist.id) }}{% else %}/{% endif %}" 
            class="text-indigo-600 hover:text-indigo-800">
-            <i class="fas fa-arrow-left mr-2"></i>Retour
+            <i class="fas fa-arrow-left mr-2"></i>{{ _('back') }}
         </a>
     </div>
 
     <div class="bg-white rounded-xl shadow-md p-8">
         <h1 class="text-2xl font-bold text-gray-800 mb-6">
-            {% if journalist %}Modifier le journaliste{% else %}Créer un nouveau journaliste{% endif %}
+            {% if journalist %}{{ _('edit_journalist') }}{% else %}{{ _('create_journalist') }}{% endif %}
         </h1>
 
         <form method="POST" class="space-y-6">
             <div>
-                <label class="block text-sm font-medium text-gray-700 mb-2">Nom du journaliste *</label>
+                <label class="block text-sm font-medium text-gray-700 mb-2">{{ _('journalist_name') }} *</label>
                 <input type="text" name="name" required
                        value="{{ journalist.name if journalist else '' }}"
                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-                       placeholder="Ex: Alex News">
+                       placeholder="{% if current_lang == 'fr' %}Ex: Alex News{% else %}e.g., Alex News{% endif %}">
             </div>
 
             <div>
-                <label class="block text-sm font-medium text-gray-700 mb-2">Token Telegram Bot *</label>
+                <label class="block text-sm font-medium text-gray-700 mb-2">{{ _('telegram_bot_token') }} *</label>
                 <input type="text" name="telegram_token" {% if not journalist %}required{% endif %}
                        value="{{ journalist.telegram_token if journalist else '' }}"
                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent font-mono text-sm"
                        placeholder="123456789:ABCdefGHIjklMNOpqrsTUVwxyz">
-                <p class="text-xs text-gray-500 mt-1">Obtenez ce token via @BotFather sur Telegram</p>
+                <p class="text-xs text-gray-500 mt-1">{% if current_lang == 'fr' %}Obtenez ce token via @BotFather sur Telegram{% else %}Get this token from @BotFather on Telegram{% endif %}</p>
             </div>
 
             <div>
-                <label class="block text-sm font-medium text-gray-700 mb-2">Personnalité</label>
+                <label class="block text-sm font-medium text-gray-700 mb-2">{% if current_lang == 'fr' %}Personnalité{% else %}Personality{% endif %}</label>
                 <textarea name="personality" rows="3"
                           class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-                          placeholder="Décrivez la personnalité du journaliste...">{{ journalist.personality if journalist else 'Journaliste professionnel et concis' }}</textarea>
+                          placeholder="{% if current_lang == 'fr' %}Décrivez la personnalité du journaliste...{% else %}Describe the journalist's personality...{% endif %}">{{ journalist.personality if journalist else ('Journaliste professionnel et concis' if current_lang == 'fr' else 'Professional and concise journalist') }}</textarea>
             </div>
 
             <div>
-                <label class="block text-sm font-medium text-gray-700 mb-2">Style d'écriture</label>
+                <label class="block text-sm font-medium text-gray-700 mb-2">{% if current_lang == 'fr' %}Style d'écriture{% else %}Writing style{% endif %}</label>
                 <textarea name="writing_style" rows="3"
                           class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-                          placeholder="Décrivez le style d'écriture...">{{ journalist.writing_style if journalist else 'Clair, factuel et engageant' }}</textarea>
+                          placeholder="{% if current_lang == 'fr' %}Décrivez le style d'écriture...{% else %}Describe the writing style...{% endif %}">{{ journalist.writing_style if journalist else ('Clair, factuel et engageant' if current_lang == 'fr' else 'Clear, factual and engaging') }}</textarea>
             </div>
 
             <div class="grid grid-cols-2 gap-4">
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Ton</label>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">{% if current_lang == 'fr' %}Ton{% else %}Tone{% endif %}</label>
                     <select name="tone" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
-                        <option value="neutral" {% if journalist and journalist.tone == 'neutral' %}selected{% endif %}>Neutre</option>
-                        <option value="formal" {% if journalist and journalist.tone == 'formal' %}selected{% endif %}>Formel</option>
-                        <option value="casual" {% if journalist and journalist.tone == 'casual' %}selected{% endif %}>Décontracté</option>
-                        <option value="humorous" {% if journalist and journalist.tone == 'humorous' %}selected{% endif %}>Humoristique</option>
-                        <option value="serious" {% if journalist and journalist.tone == 'serious' %}selected{% endif %}>Sérieux</option>
+                        <option value="neutral" {% if journalist and journalist.tone == 'neutral' %}selected{% endif %}>{% if current_lang == 'fr' %}Neutre{% else %}Neutral{% endif %}</option>
+                        <option value="formal" {% if journalist and journalist.tone == 'formal' %}selected{% endif %}>{% if current_lang == 'fr' %}Formel{% else %}Formal{% endif %}</option>
+                        <option value="casual" {% if journalist and journalist.tone == 'casual' %}selected{% endif %}>{% if current_lang == 'fr' %}Décontracté{% else %}Casual{% endif %}</option>
+                        <option value="humorous" {% if journalist and journalist.tone == 'humorous' %}selected{% endif %}>{% if current_lang == 'fr' %}Humoristique{% else %}Humorous{% endif %}</option>
+                        <option value="serious" {% if journalist and journalist.tone == 'serious' %}selected{% endif %}>{% if current_lang == 'fr' %}Sérieux{% else %}Serious{% endif %}</option>
                     </select>
                 </div>
 
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Langue</label>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">{{ _('language') }}</label>
                     <select name="language" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
-                        <option value="fr" {% if journalist and journalist.language == 'fr' %}selected{% endif %}>Français</option>
-                        <option value="en" {% if journalist and journalist.language == 'en' %}selected{% endif %}>English</option>
+                        <option value="fr" {% if journalist and journalist.language == 'fr' %}selected{% endif %}>{{ _('french') }}</option>
+                        <option value="en" {% if journalist and journalist.language == 'en' %}selected{% endif %}>{{ _('english') }}</option>
                         <option value="es" {% if journalist and journalist.language == 'es' %}selected{% endif %}>Español</option>
                         <option value="de" {% if journalist and journalist.language == 'de' %}selected{% endif %}>Deutsch</option>
                     </select>
@@ -72,12 +72,12 @@
             </div>
 
             <div>
-                <label class="block text-sm font-medium text-gray-700 mb-2">Eleven Labs Voice ID (optionnel)</label>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Eleven Labs Voice ID ({% if current_lang == 'fr' %}optionnel{% else %}optional{% endif %})</label>
                 <input type="text" name="eleven_labs_voice_id"
                        value="{{ journalist.eleven_labs_voice_id if journalist else '' }}"
                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent font-mono text-sm"
-                       placeholder="Ex: 21m00Tcm4TlvDq8ikWAM">
-                <p class="text-xs text-gray-500 mt-1">Pour générer des résumés audio</p>
+                       placeholder="{% if current_lang == 'fr' %}Ex: 21m00Tcm4TlvDq8ikWAM{% else %}e.g., 21m00Tcm4TlvDq8ikWAM{% endif %}">
+                <p class="text-xs text-gray-500 mt-1">{% if current_lang == 'fr' %}Pour générer des résumés audio{% else %}For audio summaries{% endif %}</p>
             </div>
 
             {% if journalist %}
@@ -85,18 +85,18 @@
                 <input type="checkbox" name="is_active" id="is_active" 
                        {% if journalist.is_active %}checked{% endif %}
                        class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded">
-                <label for="is_active" class="ml-2 text-sm text-gray-700">Journaliste actif</label>
+                <label for="is_active" class="ml-2 text-sm text-gray-700">{% if current_lang == 'fr' %}Journaliste actif{% else %}Active journalist{% endif %}</label>
             </div>
             {% endif %}
 
             <div class="flex gap-4">
                 <button type="submit" 
                         class="flex-1 bg-indigo-600 text-white py-3 rounded-lg font-semibold hover:bg-indigo-700 transition">
-                    {% if journalist %}Enregistrer{% else %}Créer{% endif %}
+                    {% if journalist %}{{ _('save') }}{% else %}{{ _('create') }}{% endif %}
                 </button>
                 <a href="{% if journalist %}{{ url_for('view_journalist', journalist_id=journalist.id) }}{% else %}/{% endif %}" 
                    class="flex-1 bg-gray-200 text-gray-700 py-3 rounded-lg font-semibold hover:bg-gray-300 transition text-center">
-                    Annuler
+                    {{ _('cancel') }}
                 </a>
             </div>
         </form>
