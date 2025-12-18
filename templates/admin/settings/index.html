@@ -122,36 +122,48 @@
                 </div>
             </div>
             
-            <div id="api" class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+            <div id="api" class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 space-y-6">
                 <h3 class="font-semibold text-gray-800 mb-4 flex items-center gap-2">
                     <i class="fas fa-key text-primary-600"></i>{% if current_lang == 'fr' %}Configuration API{% else %}API Configuration{% endif %}
                 </h3>
                 
-                <div class="grid md:grid-cols-2 gap-4">
-                    {% for setting in settings.api %}
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">{{ setting.key }}</label>
-                        {% if setting.key == 'default_ai_model' %}
-                        <select name="setting_{{ setting.key }}" class="w-full px-4 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500">
-                            <option value="perplexity" {% if setting.value == 'perplexity' %}selected{% endif %}>Perplexity AI</option>
-                            <option value="gemini" {% if setting.value == 'gemini' %}selected{% endif %}>Google Gemini</option>
-                            <option value="openai" {% if setting.value == 'openai' %}selected{% endif %}>OpenAI</option>
-                            <option value="openrouter" {% if setting.value == 'openrouter' %}selected{% endif %}>OpenRouter</option>
-                        </select>
-                        {% else %}
-                        <input type="text" name="setting_{{ setting.key }}" value="{{ setting.value }}" 
-                               class="w-full px-4 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500">
-                        {% endif %}
-                        <input type="hidden" name="category_{{ setting.key }}" value="api">
-                        {% if setting.description %}
-                        <p class="text-xs text-gray-500 mt-1">{{ setting.description }}</p>
-                        {% endif %}
+                {% set default_ai_setting = settings.api|selectattr('key', 'equalto', 'default_ai_model')|first %}
+                {% if default_ai_setting %}
+                <div class="bg-gradient-to-r from-blue-50 to-purple-50 rounded-xl p-4 border border-blue-100">
+                    <label class="block text-sm font-semibold text-gray-800 mb-2">
+                        <i class="fas fa-brain text-blue-600 mr-2"></i>{% if current_lang == 'fr' %}Modèle IA par défaut{% else %}Default AI Model{% endif %}
+                    </label>
+                    <select name="setting_{{ default_ai_setting.key }}" class="w-full px-4 py-2 border border-blue-200 rounded-lg focus:ring-2 focus:ring-blue-500 bg-white">
+                        <option value="perplexity" {% if default_ai_setting.value == 'perplexity' %}selected{% endif %}>Perplexity AI</option>
+                        <option value="gemini" {% if default_ai_setting.value == 'gemini' %}selected{% endif %}>Google Gemini</option>
+                        <option value="openai" {% if default_ai_setting.value == 'openai' %}selected{% endif %}>OpenAI</option>
+                        <option value="openrouter" {% if default_ai_setting.value == 'openrouter' %}selected{% endif %}>OpenRouter</option>
+                    </select>
+                    <p class="text-xs text-gray-600 mt-2">{{ default_ai_setting.description }}</p>
+                    <input type="hidden" name="category_{{ default_ai_setting.key }}" value="api">
+                </div>
+                {% endif %}
+                
+                <div class="space-y-4">
+                    <h4 class="text-sm font-semibold text-gray-700 flex items-center gap-2">
+                        <i class="fas fa-sliders-h text-gray-500"></i>{% if current_lang == 'fr' %}Paramètres additionnels{% else %}Additional Settings{% endif %}
+                    </h4>
+                    
+                    <div class="grid md:grid-cols-2 gap-4">
+                        {% for setting in settings.api %}
+                            {% if setting.key != 'default_ai_model' %}
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">{{ setting.key }}</label>
+                                <input type="text" name="setting_{{ setting.key }}" value="{{ setting.value }}" 
+                                       class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary-500">
+                                <input type="hidden" name="category_{{ setting.key }}" value="api">
+                                {% if setting.description %}
+                                <p class="text-xs text-gray-500 mt-1">{{ setting.description }}</p>
+                                {% endif %}
+                            </div>
+                            {% endif %}
+                        {% endfor %}
                     </div>
-                    {% else %}
-                    <div class="col-span-2">
-                        <p class="text-gray-500 text-sm py-4 text-center">{% if current_lang == 'fr' %}Aucun paramètre API.{% else %}No API settings.{% endif %} <button type="button" onclick="document.querySelector('form[action*=initialize]').submit()" class="text-blue-600 hover:underline">{% if current_lang == 'fr' %}Initialiser les paramètres par défaut{% else %}Initialize default settings{% endif %}</button></p>
-                    </div>
-                    {% endfor %}
                 </div>
             </div>
             
