@@ -104,18 +104,20 @@
                 </h3>
                 
                 {% if settings.general %}
-                <div class="grid md:grid-cols-2 gap-4">
-                    {% for setting in settings.general %}
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">{{ setting.key }}</label>
-                        <input type="text" name="setting_{{ setting.key }}" value="{{ setting.value }}" 
-                               class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary-500">
-                        <input type="hidden" name="category_{{ setting.key }}" value="general">
-                        {% if setting.description %}
-                        <p class="text-xs text-gray-500 mt-1">{{ setting.description }}</p>
-                        {% endif %}
+                <div class="bg-gradient-to-r from-amber-50 to-orange-50 rounded-xl p-4 border border-amber-100">
+                    <div class="grid md:grid-cols-2 gap-4">
+                        {% for setting in settings.general %}
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">{{ setting.key }}</label>
+                            <input type="text" name="setting_{{ setting.key }}" value="{{ setting.value }}" 
+                                   class="w-full px-4 py-2 border border-amber-200 rounded-lg focus:ring-2 focus:ring-amber-500 bg-white">
+                            <input type="hidden" name="category_{{ setting.key }}" value="general">
+                            {% if setting.description %}
+                            <p class="text-xs text-gray-600 mt-1">{{ setting.description }}</p>
+                            {% endif %}
+                        </div>
+                        {% endfor %}
                     </div>
-                    {% endfor %}
                 </div>
                 {% else %}
                 <p class="text-gray-500 text-sm py-4 text-center">{% if current_lang == 'fr' %}Aucun paramètre général.{% else %}No general settings.{% endif %}</p>
@@ -165,20 +167,22 @@
                         <i class="fas fa-sliders-h text-gray-500"></i>{% if current_lang == 'fr' %}Paramètres additionnels{% else %}Additional Settings{% endif %}
                     </h4>
                     
-                    <div class="grid md:grid-cols-2 gap-4">
-                        {% for setting in settings.api %}
-                            {% if setting.key != 'default_ai_model' %}
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-2">{{ setting.key }}</label>
-                                <input type="text" name="setting_{{ setting.key }}" value="{{ setting.value }}" 
-                                       class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary-500">
-                                <input type="hidden" name="category_{{ setting.key }}" value="api">
-                                {% if setting.description %}
-                                <p class="text-xs text-gray-500 mt-1">{{ setting.description }}</p>
+                    <div class="bg-gradient-to-r from-cyan-50 to-teal-50 rounded-xl p-4 border border-cyan-100">
+                        <div class="grid md:grid-cols-2 gap-4">
+                            {% for setting in settings.api %}
+                                {% if setting.key != 'default_ai_model' %}
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">{{ setting.key }}</label>
+                                    <input type="text" name="setting_{{ setting.key }}" value="{{ setting.value }}" 
+                                           class="w-full px-4 py-2 border border-cyan-200 rounded-lg focus:ring-2 focus:ring-cyan-500 bg-white">
+                                    <input type="hidden" name="category_{{ setting.key }}" value="api">
+                                    {% if setting.description %}
+                                    <p class="text-xs text-gray-600 mt-1">{{ setting.description }}</p>
+                                    {% endif %}
+                                </div>
                                 {% endif %}
-                            </div>
-                            {% endif %}
-                        {% endfor %}
+                            {% endfor %}
+                        </div>
                     </div>
                 </div>
             </div>
@@ -189,25 +193,27 @@
                 </h3>
                 
                 {% if settings.notifications %}
-                <div class="grid md:grid-cols-2 gap-4">
-                    {% for setting in settings.notifications %}
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">{{ setting.key }}</label>
-                        {% if setting.value in ['true', 'false'] %}
-                        <select name="setting_{{ setting.key }}" class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary-500">
-                            <option value="true" {% if setting.value == 'true' %}selected{% endif %}>{% if current_lang == 'fr' %}Activé{% else %}Enabled{% endif %}</option>
-                            <option value="false" {% if setting.value == 'false' %}selected{% endif %}>{% if current_lang == 'fr' %}Désactivé{% else %}Disabled{% endif %}</option>
-                        </select>
-                        {% else %}
-                        <input type="text" name="setting_{{ setting.key }}" value="{{ setting.value }}" 
-                               class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary-500">
-                        {% endif %}
-                        <input type="hidden" name="category_{{ setting.key }}" value="notifications">
-                        {% if setting.description %}
-                        <p class="text-xs text-gray-500 mt-1">{{ setting.description }}</p>
-                        {% endif %}
+                <div class="bg-gradient-to-r from-pink-50 to-rose-50 rounded-xl p-4 border border-pink-100">
+                    <div class="grid md:grid-cols-2 gap-4">
+                        {% for setting in settings.notifications %}
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">{{ setting.key }}</label>
+                            {% if setting.value in ['true', 'false'] %}
+                            <select name="setting_{{ setting.key }}" class="w-full px-4 py-2 border border-pink-200 rounded-lg focus:ring-2 focus:ring-pink-500 bg-white">
+                                <option value="true" {% if setting.value == 'true' %}selected{% endif %}>{% if current_lang == 'fr' %}Activé{% else %}Enabled{% endif %}</option>
+                                <option value="false" {% if setting.value == 'false' %}selected{% endif %}>{% if current_lang == 'fr' %}Désactivé{% else %}Disabled{% endif %}</option>
+                            </select>
+                            {% else %}
+                            <input type="text" name="setting_{{ setting.key }}" value="{{ setting.value }}" 
+                                   class="w-full px-4 py-2 border border-pink-200 rounded-lg focus:ring-2 focus:ring-pink-500 bg-white">
+                            {% endif %}
+                            <input type="hidden" name="category_{{ setting.key }}" value="notifications">
+                            {% if setting.description %}
+                            <p class="text-xs text-gray-600 mt-1">{{ setting.description }}</p>
+                            {% endif %}
+                        </div>
+                        {% endfor %}
                     </div>
-                    {% endfor %}
                 </div>
                 {% else %}
                 <p class="text-gray-500 text-sm py-4 text-center">{% if current_lang == 'fr' %}Aucun paramètre de notification.{% else %}No notification settings.{% endif %}</p>
@@ -220,25 +226,27 @@
                 </h3>
                 
                 {% if settings.security %}
-                <div class="grid md:grid-cols-2 gap-4">
-                    {% for setting in settings.security %}
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">{{ setting.key }}</label>
-                        {% if setting.value in ['true', 'false'] %}
-                        <select name="setting_{{ setting.key }}" class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary-500">
-                            <option value="true" {% if setting.value == 'true' %}selected{% endif %}>{% if current_lang == 'fr' %}Activé{% else %}Enabled{% endif %}</option>
-                            <option value="false" {% if setting.value == 'false' %}selected{% endif %}>{% if current_lang == 'fr' %}Désactivé{% else %}Disabled{% endif %}</option>
-                        </select>
-                        {% else %}
-                        <input type="text" name="setting_{{ setting.key }}" value="{{ setting.value }}" 
-                               class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary-500">
-                        {% endif %}
-                        <input type="hidden" name="category_{{ setting.key }}" value="security">
-                        {% if setting.description %}
-                        <p class="text-xs text-gray-500 mt-1">{{ setting.description }}</p>
-                        {% endif %}
+                <div class="bg-gradient-to-r from-red-50 to-orange-50 rounded-xl p-4 border border-red-100">
+                    <div class="grid md:grid-cols-2 gap-4">
+                        {% for setting in settings.security %}
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">{{ setting.key }}</label>
+                            {% if setting.value in ['true', 'false'] %}
+                            <select name="setting_{{ setting.key }}" class="w-full px-4 py-2 border border-red-200 rounded-lg focus:ring-2 focus:ring-red-500 bg-white">
+                                <option value="true" {% if setting.value == 'true' %}selected{% endif %}>{% if current_lang == 'fr' %}Activé{% else %}Enabled{% endif %}</option>
+                                <option value="false" {% if setting.value == 'false' %}selected{% endif %}>{% if current_lang == 'fr' %}Désactivé{% else %}Disabled{% endif %}</option>
+                            </select>
+                            {% else %}
+                            <input type="text" name="setting_{{ setting.key }}" value="{{ setting.value }}" 
+                                   class="w-full px-4 py-2 border border-red-200 rounded-lg focus:ring-2 focus:ring-red-500 bg-white">
+                            {% endif %}
+                            <input type="hidden" name="category_{{ setting.key }}" value="security">
+                            {% if setting.description %}
+                            <p class="text-xs text-gray-600 mt-1">{{ setting.description }}</p>
+                            {% endif %}
+                        </div>
+                        {% endfor %}
                     </div>
-                    {% endfor %}
                 </div>
                 {% else %}
                 <p class="text-gray-500 text-sm py-4 text-center">{% if current_lang == 'fr' %}Aucun paramètre de sécurité.{% else %}No security settings.{% endif %}</p>
@@ -251,22 +259,24 @@
                 </h3>
                 
                 {% if settings.seo %}
-                <div class="space-y-4">
-                    {% for setting in settings.seo %}
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">{{ setting.key }}</label>
-                        {% if 'description' in setting.key or 'keywords' in setting.key %}
-                        <textarea name="setting_{{ setting.key }}" rows="2" class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary-500">{{ setting.value }}</textarea>
-                        {% else %}
-                        <input type="text" name="setting_{{ setting.key }}" value="{{ setting.value }}" 
-                               class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary-500">
-                        {% endif %}
-                        <input type="hidden" name="category_{{ setting.key }}" value="seo">
-                        {% if setting.description %}
-                        <p class="text-xs text-gray-500 mt-1">{{ setting.description }}</p>
-                        {% endif %}
+                <div class="bg-gradient-to-r from-indigo-50 to-purple-50 rounded-xl p-4 border border-indigo-100">
+                    <div class="space-y-4">
+                        {% for setting in settings.seo %}
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">{{ setting.key }}</label>
+                            {% if 'description' in setting.key or 'keywords' in setting.key %}
+                            <textarea name="setting_{{ setting.key }}" rows="2" class="w-full px-4 py-2 border border-indigo-200 rounded-lg focus:ring-2 focus:ring-indigo-500 bg-white">{{ setting.value }}</textarea>
+                            {% else %}
+                            <input type="text" name="setting_{{ setting.key }}" value="{{ setting.value }}" 
+                                   class="w-full px-4 py-2 border border-indigo-200 rounded-lg focus:ring-2 focus:ring-indigo-500 bg-white">
+                            {% endif %}
+                            <input type="hidden" name="category_{{ setting.key }}" value="seo">
+                            {% if setting.description %}
+                            <p class="text-xs text-gray-600 mt-1">{{ setting.description }}</p>
+                            {% endif %}
+                        </div>
+                        {% endfor %}
                     </div>
-                    {% endfor %}
                 </div>
                 {% else %}
                 <p class="text-gray-500 text-sm py-4 text-center">{% if current_lang == 'fr' %}Aucun paramètre SEO.{% else %}No SEO settings.{% endif %}</p>

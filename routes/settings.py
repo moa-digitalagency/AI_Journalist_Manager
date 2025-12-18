@@ -212,18 +212,23 @@ def test_perplexity():
         import requests
         api_key = os.environ.get('PERPLEXITY_API_KEY')
         response = requests.post(
-            "https://api.perplexity.ai/chat/completions",
-            headers={"Authorization": f"Bearer {api_key}"},
+            "https://api.perplexity.ai/v1/chat/completions",
+            headers={
+                "Authorization": f"Bearer {api_key}",
+                "Content-Type": "application/json"
+            },
             json={
-                "model": "pplx-7b-online",
-                "messages": [{"role": "user", "content": "Bonjour"}],
+                "model": "llama-2-7b-chat",
+                "messages": [{"role": "user", "content": "Hello"}],
                 "max_tokens": 50
             },
             timeout=10
         )
         if response.status_code == 200:
-            return jsonify({'success': True, 'message': 'Connexion Perplexity réussie'})
-        return jsonify({'success': False, 'message': f'Erreur: {response.status_code}'})
+            data = response.json()
+            if data.get('choices'):
+                return jsonify({'success': True, 'message': 'Connexion Perplexity réussie'})
+        return jsonify({'success': False, 'message': f'Erreur: {response.status_code} - {response.text[:100]}'})
     except Exception as e:
         return jsonify({'success': False, 'message': str(e)})
 
