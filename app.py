@@ -12,9 +12,13 @@ logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 
 app = Flask(__name__)
-app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'dev-secret-key-change-in-production')
-app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL', 'sqlite:///app.db')
+app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY')
+app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {
+    'pool_recycle': 300,
+    'pool_pre_ping': True,
+}
 app.config['LANGUAGES'] = ['fr', 'en']
 app.config['DEFAULT_LANGUAGE'] = 'fr'
 
@@ -48,66 +52,8 @@ def utility_processor():
 
 register_blueprints(app)
 
-def init_db():
-    with app.app_context():
-        db.create_all()
-        
-        if not Role.query.first():
-            admin_role = Role(name='Admin', permissions='all')
-            editor_role = Role(name='Editor', permissions='journalists,subscribers,plans')
-            viewer_role = Role(name='Viewer', permissions='view')
-            db.session.add_all([admin_role, editor_role, viewer_role])
-            db.session.commit()
-        
-        if not User.query.first():
-            admin_username = os.environ.get('ADMIN_USERNAME', 'admin')
-            admin_email = os.environ.get('ADMIN_EMAIL', 'admin@example.com')
-            admin_password = os.environ.get('ADMIN_PASSWORD', 'admin123')
-            
-            admin = User(
-                username=admin_username,
-                email=admin_email,
-                is_superadmin=True,
-                is_active=True
-            )
-            admin.set_password(admin_password)
-            db.session.add(admin)
-            db.session.commit()
-            print(f"Admin created: {admin_username}")
-        
-        if not SubscriptionPlan.query.first():
-            trial = SubscriptionPlan(
-                name='Essai Gratuit',
-                description='7 jours d\'essai',
-                duration_days=7,
-                price=0,
-                is_trial=True,
-                can_receive_summaries=True,
-                can_ask_questions=True,
-                can_receive_audio=False
-            )
-            basic = SubscriptionPlan(
-                name='Basic',
-                description='Accès standard',
-                duration_days=30,
-                price=9.99,
-                can_receive_summaries=True,
-                can_ask_questions=True,
-                can_receive_audio=False
-            )
-            premium = SubscriptionPlan(
-                name='Premium',
-                description='Accès complet avec audio',
-                duration_days=30,
-                price=19.99,
-                can_receive_summaries=True,
-                can_ask_questions=True,
-                can_receive_audio=True
-            )
-            db.session.add_all([trial, basic, premium])
-            db.session.commit()
-
-init_db()
+with app.app_context():
+    db.create_all()
 
 def start_services():
     """Initialize background services (scheduler and Telegram bots)."""
