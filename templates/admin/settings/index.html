@@ -103,23 +103,23 @@
                     <i class="fas fa-cog text-primary-600"></i>{{ _('general_settings') }}
                 </h3>
                 
+                {% if settings.general %}
                 <div class="grid md:grid-cols-2 gap-4">
                     {% for setting in settings.general %}
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">{{ setting.key }}</label>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">{{ setting.key }}</label>
                         <input type="text" name="setting_{{ setting.key }}" value="{{ setting.value }}" 
-                               class="w-full px-4 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500">
+                               class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary-500">
                         <input type="hidden" name="category_{{ setting.key }}" value="general">
                         {% if setting.description %}
                         <p class="text-xs text-gray-500 mt-1">{{ setting.description }}</p>
                         {% endif %}
                     </div>
-                    {% else %}
-                    <div class="col-span-2">
-                        <p class="text-gray-500 text-sm py-4 text-center">{% if current_lang == 'fr' %}Aucun paramètre général.{% else %}No general settings.{% endif %} <button type="button" onclick="document.querySelector('form[action*=initialize]').submit()" class="text-blue-600 hover:underline">{% if current_lang == 'fr' %}Initialiser les paramètres par défaut{% else %}Initialize default settings{% endif %}</button></p>
-                    </div>
                     {% endfor %}
                 </div>
+                {% else %}
+                <p class="text-gray-500 text-sm py-4 text-center">{% if current_lang == 'fr' %}Aucun paramètre général.{% else %}No general settings.{% endif %}</p>
+                {% endif %}
             </div>
             
             <div id="api" class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 space-y-6">
@@ -133,12 +133,28 @@
                     <label class="block text-sm font-semibold text-gray-800 mb-2">
                         <i class="fas fa-brain text-blue-600 mr-2"></i>{% if current_lang == 'fr' %}Modèle IA par défaut{% else %}Default AI Model{% endif %}
                     </label>
-                    <select name="setting_{{ default_ai_setting.key }}" class="w-full px-4 py-2 border border-blue-200 rounded-lg focus:ring-2 focus:ring-blue-500 bg-white">
-                        <option value="perplexity" {% if default_ai_setting.value == 'perplexity' %}selected{% endif %}>Perplexity AI</option>
-                        <option value="gemini" {% if default_ai_setting.value == 'gemini' %}selected{% endif %}>Google Gemini</option>
-                        <option value="openai" {% if default_ai_setting.value == 'openai' %}selected{% endif %}>OpenAI</option>
-                        <option value="openrouter" {% if default_ai_setting.value == 'openrouter' %}selected{% endif %}>OpenRouter</option>
-                    </select>
+                    <div class="flex gap-3">
+                        <select name="setting_{{ default_ai_setting.key }}" class="flex-1 px-4 py-2 border border-blue-200 rounded-lg focus:ring-2 focus:ring-blue-500 bg-white">
+                            <option value="perplexity" {% if default_ai_setting.value == 'perplexity' %}selected{% endif %}>Perplexity AI</option>
+                            <option value="gemini" {% if default_ai_setting.value == 'gemini' %}selected{% endif %}>Google Gemini</option>
+                            <option value="openai" {% if default_ai_setting.value == 'openai' %}selected{% endif %}>OpenAI</option>
+                            <option value="openrouter" {% if default_ai_setting.value == 'openrouter' %}selected{% endif %}>OpenRouter</option>
+                        </select>
+                        <div class="flex gap-2">
+                            <button type="button" onclick="testApi('perplexity')" class="px-3 py-2 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition text-xs font-medium" title="Tester Perplexity">
+                                <i class="fas fa-flask mr-1"></i>PPX
+                            </button>
+                            <button type="button" onclick="testApi('gemini')" class="px-3 py-2 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition text-xs font-medium" title="Tester Gemini">
+                                <i class="fas fa-flask mr-1"></i>GEM
+                            </button>
+                            <button type="button" onclick="testApi('openai')" class="px-3 py-2 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition text-xs font-medium" title="Tester OpenAI">
+                                <i class="fas fa-flask mr-1"></i>OAI
+                            </button>
+                            <button type="button" onclick="testApi('openrouter')" class="px-3 py-2 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition text-xs font-medium" title="Tester OpenRouter">
+                                <i class="fas fa-flask mr-1"></i>ORT
+                            </button>
+                        </div>
+                    </div>
                     <p class="text-xs text-gray-600 mt-2">{{ default_ai_setting.description }}</p>
                     <input type="hidden" name="category_{{ default_ai_setting.key }}" value="api">
                 </div>
@@ -172,30 +188,30 @@
                     <i class="fas fa-bell text-primary-600"></i>{% if current_lang == 'fr' %}Notifications{% else %}Notifications{% endif %}
                 </h3>
                 
+                {% if settings.notifications %}
                 <div class="grid md:grid-cols-2 gap-4">
                     {% for setting in settings.notifications %}
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">{{ setting.key }}</label>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">{{ setting.key }}</label>
                         {% if setting.value in ['true', 'false'] %}
-                        <select name="setting_{{ setting.key }}" class="w-full px-4 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500">
+                        <select name="setting_{{ setting.key }}" class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary-500">
                             <option value="true" {% if setting.value == 'true' %}selected{% endif %}>{% if current_lang == 'fr' %}Activé{% else %}Enabled{% endif %}</option>
                             <option value="false" {% if setting.value == 'false' %}selected{% endif %}>{% if current_lang == 'fr' %}Désactivé{% else %}Disabled{% endif %}</option>
                         </select>
                         {% else %}
                         <input type="text" name="setting_{{ setting.key }}" value="{{ setting.value }}" 
-                               class="w-full px-4 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500">
+                               class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary-500">
                         {% endif %}
                         <input type="hidden" name="category_{{ setting.key }}" value="notifications">
                         {% if setting.description %}
                         <p class="text-xs text-gray-500 mt-1">{{ setting.description }}</p>
                         {% endif %}
                     </div>
-                    {% else %}
-                    <div class="col-span-2">
-                        <p class="text-gray-500 text-sm py-4 text-center">{% if current_lang == 'fr' %}Aucun paramètre de notification.{% else %}No notification settings.{% endif %} <button type="button" onclick="document.querySelector('form[action*=initialize]').submit()" class="text-blue-600 hover:underline">{% if current_lang == 'fr' %}Initialiser les paramètres par défaut{% else %}Initialize default settings{% endif %}</button></p>
-                    </div>
                     {% endfor %}
                 </div>
+                {% else %}
+                <p class="text-gray-500 text-sm py-4 text-center">{% if current_lang == 'fr' %}Aucun paramètre de notification.{% else %}No notification settings.{% endif %}</p>
+                {% endif %}
             </div>
             
             <div id="security" class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
@@ -203,30 +219,30 @@
                     <i class="fas fa-shield-alt text-primary-600"></i>{% if current_lang == 'fr' %}Sécurité{% else %}Security{% endif %}
                 </h3>
                 
+                {% if settings.security %}
                 <div class="grid md:grid-cols-2 gap-4">
                     {% for setting in settings.security %}
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">{{ setting.key }}</label>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">{{ setting.key }}</label>
                         {% if setting.value in ['true', 'false'] %}
-                        <select name="setting_{{ setting.key }}" class="w-full px-4 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500">
+                        <select name="setting_{{ setting.key }}" class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary-500">
                             <option value="true" {% if setting.value == 'true' %}selected{% endif %}>{% if current_lang == 'fr' %}Activé{% else %}Enabled{% endif %}</option>
                             <option value="false" {% if setting.value == 'false' %}selected{% endif %}>{% if current_lang == 'fr' %}Désactivé{% else %}Disabled{% endif %}</option>
                         </select>
                         {% else %}
                         <input type="text" name="setting_{{ setting.key }}" value="{{ setting.value }}" 
-                               class="w-full px-4 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500">
+                               class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary-500">
                         {% endif %}
                         <input type="hidden" name="category_{{ setting.key }}" value="security">
                         {% if setting.description %}
                         <p class="text-xs text-gray-500 mt-1">{{ setting.description }}</p>
                         {% endif %}
                     </div>
-                    {% else %}
-                    <div class="col-span-2">
-                        <p class="text-gray-500 text-sm py-4 text-center">{% if current_lang == 'fr' %}Aucun paramètre de sécurité.{% else %}No security settings.{% endif %} <button type="button" onclick="document.querySelector('form[action*=initialize]').submit()" class="text-blue-600 hover:underline">{% if current_lang == 'fr' %}Initialiser les paramètres par défaut{% else %}Initialize default settings{% endif %}</button></p>
-                    </div>
                     {% endfor %}
                 </div>
+                {% else %}
+                <p class="text-gray-500 text-sm py-4 text-center">{% if current_lang == 'fr' %}Aucun paramètre de sécurité.{% else %}No security settings.{% endif %}</p>
+                {% endif %}
             </div>
             
             <div id="seo" class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
@@ -234,25 +250,27 @@
                     <i class="fas fa-search text-primary-600"></i>SEO
                 </h3>
                 
+                {% if settings.seo %}
                 <div class="space-y-4">
                     {% for setting in settings.seo %}
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">{{ setting.key }}</label>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">{{ setting.key }}</label>
                         {% if 'description' in setting.key or 'keywords' in setting.key %}
-                        <textarea name="setting_{{ setting.key }}" rows="2" class="w-full px-4 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500">{{ setting.value }}</textarea>
+                        <textarea name="setting_{{ setting.key }}" rows="2" class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary-500">{{ setting.value }}</textarea>
                         {% else %}
                         <input type="text" name="setting_{{ setting.key }}" value="{{ setting.value }}" 
-                               class="w-full px-4 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500">
+                               class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary-500">
                         {% endif %}
                         <input type="hidden" name="category_{{ setting.key }}" value="seo">
                         {% if setting.description %}
                         <p class="text-xs text-gray-500 mt-1">{{ setting.description }}</p>
                         {% endif %}
                     </div>
-                    {% else %}
-                    <p class="text-gray-500 text-sm py-4 text-center">{% if current_lang == 'fr' %}Aucun paramètre SEO.{% else %}No SEO settings.{% endif %} <button type="button" onclick="document.querySelector('form[action*=initialize]').submit()" class="text-blue-600 hover:underline">{% if current_lang == 'fr' %}Initialiser les paramètres par défaut{% else %}Initialize default settings{% endif %}</button></p>
                     {% endfor %}
                 </div>
+                {% else %}
+                <p class="text-gray-500 text-sm py-4 text-center">{% if current_lang == 'fr' %}Aucun paramètre SEO.{% else %}No SEO settings.{% endif %}</p>
+                {% endif %}
             </div>
             
             <div class="flex gap-4">
@@ -262,74 +280,9 @@
             </div>
         </form>
         
-        <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
-            <h3 class="font-semibold text-gray-800 mb-4">{% if current_lang == 'fr' %}Ajouter un paramètre personnalisé{% else %}Add custom setting{% endif %}</h3>
-            <form action="{{ url_for('settings.create') }}" method="POST" class="grid md:grid-cols-5 gap-4">
-                <div>
-                    <input type="text" name="key" required placeholder="{% if current_lang == 'fr' %}Clé{% else %}Key{% endif %}" 
-                           class="w-full px-4 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500">
-                </div>
-                <div>
-                    <input type="text" name="value" placeholder="{% if current_lang == 'fr' %}Valeur{% else %}Value{% endif %}" 
-                           class="w-full px-4 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500">
-                </div>
-                <div>
-                    <select name="category" class="w-full px-4 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500">
-                        <option value="general">{% if current_lang == 'fr' %}Général{% else %}General{% endif %}</option>
-                        <option value="api">API</option>
-                        <option value="notifications">Notifications</option>
-                        <option value="security">{% if current_lang == 'fr' %}Sécurité{% else %}Security{% endif %}</option>
-                        <option value="seo">SEO</option>
-                    </select>
-                </div>
-                <div>
-                    <input type="text" name="description" placeholder="{{ _('description') }}" 
-                           class="w-full px-4 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500">
-                </div>
-                <div>
-                    <button type="submit" class="w-full py-2 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200 transition">
-                        <i class="fas fa-plus mr-1"></i>{{ _('add') }}
-                    </button>
-                </div>
-            </form>
-        </div>
-        
-        {% set all_settings_list = settings.general + settings.api + settings.notifications + settings.security + settings.seo %}
-        {% if all_settings_list %}
-        <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
-            <h3 class="font-semibold text-gray-800 mb-4">{% if current_lang == 'fr' %}Gérer les paramètres existants{% else %}Manage existing settings{% endif %}</h3>
-            <div class="overflow-x-auto">
-                <table class="w-full text-sm">
-                    <thead>
-                        <tr class="border-b border-gray-100">
-                            <th class="text-left py-3 px-4 font-medium text-gray-600">{% if current_lang == 'fr' %}Clé{% else %}Key{% endif %}</th>
-                            <th class="text-left py-3 px-4 font-medium text-gray-600">{% if current_lang == 'fr' %}Valeur{% else %}Value{% endif %}</th>
-                            <th class="text-left py-3 px-4 font-medium text-gray-600">{% if current_lang == 'fr' %}Catégorie{% else %}Category{% endif %}</th>
-                            <th class="text-right py-3 px-4 font-medium text-gray-600">{{ _('action') }}</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for setting in all_settings_list %}
-                        <tr class="border-b border-gray-50 hover:bg-gray-50">
-                            <td class="py-3 px-4 font-medium">{{ setting.key }}</td>
-                            <td class="py-3 px-4 text-gray-600">{{ setting.value[:50] }}{% if setting.value|length > 50 %}...{% endif %}</td>
-                            <td class="py-3 px-4">
-                                <span class="px-2 py-1 bg-gray-100 rounded-full text-xs">{{ setting.category }}</span>
-                            </td>
-                            <td class="py-3 px-4 text-right">
-                                <form action="{{ url_for('settings.delete', id=setting.id) }}" method="POST" class="inline">
-                                    <button type="submit" onclick="return confirm('{{ _('confirm_delete') }}')" class="text-red-500 hover:text-red-700">
-                                        <i class="fas fa-trash"></i>
-                                    </button>
-                                </form>
-                            </td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-        </div>
-        {% endif %}
+        <style>
+            .custom-param-section { display: none; }
+        </style>
     </div>
 </div>
 {% endblock %}

@@ -201,6 +201,84 @@ def test_gemini():
     except Exception as e:
         return jsonify({'success': False, 'message': str(e)})
 
+@settings_bp.route('/test-perplexity', methods=['POST'])
+@admin_required
+def test_perplexity():
+    """Test Perplexity API connection."""
+    if not os.environ.get('PERPLEXITY_API_KEY'):
+        return jsonify({'success': False, 'message': 'Clé API Perplexity non configurée'})
+    
+    try:
+        import requests
+        api_key = os.environ.get('PERPLEXITY_API_KEY')
+        response = requests.post(
+            "https://api.perplexity.ai/chat/completions",
+            headers={"Authorization": f"Bearer {api_key}"},
+            json={
+                "model": "pplx-7b-online",
+                "messages": [{"role": "user", "content": "Bonjour"}],
+                "max_tokens": 50
+            },
+            timeout=10
+        )
+        if response.status_code == 200:
+            return jsonify({'success': True, 'message': 'Connexion Perplexity réussie'})
+        return jsonify({'success': False, 'message': f'Erreur: {response.status_code}'})
+    except Exception as e:
+        return jsonify({'success': False, 'message': str(e)})
+
+@settings_bp.route('/test-openai', methods=['POST'])
+@admin_required
+def test_openai():
+    """Test OpenAI API connection."""
+    if not os.environ.get('OPENAI_API_KEY'):
+        return jsonify({'success': False, 'message': 'Clé API OpenAI non configurée'})
+    
+    try:
+        import requests
+        api_key = os.environ.get('OPENAI_API_KEY')
+        response = requests.post(
+            "https://api.openai.com/v1/chat/completions",
+            headers={"Authorization": f"Bearer {api_key}"},
+            json={
+                "model": "gpt-4o-mini",
+                "messages": [{"role": "user", "content": "Bonjour"}],
+                "max_tokens": 50
+            },
+            timeout=10
+        )
+        if response.status_code == 200:
+            return jsonify({'success': True, 'message': 'Connexion OpenAI réussie'})
+        return jsonify({'success': False, 'message': f'Erreur: {response.status_code}'})
+    except Exception as e:
+        return jsonify({'success': False, 'message': str(e)})
+
+@settings_bp.route('/test-openrouter', methods=['POST'])
+@admin_required
+def test_openrouter():
+    """Test OpenRouter API connection."""
+    if not os.environ.get('OPENROUTER_API_KEY'):
+        return jsonify({'success': False, 'message': 'Clé API OpenRouter non configurée'})
+    
+    try:
+        import requests
+        api_key = os.environ.get('OPENROUTER_API_KEY')
+        response = requests.post(
+            "https://openrouter.ai/api/v1/chat/completions",
+            headers={"Authorization": f"Bearer {api_key}"},
+            json={
+                "model": "openrouter/auto",
+                "messages": [{"role": "user", "content": "Bonjour"}],
+                "max_tokens": 50
+            },
+            timeout=10
+        )
+        if response.status_code == 200:
+            return jsonify({'success': True, 'message': 'Connexion OpenRouter réussie'})
+        return jsonify({'success': False, 'message': f'Erreur: {response.status_code}'})
+    except Exception as e:
+        return jsonify({'success': False, 'message': str(e)})
+
 @settings_bp.route('/test-elevenlabs', methods=['POST'])
 @admin_required
 def test_elevenlabs():
