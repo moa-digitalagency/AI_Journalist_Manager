@@ -14,6 +14,7 @@ REQUIRED_ENV_VARS = [
     ('DATABASE_URL', True, 'PostgreSQL database connection URL'),
     ('SECRET_KEY', False, 'Flask session secret key (has default fallback)'),
     ('GEMINI_API_KEY', False, 'Google Gemini API key for AI features'),
+    ('PERPLEXITY_API_KEY', False, 'Perplexity API key for AI features (alternative to Gemini)'),
     ('ELEVEN_LABS_API_KEY', False, 'Eleven Labs API key for audio generation'),
 ]
 

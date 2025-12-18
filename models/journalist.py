@@ -40,6 +40,7 @@ class Journalist(db.Model):
     language = db.Column(db.String(10), default="fr")
     timezone = db.Column(db.String(50), default="Europe/Paris")
     eleven_labs_voice_id = db.Column(db.String(100))
+    ai_provider = db.Column(db.String(20), default="gemini")  # gemini or perplexity
     is_active = db.Column(db.Boolean, default=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     last_summary_at = db.Column(db.DateTime)

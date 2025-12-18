@@ -17,14 +17,33 @@ class AIService:
         return cls._client
     
     @classmethod
-    def is_available(cls):
+    def is_available(cls, provider: str = "gemini"):
+        """Check if API is available for the given provider."""
+        if provider == "perplexity":
+            return os.environ.get("PERPLEXITY_API_KEY") is not None
         return os.environ.get("GEMINI_API_KEY") is not None
     
     @classmethod
-    def generate_summary(cls, articles: list, personality: str, writing_style: str, tone: str, language: str = "fr") -> str:
+    def get_provider_service(cls, provider: str = "gemini"):
+        """Get the appropriate service based on provider."""
+        if provider == "perplexity":
+            from services.perplexity_service import PerplexityService
+            return PerplexityService
+        return cls
+    
+    @classmethod
+    def generate_summary(cls, articles: list, personality: str, writing_style: str, tone: str, language: str = "fr", provider: str = "gemini") -> str:
         if not articles:
             return "Aucune nouvelle actualité à résumer aujourd'hui."
         
+        # Use the appropriate provider service
+        service = cls.get_provider_service(provider)
+        
+        # If not Gemini, delegate to the provider service
+        if provider != "gemini":
+            return service.generate_summary(articles, personality, writing_style, tone, language)
+        
+        # Gemini implementation
         client = cls.get_client()
         if client is None:
             logger.warning("GEMINI_API_KEY not configured")
@@ -64,7 +83,15 @@ Résumé:"""
             return f"Erreur lors de la génération du résumé: {str(e)}"
     
     @classmethod
-    def answer_question(cls, question: str, articles: list, personality: str, writing_style: str, tone: str, language: str = "fr") -> str:
+    def answer_question(cls, question: str, articles: list, personality: str, writing_style: str, tone: str, language: str = "fr", provider: str = "gemini") -> str:
+        # Use the appropriate provider service
+        service = cls.get_provider_service(provider)
+        
+        # If not Gemini, delegate to the provider service
+        if provider != "gemini":
+            return service.answer_question(question, articles, personality, writing_style, tone, language)
+        
+        # Gemini implementation
         client = cls.get_client()
         if client is None:
             return "Le service IA n'est pas configuré. Contactez l'administrateur."
@@ -101,7 +128,15 @@ Réponse:"""
             return f"Erreur: {str(e)}"
     
     @classmethod
-    def extract_keywords(cls, text: str) -> list:
+    def extract_keywords(cls, text: str, provider: str = "gemini") -> list:
+        # Use the appropriate provider service
+        service = cls.get_provider_service(provider)
+        
+        # If not Gemini, delegate to the provider service
+        if provider != "gemini":
+            return service.extract_keywords(text)
+        
+        # Gemini implementation
         client = cls.get_client()
         if client is None:
             return []

@@ -196,7 +196,8 @@ Posez-moi n'importe quelle question sur l'actualite !"""
                 personality=journalist.personality,
                 writing_style=journalist.writing_style,
                 tone=journalist.tone,
-                language=journalist.language
+                language=journalist.language,
+                provider=journalist.ai_provider
             )
             
             await update.message.reply_text(response)

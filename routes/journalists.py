@@ -42,6 +42,7 @@ def create():
             language=request.form.get('language', 'fr'),
             timezone=request.form.get('timezone', 'Europe/Paris'),
             eleven_labs_voice_id=request.form.get('eleven_labs_voice_id'),
+            ai_provider=request.form.get('ai_provider', 'gemini'),
             summary_time=request.form.get('summary_time', '08:00')
         )
         db.session.add(journalist)
@@ -89,6 +90,7 @@ def edit(id):
         journalist.language = request.form.get('language', journalist.language)
         journalist.timezone = request.form.get('timezone', journalist.timezone)
         journalist.eleven_labs_voice_id = request.form.get('eleven_labs_voice_id')
+        journalist.ai_provider = request.form.get('ai_provider', journalist.ai_provider)
         journalist.summary_time = request.form.get('summary_time', journalist.summary_time)
         journalist.is_active = 'is_active' in request.form
         
@@ -169,6 +171,11 @@ def fetch_sources(id):
             if data['url'] and Article.query.filter_by(journalist_id=id, url=data['url']).first():
                 continue
             
+            keywords = AIService.extract_keywords(
+                f"{data['title']} {data['content']}", 
+                provider=journalist.ai_provider if hasattr(journalist, 'ai_provider') else 'gemini'
+            )
+            
             article = Article(
                 journalist_id=id,
                 source_id=source.id,
@@ -177,7 +184,7 @@ def fetch_sources(id):
                 url=data['url'],
                 author=data['author'],
                 published_at=data['published_at'],
-                keywords=','.join(AIService.extract_keywords(f"{data['title']} {data['content']}"))
+                keywords=','.join(keywords)
             )
             db.session.add(article)
             fetched += 1
@@ -213,7 +220,8 @@ def generate_summary(id):
         personality=journalist.personality,
         writing_style=journalist.writing_style,
         tone=journalist.tone,
-        language=journalist.language
+        language=journalist.language,
+        provider=journalist.ai_provider
     )
     
     audio_path = None
