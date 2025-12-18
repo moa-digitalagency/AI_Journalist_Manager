@@ -13,6 +13,7 @@ DEFAULT_SETTINGS = {
         {'key': 'trial_days', 'value': '7', 'description': 'Durée de la période d\'essai en jours'},
         {'key': 'fetch_hour', 'value': '2', 'description': 'Heure de collecte automatique (0-23)'},
         {'key': 'summary_hour', 'value': '8', 'description': 'Heure d\'envoi des résumés (0-23)'},
+        {'key': 'default_timezone', 'value': 'Europe/Paris', 'description': 'Fuseau horaire par défaut'},
     ],
     'api': [
         {'key': 'gemini_model', 'value': 'gemini-2.5-flash', 'description': 'Modèle Gemini à utiliser'},
@@ -47,6 +48,24 @@ def get_api_status():
             'name': 'Google Gemini',
             'description': 'IA pour la génération de résumés',
             'required': True
+        },
+        'perplexity': {
+            'configured': bool(os.environ.get('PERPLEXITY_API_KEY')),
+            'name': 'Perplexity AI',
+            'description': 'IA alternative pour les résumés',
+            'required': False
+        },
+        'openai': {
+            'configured': bool(os.environ.get('OPENAI_API_KEY')),
+            'name': 'OpenAI',
+            'description': 'IA alternative pour les résumés',
+            'required': False
+        },
+        'openrouter': {
+            'configured': bool(os.environ.get('OPENROUTER_API_KEY')),
+            'name': 'OpenRouter',
+            'description': 'Agrégateur d\'IA (multiple modèles)',
+            'required': False
         },
         'eleven_labs': {
             'configured': bool(os.environ.get('ELEVEN_LABS_API_KEY')),
