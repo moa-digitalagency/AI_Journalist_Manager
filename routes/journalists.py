@@ -47,6 +47,10 @@ def create():
         db.session.add(journalist)
         db.session.commit()
         
+        # Automatically start Telegram bot if token is provided
+        if journalist.telegram_token:
+            TelegramService.start_bot(journalist.id, journalist.telegram_token)
+        
         log_activity('create_journalist', 'journalist', journalist.id, f'Created: {name}')
         flash('Journaliste créé', 'success')
         return redirect(url_for('journalists.view', id=journalist.id))
@@ -73,6 +77,9 @@ def edit(id):
     journalist = Journalist.query.get_or_404(id)
     
     if request.method == 'POST':
+        old_token = journalist.telegram_token
+        old_active = journalist.is_active
+        
         journalist.name = request.form.get('name', journalist.name)
         journalist.telegram_token = request.form.get('telegram_token', journalist.telegram_token)
         journalist.personality = request.form.get('personality', journalist.personality)
@@ -86,6 +93,17 @@ def edit(id):
         journalist.is_active = 'is_active' in request.form
         
         db.session.commit()
+        
+        # Handle Telegram bot updates
+        new_active = journalist.is_active
+        if journalist.telegram_token:
+            # Token changed or journalist was deactivated then reactivated
+            if journalist.telegram_token != old_token or (not old_active and new_active):
+                TelegramService.start_bot(journalist.id, journalist.telegram_token)
+            # Journalist was deactivated
+            elif old_active and not new_active:
+                TelegramService.stop_bot(journalist.id)
+        
         log_activity('update_journalist', 'journalist', id, f'Updated: {journalist.name}')
         flash('Journaliste mis à jour', 'success')
         return redirect(url_for('journalists.view', id=id))
@@ -97,6 +115,10 @@ def edit(id):
 def delete(id):
     journalist = Journalist.query.get_or_404(id)
     name = journalist.name
+    
+    # Stop Telegram bot if it's running
+    TelegramService.stop_bot(id)
+    
     db.session.delete(journalist)
     db.session.commit()
     log_activity('delete_journalist', 'journalist', id, f'Deleted: {name}')
