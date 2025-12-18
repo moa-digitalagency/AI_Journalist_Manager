@@ -83,16 +83,20 @@ def init_admin():
     from app import app
     from models import db, User
     
+    admin_username = os.environ.get('ADMIN_USERNAME')
+    admin_email = os.environ.get('ADMIN_EMAIL')
+    admin_password = os.environ.get('ADMIN_PASSWORD')
+    
+    if not all([admin_username, admin_email, admin_password]):
+        logger.warning("Admin creation skipped: ADMIN_USERNAME, ADMIN_EMAIL, and ADMIN_PASSWORD environment variables are required")
+        return
+    
     with app.app_context():
         if User.query.first():
             logger.info("Users already exist, skipping admin creation...")
             return
         
         logger.info("Creating admin user...")
-        admin_username = os.environ.get('ADMIN_USERNAME', 'admin')
-        admin_email = os.environ.get('ADMIN_EMAIL', 'admin@example.com')
-        admin_password = os.environ.get('ADMIN_PASSWORD', 'admin123')
-        
         admin = User(
             username=admin_username,
             email=admin_email,
