@@ -16,6 +16,7 @@ DEFAULT_SETTINGS = {
         {'key': 'default_timezone', 'value': 'Europe/Paris', 'description': 'Fuseau horaire par défaut'},
     ],
     'api': [
+        {'key': 'default_ai_model', 'value': 'perplexity', 'description': 'Modèle IA par défaut (perplexity, gemini, openai, openrouter)'},
         {'key': 'gemini_model', 'value': 'gemini-2.5-flash', 'description': 'Modèle Gemini à utiliser'},
         {'key': 'eleven_labs_default_voice', 'value': '21m00Tcm4TlvDq8ikWAM', 'description': 'Voice ID Eleven Labs par défaut'},
         {'key': 'summary_max_length', 'value': '2000', 'description': 'Longueur maximale des résumés (caractères)'},
@@ -42,27 +43,36 @@ DEFAULT_SETTINGS = {
 
 def get_api_status():
     """Check the status of configured APIs."""
+    # Check which AI models are configured
+    gemini_configured = bool(os.environ.get('GEMINI_API_KEY'))
+    perplexity_configured = bool(os.environ.get('PERPLEXITY_API_KEY'))
+    openai_configured = bool(os.environ.get('OPENAI_API_KEY'))
+    openrouter_configured = bool(os.environ.get('OPENROUTER_API_KEY'))
+    
+    # At least one AI model is required
+    ai_model_required = not any([gemini_configured, perplexity_configured, openai_configured, openrouter_configured])
+    
     status = {
         'gemini': {
-            'configured': bool(os.environ.get('GEMINI_API_KEY')),
+            'configured': gemini_configured,
             'name': 'Google Gemini',
             'description': 'IA pour la génération de résumés',
-            'required': True
+            'required': False
         },
         'perplexity': {
-            'configured': bool(os.environ.get('PERPLEXITY_API_KEY')),
+            'configured': perplexity_configured,
             'name': 'Perplexity AI',
-            'description': 'IA alternative pour les résumés',
+            'description': 'IA pour la génération de résumés et conversations',
             'required': False
         },
         'openai': {
-            'configured': bool(os.environ.get('OPENAI_API_KEY')),
+            'configured': openai_configured,
             'name': 'OpenAI',
-            'description': 'IA alternative pour les résumés',
+            'description': 'IA pour la génération de résumés',
             'required': False
         },
         'openrouter': {
-            'configured': bool(os.environ.get('OPENROUTER_API_KEY')),
+            'configured': openrouter_configured,
             'name': 'OpenRouter',
             'description': 'Agrégateur d\'IA (multiple modèles)',
             'required': False
@@ -80,6 +90,13 @@ def get_api_status():
             'required': True
         }
     }
+    
+    # Add a status message if no AI models are configured
+    status['ai_requirement'] = {
+        'required': ai_model_required,
+        'message': 'Au moins un modèle IA doit être configuré' if ai_model_required else 'Modèle IA configuré'
+    }
+    
     return status
 
 @settings_bp.route('/')

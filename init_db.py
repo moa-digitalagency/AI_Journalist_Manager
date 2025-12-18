@@ -164,6 +164,7 @@ def init_default_settings():
             {'key': 'default_timezone', 'value': 'Europe/Paris', 'description': 'Fuseau horaire par défaut'},
         ],
         'api': [
+            {'key': 'default_ai_model', 'value': 'perplexity', 'description': 'Modèle IA par défaut (perplexity, gemini, openai, openrouter)'},
             {'key': 'gemini_model', 'value': 'gemini-2.5-flash', 'description': 'Modèle Gemini à utiliser'},
             {'key': 'eleven_labs_default_voice', 'value': '21m00Tcm4TlvDq8ikWAM', 'description': 'Voice ID Eleven Labs par défaut'},
             {'key': 'summary_max_length', 'value': '2000', 'description': 'Longueur maximale des résumés'},
