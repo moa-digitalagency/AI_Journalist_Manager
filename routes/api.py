@@ -119,3 +119,88 @@ def services_status():
         'active_bots': list(TelegramService.active_bots.keys()),
         'telegram_running': TelegramService.running
     })
+
+@api_bp.route('/ai/test-model', methods=['POST'])
+@admin_required
+def test_ai_model():
+    """Test an AI model with a sample prompt."""
+    from services.ai_service import AIService
+    
+    data = request.get_json()
+    provider = data.get('provider', 'gemini')
+    model = data.get('model', 'auto')
+    
+    # Check if API is available
+    if not AIService.is_available(provider):
+        api_key_name = {
+            'gemini': 'GEMINI_API_KEY',
+            'perplexity': 'PERPLEXITY_API_KEY',
+            'openai': 'OPENAI_API_KEY',
+            'openrouter': 'OPENROUTER_API_KEY'
+        }.get(provider, 'API_KEY')
+        
+        return jsonify({
+            'success': False,
+            'error': f'{provider.upper()} API not configured. Please set {api_key_name}'
+        }), 400
+    
+    try:
+        service = AIService.get_provider_service(provider)
+        
+        # Simple test prompt
+        test_prompt = "Dis-moi bonjour en une phrase"
+        
+        if provider == 'gemini':
+            response = AIService.generate_summary(
+                [{'title': 'Test', 'content': test_prompt, 'source': 'Test'}],
+                personality='Test',
+                writing_style='Test',
+                tone='Test',
+                language='fr',
+                provider=provider,
+                model=model
+            )
+        elif provider == 'openai':
+            response = service.generate_summary(
+                [{'title': 'Test', 'content': test_prompt, 'source': 'Test'}],
+                personality='Test',
+                writing_style='Test',
+                tone='Test',
+                language='fr',
+                model=model or 'gpt-4o-mini'
+            )
+        elif provider == 'openrouter':
+            response = service.generate_summary(
+                [{'title': 'Test', 'content': test_prompt, 'source': 'Test'}],
+                personality='Test',
+                writing_style='Test',
+                tone='Test',
+                language='fr',
+                model=model or 'openrouter/auto'
+            )
+        else:  # perplexity
+            response = service.generate_summary(
+                [{'title': 'Test', 'content': test_prompt, 'source': 'Test'}],
+                personality='Test',
+                writing_style='Test',
+                tone='Test',
+                language='fr'
+            )
+        
+        if response and 'Erreur' not in response:
+            return jsonify({
+                'success': True,
+                'provider': provider,
+                'model': model or 'default',
+                'response': response[:300] + '...' if len(response) > 300 else response
+            })
+        else:
+            return jsonify({
+                'success': False,
+                'error': response or 'Model test failed'
+            }), 500
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500

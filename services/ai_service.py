@@ -29,10 +29,16 @@ class AIService:
         if provider == "perplexity":
             from services.perplexity_service import PerplexityService
             return PerplexityService
+        elif provider == "openai":
+            from services.openai_service import OpenAIService
+            return OpenAIService
+        elif provider == "openrouter":
+            from services.openrouter_service import OpenRouterService
+            return OpenRouterService
         return cls
     
     @classmethod
-    def generate_summary(cls, articles: list, personality: str, writing_style: str, tone: str, language: str = "fr", provider: str = "gemini") -> str:
+    def generate_summary(cls, articles: list, personality: str, writing_style: str, tone: str, language: str = "fr", provider: str = "gemini", model: str = "auto") -> str:
         if not articles:
             return "Aucune nouvelle actualité à résumer aujourd'hui."
         
@@ -41,7 +47,12 @@ class AIService:
         
         # If not Gemini, delegate to the provider service
         if provider != "gemini":
-            return service.generate_summary(articles, personality, writing_style, tone, language)
+            if provider == "openai":
+                return service.generate_summary(articles, personality, writing_style, tone, language, model or "gpt-4o-mini")
+            elif provider == "openrouter":
+                return service.generate_summary(articles, personality, writing_style, tone, language, model or "openrouter/auto")
+            else:
+                return service.generate_summary(articles, personality, writing_style, tone, language)
         
         # Gemini implementation
         client = cls.get_client()
@@ -83,13 +94,18 @@ Résumé:"""
             return f"Erreur lors de la génération du résumé: {str(e)}"
     
     @classmethod
-    def answer_question(cls, question: str, articles: list, personality: str, writing_style: str, tone: str, language: str = "fr", provider: str = "gemini") -> str:
+    def answer_question(cls, question: str, articles: list, personality: str, writing_style: str, tone: str, language: str = "fr", provider: str = "gemini", model: str = "auto") -> str:
         # Use the appropriate provider service
         service = cls.get_provider_service(provider)
         
         # If not Gemini, delegate to the provider service
         if provider != "gemini":
-            return service.answer_question(question, articles, personality, writing_style, tone, language)
+            if provider == "openai":
+                return service.answer_question(question, articles, personality, writing_style, tone, language, model or "gpt-4o-mini")
+            elif provider == "openrouter":
+                return service.answer_question(question, articles, personality, writing_style, tone, language, model or "openrouter/auto")
+            else:
+                return service.answer_question(question, articles, personality, writing_style, tone, language)
         
         # Gemini implementation
         client = cls.get_client()
@@ -128,13 +144,18 @@ Réponse:"""
             return f"Erreur: {str(e)}"
     
     @classmethod
-    def extract_keywords(cls, text: str, provider: str = "gemini") -> list:
+    def extract_keywords(cls, text: str, provider: str = "gemini", model: str = "auto") -> list:
         # Use the appropriate provider service
         service = cls.get_provider_service(provider)
         
         # If not Gemini, delegate to the provider service
         if provider != "gemini":
-            return service.extract_keywords(text)
+            if provider == "openai":
+                return service.extract_keywords(text, model or "gpt-4o-mini")
+            elif provider == "openrouter":
+                return service.extract_keywords(text, model or "openrouter/auto")
+            else:
+                return service.extract_keywords(text)
         
         # Gemini implementation
         client = cls.get_client()
