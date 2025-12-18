@@ -98,15 +98,34 @@ Tables: users, roles, journalists, sources, articles, subscribers, subscription_
 
 ## Variables d'environnement
 
+### Essentielles
 - `DATABASE_URL` - URL PostgreSQL (automatique sur Replit)
-- `GEMINI_API_KEY` - Clé API Google Gemini (requis)
-- `ELEVEN_LABS_API_KEY` - Clé API Eleven Labs (optionnel)
+- `SESSION_SECRET` - Clé secrète pour les sessions Flask
+- `ADMIN_USERNAME` - Nom d'utilisateur admin
+- `ADMIN_EMAIL` - Email de l'admin
+- `ADMIN_PASSWORD` - Mot de passe admin
 
-## Compte admin par défaut
+### Modèles IA (au moins 1 requis)
+- `GEMINI_API_KEY` - Google Gemini API key
+- `PERPLEXITY_API_KEY` - Perplexity AI API key (recommandé pour IA Journalist)
+- `OPENAI_API_KEY` - OpenAI API key
+- `OPENROUTER_API_KEY` - OpenRouter API key (agrégateur de modèles)
 
-- Username: `admin`
-- Email: `admin@example.com`
-- Password: `admin123`
+### Services optionnels
+- `ELEVEN_LABS_API_KEY` - Eleven Labs pour la synthèse vocale TTS
+
+## Providers IA supportés
+
+1. **Gemini** (Google) - Modèle par défaut
+2. **Perplexity** - Modèle recherche temps réel (recommandé pour journalistes)
+3. **OpenAI** - GPT-4/GPT-4o
+4. **OpenRouter** - Agrégateur multi-modèles
+
+Chaque journaliste peut choisir son propre modèle IA indépendamment.
+
+## Compte admin
+
+Configuré via variables d'environnement (`ADMIN_USERNAME`, `ADMIN_EMAIL`, `ADMIN_PASSWORD`)
 
 ## Design
 

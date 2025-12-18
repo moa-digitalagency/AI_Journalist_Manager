@@ -118,7 +118,9 @@ class SchedulerService:
                         personality=journalist.personality,
                         writing_style=journalist.writing_style,
                         tone=journalist.tone,
-                        language=journalist.language
+                        language=journalist.language,
+                        provider=journalist.ai_provider,
+                        model=journalist.ai_model
                     )
                     
                     audio_path = None
