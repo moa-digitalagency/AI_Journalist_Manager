@@ -218,19 +218,29 @@ def test_perplexity():
                 "Content-Type": "application/json"
             },
             json={
-                "model": "llama-2-7b-chat",
+                "model": "sonar-small-online",
                 "messages": [{"role": "user", "content": "Hello"}],
                 "max_tokens": 50
             },
-            timeout=10
+            timeout=15
         )
         if response.status_code == 200:
-            data = response.json()
-            if data.get('choices'):
-                return jsonify({'success': True, 'message': 'Connexion Perplexity réussie'})
-        return jsonify({'success': False, 'message': f'Erreur: {response.status_code} - {response.text[:100]}'})
+            try:
+                data = response.json()
+                if data.get('choices'):
+                    return jsonify({'success': True, 'message': 'Connexion Perplexity réussie'})
+                return jsonify({'success': False, 'message': 'Réponse invalide de Perplexity'})
+            except:
+                return jsonify({'success': False, 'message': 'Réponse non-JSON de Perplexity'})
+        elif response.status_code == 401:
+            return jsonify({'success': False, 'message': 'Clé API Perplexity invalide'})
+        else:
+            return jsonify({'success': False, 'message': f'Erreur Perplexity: {response.status_code}'})
+    except requests.exceptions.Timeout:
+        return jsonify({'success': False, 'message': 'Timeout - Perplexity ne répond pas'})
     except Exception as e:
-        return jsonify({'success': False, 'message': str(e)})
+        return jsonify({'success': False, 'message': f'Erreur: {str(e)}'})
+
 
 @settings_bp.route('/test-openai', methods=['POST'])
 @admin_required
