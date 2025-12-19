@@ -5,346 +5,432 @@
 {% block subheader %}{% if current_lang == 'fr' %}Configurez les options générales et les APIs{% else %}Configure general options and APIs{% endif %}{% endblock %}
 
 {% block content %}
-<div class="grid lg:grid-cols-4 gap-6">
-    <div class="lg:col-span-1">
-        <nav class="bg-white rounded-2xl p-4 shadow-sm border border-gray-100 space-y-1 sticky top-4">
-            <a href="#api-status" class="block px-4 py-2 rounded-xl text-gray-700 hover:bg-gray-50 transition">
-                <i class="fas fa-plug w-5 mr-2"></i>{% if current_lang == 'fr' %}Statut APIs{% else %}API Status{% endif %}
-            </a>
-            <a href="#general" class="block px-4 py-2 rounded-xl text-gray-700 hover:bg-gray-50 transition">
-                <i class="fas fa-cog w-5 mr-2"></i>{{ _('general_settings') }}
-            </a>
-            <a href="#api" class="block px-4 py-2 rounded-xl text-gray-700 hover:bg-gray-50 transition">
-                <i class="fas fa-key w-5 mr-2"></i>{% if current_lang == 'fr' %}Configuration API{% else %}API Configuration{% endif %}
-            </a>
-            <a href="#notifications" class="block px-4 py-2 rounded-xl text-gray-700 hover:bg-gray-50 transition">
-                <i class="fas fa-bell w-5 mr-2"></i>{% if current_lang == 'fr' %}Notifications{% else %}Notifications{% endif %}
-            </a>
-            <a href="#security" class="block px-4 py-2 rounded-xl text-gray-700 hover:bg-gray-50 transition">
-                <i class="fas fa-shield-alt w-5 mr-2"></i>{% if current_lang == 'fr' %}Sécurité{% else %}Security{% endif %}
-            </a>
-            <a href="#seo" class="block px-4 py-2 rounded-xl text-gray-700 hover:bg-gray-50 transition">
-                <i class="fas fa-search w-5 mr-2"></i>SEO
-            </a>
-            <hr class="my-2 border-gray-200">
-            <form action="{{ url_for('settings.initialize') }}" method="POST">
-                <button type="submit" class="w-full px-4 py-2 text-left rounded-xl text-blue-600 hover:bg-blue-50 transition">
-                    <i class="fas fa-magic w-5 mr-2"></i>{% if current_lang == 'fr' %}Initialiser défauts{% else %}Initialize defaults{% endif %}
-                </button>
-            </form>
-        </nav>
-    </div>
+<div class="space-y-6">
     
-    <div class="lg:col-span-3 space-y-6">
-        
-        <div id="api-status" class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
-            <h3 class="font-semibold text-gray-800 mb-4 flex items-center gap-2">
-                <i class="fas fa-plug text-primary-600"></i>{% if current_lang == 'fr' %}Statut des APIs externes{% else %}External API Status{% endif %}
-            </h3>
-            <p class="text-sm text-gray-500 mb-4">{% if current_lang == 'fr' %}Les clés API doivent être configurées dans les variables d'environnement (Secrets){% else %}API keys must be configured in environment variables (Secrets){% endif %}</p>
+    <!-- Quick Navigation Tabs -->
+    <div class="flex gap-2 overflow-x-auto pb-2 sticky top-0 bg-white z-10 rounded-xl">
+        <button onclick="switchTab('api-status')" class="tab-btn px-6 py-3 rounded-lg font-medium text-sm whitespace-nowrap transition-all" data-tab="api-status">
+            <i class="fas fa-plug mr-2"></i>{% if current_lang == 'fr' %}APIs{% else %}APIs{% endif %}
+        </button>
+        <button onclick="switchTab('general')" class="tab-btn px-6 py-3 rounded-lg font-medium text-sm whitespace-nowrap transition-all" data-tab="general">
+            <i class="fas fa-sliders-h mr-2"></i>{% if current_lang == 'fr' %}Général{% else %}General{% endif %}
+        </button>
+        <button onclick="switchTab('api')" class="tab-btn px-6 py-3 rounded-lg font-medium text-sm whitespace-nowrap transition-all" data-tab="api">
+            <i class="fas fa-brain mr-2"></i>{% if current_lang == 'fr' %}Modèles IA{% else %}AI Models{% endif %}
+        </button>
+        <button onclick="switchTab('notifications')" class="tab-btn px-6 py-3 rounded-lg font-medium text-sm whitespace-nowrap transition-all" data-tab="notifications">
+            <i class="fas fa-bell mr-2"></i>{% if current_lang == 'fr' %}Notifications{% else %}Notifications{% endif %}
+        </button>
+        <button onclick="switchTab('security')" class="tab-btn px-6 py-3 rounded-lg font-medium text-sm whitespace-nowrap transition-all" data-tab="security">
+            <i class="fas fa-shield-alt mr-2"></i>{% if current_lang == 'fr' %}Sécurité{% else %}Security{% endif %}
+        </button>
+        <button onclick="switchTab('seo')" class="tab-btn px-6 py-3 rounded-lg font-medium text-sm whitespace-nowrap transition-all" data-tab="seo">
+            <i class="fas fa-search mr-2"></i>SEO
+        </button>
+    </div>
+
+    <!-- API Status Section -->
+    <div id="api-status" class="tab-content">
+        <div class="bg-gradient-to-br from-slate-50 to-blue-50 rounded-2xl p-8 shadow-sm border border-blue-100">
+            <div class="flex items-center justify-between mb-6">
+                <div>
+                    <h2 class="text-2xl font-bold text-slate-900 mb-2 flex items-center gap-3">
+                        <span class="p-3 bg-blue-600 text-white rounded-lg"><i class="fas fa-plug"></i></span>
+                        {% if current_lang == 'fr' %}Statut des APIs{% else %}External API Status{% endif %}
+                    </h2>
+                    <p class="text-slate-600">{% if current_lang == 'fr' %}Les clés API doivent être configurées dans les variables d'environnement{% else %}API keys must be configured in environment variables{% endif %}</p>
+                </div>
+            </div>
             
-            <div class="grid md:grid-cols-3 gap-4">
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
                 {% for key, api in api_status.items() %}
-                <div class="p-4 rounded-xl border {% if api.configured %}border-green-200 bg-green-50{% else %}border-{% if api.required %}red{% else %}yellow{% endif %}-200 bg-{% if api.required %}red{% else %}yellow{% endif %}-50{% endif %}">
-                    <div class="flex items-center justify-between mb-2">
-                        <span class="font-medium text-gray-800">{{ api.name }}</span>
+                <div class="group relative bg-white rounded-xl p-6 border-2 transition-all hover:shadow-lg {% if api.configured %}border-green-200 bg-white{% else %}border-{% if api.required %}red{% else %}amber{% endif %}-200{% endif %}">
+                    <div class="absolute top-4 right-4">
                         {% if api.configured %}
-                        <span class="px-2 py-1 bg-green-100 text-green-700 rounded-full text-xs">{% if current_lang == 'fr' %}Configuré{% else %}Configured{% endif %}</span>
+                        <span class="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-700">
+                            <i class="fas fa-check-circle"></i>{% if current_lang == 'fr' %}Actif{% else %}Active{% endif %}
+                        </span>
                         {% else %}
-                        <span class="px-2 py-1 bg-{% if api.required %}red{% else %}yellow{% endif %}-100 text-{% if api.required %}red{% else %}yellow{% endif %}-700 rounded-full text-xs">
-                            {% if api.required %}{% if current_lang == 'fr' %}Requis{% else %}Required{% endif %}{% else %}{% if current_lang == 'fr' %}Optionnel{% else %}Optional{% endif %}{% endif %}
+                        <span class="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold bg-{% if api.required %}red{% else %}amber{% endif %}-100 text-{% if api.required %}red{% else %}amber{% endif %}-700">
+                            <i class="fas fa-alert-circle"></i>{% if api.required %}{% if current_lang == 'fr' %}Requis{% else %}Required{% endif %}{% else %}{% if current_lang == 'fr' %}Optionnel{% else %}Optional{% endif %}{% endif %}
                         </span>
                         {% endif %}
                     </div>
-                    <p class="text-xs text-gray-600">{{ api.description }}</p>
-                    
-                    {% if api.configured and key in ['gemini', 'eleven_labs'] %}
-                    <button onclick="testApi('{{ key }}')" class="mt-3 px-3 py-1 bg-white border border-gray-200 rounded-lg text-xs hover:bg-gray-50 transition">
+                    <h4 class="font-bold text-slate-900 mb-2 pr-24">{{ api.name }}</h4>
+                    <p class="text-sm text-slate-600 mb-4 line-clamp-2">{{ api.description }}</p>
+                    {% if api.configured and key in ['gemini', 'eleven_labs', 'perplexity', 'openai', 'openrouter'] %}
+                    <button onclick="testApi('{{ key }}')" class="mt-2 w-full px-3 py-2 bg-blue-50 text-blue-700 rounded-lg text-xs font-medium hover:bg-blue-100 transition-colors">
                         <i class="fas fa-vial mr-1"></i>{% if current_lang == 'fr' %}Tester{% else %}Test{% endif %}
-                    </button>
-                    {% endif %}
-                    
-                    {% if key == 'database' and api.configured %}
-                    <button onclick="testApi('telegram')" class="mt-3 px-3 py-1 bg-white border border-gray-200 rounded-lg text-xs hover:bg-gray-50 transition">
-                        <i class="fab fa-telegram mr-1"></i>{% if current_lang == 'fr' %}Tester Bots Telegram{% else %}Test Telegram Bots{% endif %}
                     </button>
                     {% endif %}
                 </div>
                 {% endfor %}
             </div>
-            
-            <div class="mt-4 p-4 bg-blue-50 rounded-xl">
-                <h4 class="font-medium text-blue-800 mb-2"><i class="fas fa-info-circle mr-2"></i>{% if current_lang == 'fr' %}Comment configurer les APIs{% else %}How to configure APIs{% endif %}</h4>
-                <ul class="text-sm text-blue-700 space-y-1">
-                    <li><strong>GEMINI_API_KEY</strong> : {% if current_lang == 'fr' %}Obtenez votre clé sur{% else %}Get your key from{% endif %} <a href="https://aistudio.google.com/apikey" target="_blank" class="underline">Google AI Studio</a></li>
-                    <li><strong>PERPLEXITY_API_KEY</strong> : {% if current_lang == 'fr' %}Obtenez votre clé sur{% else %}Get your key from{% endif %} <a href="https://www.perplexity.ai/api" target="_blank" class="underline">Perplexity API</a></li>
-                    <li><strong>OPENAI_API_KEY</strong> : {% if current_lang == 'fr' %}Obtenez votre clé sur{% else %}Get your key from{% endif %} <a href="https://platform.openai.com/api-keys" target="_blank" class="underline">OpenAI Platform</a></li>
-                    <li><strong>OPENROUTER_API_KEY</strong> : {% if current_lang == 'fr' %}Obtenez votre clé sur{% else %}Get your key from{% endif %} <a href="https://openrouter.ai/keys" target="_blank" class="underline">OpenRouter</a></li>
-                    <li><strong>ELEVEN_LABS_API_KEY</strong> : {% if current_lang == 'fr' %}Obtenez votre clé sur{% else %}Get your key from{% endif %} <a href="https://elevenlabs.io/api" target="_blank" class="underline">Eleven Labs</a></li>
-                </ul>
-                <p class="text-xs text-blue-600 mt-2">{% if current_lang == 'fr' %}Ajoutez ces clés dans l'onglet "Secrets" de Replit{% else %}Add these keys in Replit's "Secrets" tab{% endif %}</p>
+
+            <div id="testResult" class="hidden mb-6 p-6 bg-white rounded-xl border-2 border-blue-200">
+                <div class="flex items-start gap-4">
+                    <div id="testIcon" class="w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0"></div>
+                    <div class="flex-1">
+                        <p id="testMessage" class="font-semibold text-slate-900 mb-1"></p>
+                        <p id="testDetails" class="text-sm text-slate-600"></p>
+                    </div>
+                </div>
             </div>
-        </div>
-        
-        <div id="testResult" class="hidden bg-white rounded-2xl p-4 shadow-sm border border-gray-100">
-            <div class="flex items-center gap-3">
-                <div id="testIcon" class="w-10 h-10 rounded-full flex items-center justify-center"></div>
-                <div>
-                    <p id="testMessage" class="font-medium"></p>
-                    <p id="testDetails" class="text-sm text-gray-500"></p>
+
+            <div class="bg-blue-50 rounded-xl p-6 border border-blue-200">
+                <h3 class="font-bold text-blue-900 mb-4"><i class="fas fa-lightbulb mr-2"></i>{% if current_lang == 'fr' %}Comment configurer les APIs{% else %}How to configure APIs{% endif %}</h3>
+                <div class="grid md:grid-cols-2 gap-4 text-sm">
+                    <div class="space-y-2">
+                        <p><strong>GEMINI_API_KEY:</strong> <a href="https://aistudio.google.com/apikey" target="_blank" class="text-blue-600 hover:underline">Google AI Studio</a></p>
+                        <p><strong>PERPLEXITY_API_KEY:</strong> <a href="https://www.perplexity.ai/api" target="_blank" class="text-blue-600 hover:underline">Perplexity API</a></p>
+                    </div>
+                    <div class="space-y-2">
+                        <p><strong>OPENAI_API_KEY:</strong> <a href="https://platform.openai.com/api-keys" target="_blank" class="text-blue-600 hover:underline">OpenAI Platform</a></p>
+                        <p><strong>ELEVEN_LABS_API_KEY:</strong> <a href="https://elevenlabs.io/api" target="_blank" class="text-blue-600 hover:underline">Eleven Labs</a></p>
+                    </div>
                 </div>
             </div>
         </div>
+    </div>
+
+    <form action="{{ url_for('settings.update') }}" method="POST" class="space-y-6">
         
-        <form action="{{ url_for('settings.update') }}" method="POST" class="space-y-6">
-            
-            <div id="general" class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
-                <h3 class="font-semibold text-gray-800 mb-4 flex items-center gap-2">
-                    <i class="fas fa-cog text-primary-600"></i>{{ _('general_settings') }}
-                </h3>
+        <!-- General Settings -->
+        <div id="general" class="tab-content">
+            <div class="bg-gradient-to-br from-slate-50 to-amber-50 rounded-2xl p-8 shadow-sm border border-amber-100">
+                <div class="flex items-center gap-3 mb-8">
+                    <span class="p-3 bg-amber-600 text-white rounded-lg"><i class="fas fa-sliders-h"></i></span>
+                    <div>
+                        <h2 class="text-2xl font-bold text-slate-900">{{ _('general_settings') }}</h2>
+                        <p class="text-sm text-slate-600">{% if current_lang == 'fr' %}Paramètres de base{% else %}Basic configuration{% endif %}</p>
+                    </div>
+                </div>
                 
                 {% if settings.general %}
-                <div class="bg-gradient-to-r from-amber-50 to-orange-50 rounded-xl p-4 border border-amber-100">
-                    <div class="grid md:grid-cols-2 gap-4">
-                        {% for setting in settings.general %}
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">
-                                {% if setting.description %}{{ setting.description }}{% else %}{{ setting.key }}{% endif %}
-                            </label>
-                            {% if setting.key == 'default_language' %}
-                            <select name="setting_{{ setting.key }}" class="w-full px-4 py-2 border border-amber-200 rounded-lg focus:ring-2 focus:ring-amber-500 bg-white">
-                                <option value="fr" {% if setting.value == 'fr' %}selected{% endif %}>Français</option>
-                                <option value="en" {% if setting.value == 'en' %}selected{% endif %}>English</option>
-                                <option value="es" {% if setting.value == 'es' %}selected{% endif %}>Español</option>
-                                <option value="de" {% if setting.value == 'de' %}selected{% endif %}>Deutsch</option>
-                            </select>
-                            {% elif setting.key in ['trial_days', 'fetch_hour', 'summary_hour', 'max_login_attempts', 'session_timeout'] %}
-                            <input type="number" name="setting_{{ setting.key }}" value="{{ setting.value }}" 
-                                   class="w-full px-4 py-2 border border-amber-200 rounded-lg focus:ring-2 focus:ring-amber-500 bg-white">
-                            {% else %}
-                            <input type="text" name="setting_{{ setting.key }}" value="{{ setting.value }}" 
-                                   class="w-full px-4 py-2 border border-amber-200 rounded-lg focus:ring-2 focus:ring-amber-500 bg-white">
-                            {% endif %}
-                            <input type="hidden" name="category_{{ setting.key }}" value="general">
-                        </div>
-                        {% endfor %}
+                <div class="grid md:grid-cols-2 gap-6">
+                    {% for setting in settings.general %}
+                    <div class="group">
+                        <label class="block text-sm font-semibold text-slate-700 mb-3">
+                            {% if setting.description %}{{ setting.description }}{% else %}{{ setting.key }}{% endif %}
+                        </label>
+                        {% if setting.key == 'default_language' %}
+                        <select name="setting_{{ setting.key }}" class="w-full px-4 py-3 border-2 border-amber-200 rounded-lg focus:border-amber-500 focus:ring-2 focus:ring-amber-200 bg-white font-medium transition-all">
+                            <option value="fr" {% if setting.value == 'fr' %}selected{% endif %}>🇫🇷 Français</option>
+                            <option value="en" {% if setting.value == 'en' %}selected{% endif %}>🇬🇧 English</option>
+                            <option value="es" {% if setting.value == 'es' %}selected{% endif %}>🇪🇸 Español</option>
+                            <option value="de" {% if setting.value == 'de' %}selected{% endif %}>🇩🇪 Deutsch</option>
+                        </select>
+                        {% elif setting.key in ['trial_days', 'fetch_hour', 'summary_hour', 'max_login_attempts', 'session_timeout'] %}
+                        <input type="number" name="setting_{{ setting.key }}" value="{{ setting.value }}" 
+                               class="w-full px-4 py-3 border-2 border-amber-200 rounded-lg focus:border-amber-500 focus:ring-2 focus:ring-amber-200 font-medium transition-all">
+                        {% else %}
+                        <input type="text" name="setting_{{ setting.key }}" value="{{ setting.value }}" 
+                               class="w-full px-4 py-3 border-2 border-amber-200 rounded-lg focus:border-amber-500 focus:ring-2 focus:ring-amber-200 font-medium transition-all">
+                        {% endif %}
+                        <input type="hidden" name="category_{{ setting.key }}" value="general">
                     </div>
+                    {% endfor %}
                 </div>
                 {% else %}
-                <p class="text-gray-500 text-sm py-4 text-center">{% if current_lang == 'fr' %}Aucun paramètre général.{% else %}No general settings.{% endif %}</p>
+                <p class="text-slate-500 text-center py-8">{% if current_lang == 'fr' %}Aucun paramètre général.{% else %}No general settings.{% endif %}</p>
                 {% endif %}
             </div>
-            
-            <div id="api" class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 space-y-6">
-                <h3 class="font-semibold text-gray-800 mb-4 flex items-center gap-2">
-                    <i class="fas fa-key text-primary-600"></i>{% if current_lang == 'fr' %}Configuration API{% else %}API Configuration{% endif %}
-                </h3>
-                
+        </div>
+
+        <!-- API Configuration -->
+        <div id="api" class="tab-content">
+            <div class="bg-gradient-to-br from-slate-50 to-purple-50 rounded-2xl p-8 shadow-sm border border-purple-100">
+                <div class="flex items-center gap-3 mb-8">
+                    <span class="p-3 bg-purple-600 text-white rounded-lg"><i class="fas fa-brain"></i></span>
+                    <div>
+                        <h2 class="text-2xl font-bold text-slate-900">{% if current_lang == 'fr' %}Configuration Modèles IA{% else %}AI Model Configuration{% endif %}</h2>
+                        <p class="text-sm text-slate-600">{% if current_lang == 'fr' %}Modèles et paramètres d'intelligence artificielle{% else %}AI models and settings{% endif %}</p>
+                    </div>
+                </div>
+
                 {% set default_ai_setting = settings.api|selectattr('key', 'equalto', 'default_ai_model')|first %}
                 {% if default_ai_setting %}
-                <div class="bg-gradient-to-r from-blue-50 to-purple-50 rounded-xl p-4 border border-blue-100">
-                    <label class="block text-sm font-semibold text-gray-800 mb-2">
-                        <i class="fas fa-brain text-blue-600 mr-2"></i>{% if current_lang == 'fr' %}Modèle IA par défaut{% else %}Default AI Model{% endif %}
+                <div class="bg-white rounded-xl p-6 border-2 border-purple-200 mb-8">
+                    <label class="block text-sm font-semibold text-slate-700 mb-4">
+                        <i class="fas fa-star text-purple-600 mr-2"></i>{% if current_lang == 'fr' %}Modèle IA par défaut{% else %}Default AI Model{% endif %}
                     </label>
-                    <div class="flex gap-3">
-                        <select name="setting_{{ default_ai_setting.key }}" class="flex-1 px-4 py-2 border border-blue-200 rounded-lg focus:ring-2 focus:ring-blue-500 bg-white">
-                            <option value="perplexity" {% if default_ai_setting.value == 'perplexity' %}selected{% endif %}>Perplexity AI</option>
-                            <option value="gemini" {% if default_ai_setting.value == 'gemini' %}selected{% endif %}>Google Gemini</option>
-                            <option value="openai" {% if default_ai_setting.value == 'openai' %}selected{% endif %}>OpenAI</option>
-                            <option value="openrouter" {% if default_ai_setting.value == 'openrouter' %}selected{% endif %}>OpenRouter</option>
+                    <div class="space-y-4">
+                        <select name="setting_{{ default_ai_setting.key }}" class="w-full px-4 py-3 border-2 border-purple-200 rounded-lg focus:border-purple-500 focus:ring-2 focus:ring-purple-200 bg-white font-medium transition-all">
+                            <option value="perplexity" {% if default_ai_setting.value == 'perplexity' %}selected{% endif %}>🔍 Perplexity AI</option>
+                            <option value="gemini" {% if default_ai_setting.value == 'gemini' %}selected{% endif %}>✨ Google Gemini</option>
+                            <option value="openai" {% if default_ai_setting.value == 'openai' %}selected{% endif %}>🤖 OpenAI</option>
+                            <option value="openrouter" {% if default_ai_setting.value == 'openrouter' %}selected{% endif %}>🚀 OpenRouter</option>
                         </select>
-                        <div class="flex gap-2">
-                            <button type="button" onclick="testApi('perplexity')" class="px-3 py-2 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition text-xs font-medium" title="Tester Perplexity">
-                                <i class="fas fa-flask mr-1"></i>PPX
+                        <div class="flex gap-2 flex-wrap">
+                            <button type="button" onclick="testApi('perplexity')" class="px-4 py-2 bg-purple-100 text-purple-700 rounded-lg hover:bg-purple-200 transition font-medium text-sm">
+                                <i class="fas fa-flask mr-1"></i>{% if current_lang == 'fr' %}Tester PPX{% else %}Test PPX{% endif %}
                             </button>
-                            <button type="button" onclick="testApi('gemini')" class="px-3 py-2 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition text-xs font-medium" title="Tester Gemini">
-                                <i class="fas fa-flask mr-1"></i>GEM
+                            <button type="button" onclick="testApi('gemini')" class="px-4 py-2 bg-purple-100 text-purple-700 rounded-lg hover:bg-purple-200 transition font-medium text-sm">
+                                <i class="fas fa-flask mr-1"></i>{% if current_lang == 'fr' %}Tester GEM{% else %}Test GEM{% endif %}
                             </button>
-                            <button type="button" onclick="testApi('openai')" class="px-3 py-2 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition text-xs font-medium" title="Tester OpenAI">
-                                <i class="fas fa-flask mr-1"></i>OAI
-                            </button>
-                            <button type="button" onclick="testApi('openrouter')" class="px-3 py-2 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition text-xs font-medium" title="Tester OpenRouter">
-                                <i class="fas fa-flask mr-1"></i>ORT
+                            <button type="button" onclick="testApi('openai')" class="px-4 py-2 bg-purple-100 text-purple-700 rounded-lg hover:bg-purple-200 transition font-medium text-sm">
+                                <i class="fas fa-flask mr-1"></i>{% if current_lang == 'fr' %}Tester OAI{% else %}Test OAI{% endif %}
                             </button>
                         </div>
                     </div>
-                    <p class="text-xs text-gray-600 mt-2">{{ default_ai_setting.description }}</p>
                     <input type="hidden" name="category_{{ default_ai_setting.key }}" value="api">
                 </div>
                 {% endif %}
-                
-                <div class="space-y-4">
-                    <h4 class="text-sm font-semibold text-gray-700 flex items-center gap-2">
-                        <i class="fas fa-sliders-h text-gray-500"></i>{% if current_lang == 'fr' %}Paramètres additionnels{% else %}Additional Settings{% endif %}
-                    </h4>
-                    
-                    <div class="bg-gradient-to-r from-cyan-50 to-teal-50 rounded-xl p-4 border border-cyan-100">
-                        <div class="grid md:grid-cols-2 gap-4">
-                            {% for setting in settings.api %}
-                                {% if setting.key != 'default_ai_model' %}
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-2">
-                                        {% if setting.description %}{{ setting.description }}{% else %}{{ setting.key }}{% endif %}
-                                    </label>
-                                    {% if setting.key == 'youtube_transcript_languages' %}
-                                    <div class="space-y-2">
-                                        <div class="flex items-center">
-                                            <input type="checkbox" id="lang_fr" name="setting_{{ setting.key }}_fr" value="fr" {% if 'fr' in setting.value %}checked{% endif %} class="mr-2">
-                                            <label for="lang_fr" class="text-sm">Français</label>
-                                        </div>
-                                        <div class="flex items-center">
-                                            <input type="checkbox" id="lang_en" name="setting_{{ setting.key }}_en" value="en" {% if 'en' in setting.value %}checked{% endif %} class="mr-2">
-                                            <label for="lang_en" class="text-sm">English</label>
-                                        </div>
-                                        <div class="flex items-center">
-                                            <input type="checkbox" id="lang_es" name="setting_{{ setting.key }}_es" value="es" {% if 'es' in setting.value %}checked{% endif %} class="mr-2">
-                                            <label for="lang_es" class="text-sm">Español</label>
-                                        </div>
-                                        <div class="flex items-center">
-                                            <input type="checkbox" id="lang_de" name="setting_{{ setting.key }}_de" value="de" {% if 'de' in setting.value %}checked{% endif %} class="mr-2">
-                                            <label for="lang_de" class="text-sm">Deutsch</label>
-                                        </div>
-                                    </div>
-                                    <input type="hidden" id="hidden_{{ setting.key }}" name="setting_{{ setting.key }}" value="{{ setting.value }}">
-                                    <script>
-                                        document.querySelectorAll('input[name^="setting_youtube_transcript_languages_"]').forEach(el => {
-                                            el.addEventListener('change', function() {
-                                                const langs = Array.from(document.querySelectorAll('input[name^="setting_youtube_transcript_languages_"]:checked'))
-                                                    .map(e => e.value).join(',');
-                                                document.getElementById('hidden_youtube_transcript_languages').value = langs;
-                                            });
-                                        });
-                                    </script>
-                                    {% else %}
-                                    <input type="text" name="setting_{{ setting.key }}" value="{{ setting.value }}" 
-                                           class="w-full px-4 py-2 border border-cyan-200 rounded-lg focus:ring-2 focus:ring-cyan-500 bg-white">
-                                    {% endif %}
-                                    <input type="hidden" name="category_{{ setting.key }}" value="api">
+
+                <div class="grid md:grid-cols-2 gap-6">
+                    {% for setting in settings.api %}
+                        {% if setting.key != 'default_ai_model' %}
+                        <div class="bg-white rounded-xl p-6 border-2 border-purple-100 hover:border-purple-300 transition-colors">
+                            <label class="block text-sm font-semibold text-slate-700 mb-3">
+                                {% if setting.description %}{{ setting.description }}{% else %}{{ setting.key }}{% endif %}
+                            </label>
+                            {% if setting.key == 'youtube_transcript_languages' %}
+                            <div class="grid grid-cols-2 gap-3">
+                                <div class="flex items-center">
+                                    <input type="checkbox" id="lang_fr" name="setting_{{ setting.key }}_fr" value="fr" {% if 'fr' in setting.value %}checked{% endif %} class="w-4 h-4 rounded border-gray-300 mr-2">
+                                    <label for="lang_fr" class="text-sm text-slate-600">🇫🇷 Français</label>
                                 </div>
-                                {% endif %}
-                            {% endfor %}
+                                <div class="flex items-center">
+                                    <input type="checkbox" id="lang_en" name="setting_{{ setting.key }}_en" value="en" {% if 'en' in setting.value %}checked{% endif %} class="w-4 h-4 rounded border-gray-300 mr-2">
+                                    <label for="lang_en" class="text-sm text-slate-600">🇬🇧 English</label>
+                                </div>
+                                <div class="flex items-center">
+                                    <input type="checkbox" id="lang_es" name="setting_{{ setting.key }}_es" value="es" {% if 'es' in setting.value %}checked{% endif %} class="w-4 h-4 rounded border-gray-300 mr-2">
+                                    <label for="lang_es" class="text-sm text-slate-600">🇪🇸 Español</label>
+                                </div>
+                                <div class="flex items-center">
+                                    <input type="checkbox" id="lang_de" name="setting_{{ setting.key }}_de" value="de" {% if 'de' in setting.value %}checked{% endif %} class="w-4 h-4 rounded border-gray-300 mr-2">
+                                    <label for="lang_de" class="text-sm text-slate-600">🇩🇪 Deutsch</label>
+                                </div>
+                            </div>
+                            <input type="hidden" id="hidden_{{ setting.key }}" name="setting_{{ setting.key }}" value="{{ setting.value }}">
+                            <script>
+                                document.querySelectorAll('input[name^="setting_youtube_transcript_languages_"]').forEach(el => {
+                                    el.addEventListener('change', function() {
+                                        const langs = Array.from(document.querySelectorAll('input[name^="setting_youtube_transcript_languages_"]:checked'))
+                                            .map(e => e.value).join(',');
+                                        document.getElementById('hidden_youtube_transcript_languages').value = langs;
+                                    });
+                                });
+                            </script>
+                            {% else %}
+                            <input type="text" name="setting_{{ setting.key }}" value="{{ setting.value }}" 
+                                   class="w-full px-4 py-3 border-2 border-purple-200 rounded-lg focus:border-purple-500 focus:ring-2 focus:ring-purple-200 font-medium transition-all">
+                            {% endif %}
+                            <input type="hidden" name="category_{{ setting.key }}" value="api">
                         </div>
-                    </div>
+                        {% endif %}
+                    {% endfor %}
                 </div>
             </div>
-            
-            <div id="notifications" class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
-                <h3 class="font-semibold text-gray-800 mb-4 flex items-center gap-2">
-                    <i class="fas fa-bell text-primary-600"></i>{% if current_lang == 'fr' %}Notifications{% else %}Notifications{% endif %}
-                </h3>
-                
+        </div>
+
+        <!-- Notifications -->
+        <div id="notifications" class="tab-content">
+            <div class="bg-gradient-to-br from-slate-50 to-pink-50 rounded-2xl p-8 shadow-sm border border-pink-100">
+                <div class="flex items-center gap-3 mb-8">
+                    <span class="p-3 bg-pink-600 text-white rounded-lg"><i class="fas fa-bell"></i></span>
+                    <div>
+                        <h2 class="text-2xl font-bold text-slate-900">{% if current_lang == 'fr' %}Notifications{% else %}Notifications{% endif %}</h2>
+                        <p class="text-sm text-slate-600">{% if current_lang == 'fr' %}Gérez vos préférences de notification{% else %}Manage notification preferences{% endif %}</p>
+                    </div>
+                </div>
+
                 {% if settings.notifications %}
-                <div class="bg-gradient-to-r from-pink-50 to-rose-50 rounded-xl p-4 border border-pink-100">
-                    <div class="space-y-4">
-                        {% for setting in settings.notifications %}
-                        <div class="flex items-start gap-3">
-                            {% if setting.value in ['true', 'false'] %}
-                            <div class="flex items-center gap-2">
-                                <input type="checkbox" id="notif_{{ setting.key }}" name="setting_{{ setting.key }}" value="true" {% if setting.value == 'true' %}checked{% endif %} class="rounded">
-                                <label for="notif_{{ setting.key }}" class="text-sm font-medium text-gray-700">
-                                    {% if setting.description %}{{ setting.description }}{% else %}{{ setting.key }}{% endif %}
-                                </label>
-                            </div>
+                <div class="space-y-4">
+                    {% for setting in settings.notifications %}
+                    <div class="bg-white rounded-xl p-6 border-2 border-pink-100 hover:border-pink-300 transition-colors">
+                        {% if setting.value in ['true', 'false'] %}
+                        <div class="flex items-center justify-between">
+                            <label for="notif_{{ setting.key }}" class="text-sm font-semibold text-slate-700 cursor-pointer">
+                                {% if setting.description %}{{ setting.description }}{% else %}{{ setting.key }}{% endif %}
+                            </label>
+                            <input type="checkbox" id="notif_{{ setting.key }}" name="setting_{{ setting.key }}" value="true" {% if setting.value == 'true' %}checked{% endif %} class="w-5 h-5 rounded cursor-pointer">
                             <input type="hidden" name="setting_{{ setting.key }}" value="false">
-                            {% else %}
-                            <div class="flex-1">
-                                <label class="block text-sm font-medium text-gray-700 mb-2">
-                                    {% if setting.description %}{{ setting.description }}{% else %}{{ setting.key }}{% endif %}
-                                </label>
-                                <input type="text" name="setting_{{ setting.key }}" value="{{ setting.value }}" 
-                                       class="w-full px-4 py-2 border border-pink-200 rounded-lg focus:ring-2 focus:ring-pink-500 bg-white">
-                            </div>
-                            {% endif %}
-                            <input type="hidden" name="category_{{ setting.key }}" value="notifications">
                         </div>
-                        {% endfor %}
+                        {% else %}
+                        <label class="block text-sm font-semibold text-slate-700 mb-3">
+                            {% if setting.description %}{{ setting.description }}{% else %}{{ setting.key }}{% endif %}
+                        </label>
+                        <input type="text" name="setting_{{ setting.key }}" value="{{ setting.value }}" 
+                               class="w-full px-4 py-3 border-2 border-pink-200 rounded-lg focus:border-pink-500 focus:ring-2 focus:ring-pink-200 font-medium transition-all">
+                        {% endif %}
+                        <input type="hidden" name="category_{{ setting.key }}" value="notifications">
                     </div>
+                    {% endfor %}
                 </div>
                 {% else %}
-                <p class="text-gray-500 text-sm py-4 text-center">{% if current_lang == 'fr' %}Aucun paramètre de notification.{% else %}No notification settings.{% endif %}</p>
+                <p class="text-slate-500 text-center py-8">{% if current_lang == 'fr' %}Aucun paramètre de notification.{% else %}No notification settings.{% endif %}</p>
                 {% endif %}
             </div>
-            
-            <div id="security" class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
-                <h3 class="font-semibold text-gray-800 mb-4 flex items-center gap-2">
-                    <i class="fas fa-shield-alt text-primary-600"></i>{% if current_lang == 'fr' %}Sécurité{% else %}Security{% endif %}
-                </h3>
-                
+        </div>
+
+        <!-- Security -->
+        <div id="security" class="tab-content">
+            <div class="bg-gradient-to-br from-slate-50 to-red-50 rounded-2xl p-8 shadow-sm border border-red-100">
+                <div class="flex items-center gap-3 mb-8">
+                    <span class="p-3 bg-red-600 text-white rounded-lg"><i class="fas fa-shield-alt"></i></span>
+                    <div>
+                        <h2 class="text-2xl font-bold text-slate-900">{% if current_lang == 'fr' %}Sécurité{% else %}Security{% endif %}</h2>
+                        <p class="text-sm text-slate-600">{% if current_lang == 'fr' %}Paramètres de sécurité importants{% else %}Important security settings{% endif %}</p>
+                    </div>
+                </div>
+
                 {% if settings.security %}
-                <div class="bg-gradient-to-r from-red-50 to-orange-50 rounded-xl p-4 border border-red-100">
-                    <div class="space-y-4">
-                        {% for setting in settings.security %}
-                        <div>
-                            {% if setting.value in ['true', 'false'] %}
-                            <div class="flex items-center gap-2">
-                                <input type="checkbox" id="sec_{{ setting.key }}" name="setting_{{ setting.key }}" value="true" {% if setting.value == 'true' %}checked{% endif %} class="rounded">
-                                <label for="sec_{{ setting.key }}" class="text-sm font-medium text-gray-700">
-                                    {% if setting.description %}{{ setting.description }}{% else %}{{ setting.key }}{% endif %}
-                                </label>
-                            </div>
+                <div class="space-y-4">
+                    {% for setting in settings.security %}
+                    <div class="bg-white rounded-xl p-6 border-2 border-red-100 hover:border-red-300 transition-colors">
+                        {% if setting.value in ['true', 'false'] %}
+                        <div class="flex items-center justify-between">
+                            <label for="sec_{{ setting.key }}" class="text-sm font-semibold text-slate-700 cursor-pointer">
+                                {% if setting.description %}{{ setting.description }}{% else %}{{ setting.key }}{% endif %}
+                            </label>
+                            <input type="checkbox" id="sec_{{ setting.key }}" name="setting_{{ setting.key }}" value="true" {% if setting.value == 'true' %}checked{% endif %} class="w-5 h-5 rounded cursor-pointer">
                             <input type="hidden" name="setting_{{ setting.key }}" value="false">
-                            {% else %}
-                            <label class="block text-sm font-medium text-gray-700 mb-2">
-                                {% if setting.description %}{{ setting.description }}{% else %}{{ setting.key }}{% endif %}
-                            </label>
-                            <input type="text" name="setting_{{ setting.key }}" value="{{ setting.value }}" 
-                                   class="w-full px-4 py-2 border border-red-200 rounded-lg focus:ring-2 focus:ring-red-500 bg-white">
-                            {% endif %}
-                            <input type="hidden" name="category_{{ setting.key }}" value="security">
                         </div>
-                        {% endfor %}
+                        {% else %}
+                        <label class="block text-sm font-semibold text-slate-700 mb-3">
+                            {% if setting.description %}{{ setting.description }}{% else %}{{ setting.key }}{% endif %}
+                        </label>
+                        <input type="text" name="setting_{{ setting.key }}" value="{{ setting.value }}" 
+                               class="w-full px-4 py-3 border-2 border-red-200 rounded-lg focus:border-red-500 focus:ring-2 focus:ring-red-200 font-medium transition-all">
+                        {% endif %}
+                        <input type="hidden" name="category_{{ setting.key }}" value="security">
                     </div>
+                    {% endfor %}
                 </div>
                 {% else %}
-                <p class="text-gray-500 text-sm py-4 text-center">{% if current_lang == 'fr' %}Aucun paramètre de sécurité.{% else %}No security settings.{% endif %}</p>
+                <p class="text-slate-500 text-center py-8">{% if current_lang == 'fr' %}Aucun paramètre de sécurité.{% else %}No security settings.{% endif %}</p>
                 {% endif %}
             </div>
-            
-            <div id="seo" class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
-                <h3 class="font-semibold text-gray-800 mb-4 flex items-center gap-2">
-                    <i class="fas fa-search text-primary-600"></i>SEO
-                </h3>
-                
+        </div>
+
+        <!-- SEO -->
+        <div id="seo" class="tab-content">
+            <div class="bg-gradient-to-br from-slate-50 to-indigo-50 rounded-2xl p-8 shadow-sm border border-indigo-100">
+                <div class="flex items-center gap-3 mb-8">
+                    <span class="p-3 bg-indigo-600 text-white rounded-lg"><i class="fas fa-search"></i></span>
+                    <div>
+                        <h2 class="text-2xl font-bold text-slate-900">SEO {% if current_lang == 'fr' %}& Optimisation{% else %}& Optimization{% endif %}</h2>
+                        <p class="text-sm text-slate-600">{% if current_lang == 'fr' %}Optimisez votre présence en ligne{% else %}Optimize your online presence{% endif %}</p>
+                    </div>
+                </div>
+
                 {% if settings.seo %}
-                <div class="bg-gradient-to-r from-indigo-50 to-purple-50 rounded-xl p-4 border border-indigo-100">
-                    <div class="space-y-4">
-                        {% for setting in settings.seo %}
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">
-                                {% if setting.description %}{{ setting.description }}{% else %}{{ setting.key }}{% endif %}
-                            </label>
-                            {% if 'description' in setting.key or 'keywords' in setting.key %}
-                            <textarea name="setting_{{ setting.key }}" rows="2" class="w-full px-4 py-2 border border-indigo-200 rounded-lg focus:ring-2 focus:ring-indigo-500 bg-white">{{ setting.value }}</textarea>
-                            {% else %}
-                            <input type="text" name="setting_{{ setting.key }}" value="{{ setting.value }}" 
-                                   class="w-full px-4 py-2 border border-indigo-200 rounded-lg focus:ring-2 focus:ring-indigo-500 bg-white">
-                            {% endif %}
-                            <input type="hidden" name="category_{{ setting.key }}" value="seo">
-                        </div>
-                        {% endfor %}
+                <div class="grid md:grid-cols-2 gap-6">
+                    {% for setting in settings.seo %}
+                    <div class="bg-white rounded-xl p-6 border-2 border-indigo-100 hover:border-indigo-300 transition-colors">
+                        <label class="block text-sm font-semibold text-slate-700 mb-3">
+                            {% if setting.description %}{{ setting.description }}{% else %}{{ setting.key }}{% endif %}
+                        </label>
+                        {% if 'description' in setting.key or 'keywords' in setting.key %}
+                        <textarea name="setting_{{ setting.key }}" rows="3" class="w-full px-4 py-3 border-2 border-indigo-200 rounded-lg focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 font-medium transition-all resize-none">{{ setting.value }}</textarea>
+                        {% else %}
+                        <input type="text" name="setting_{{ setting.key }}" value="{{ setting.value }}" 
+                               class="w-full px-4 py-3 border-2 border-indigo-200 rounded-lg focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 font-medium transition-all">
+                        {% endif %}
+                        <input type="hidden" name="category_{{ setting.key }}" value="seo">
                     </div>
+                    {% endfor %}
                 </div>
                 {% else %}
-                <p class="text-gray-500 text-sm py-4 text-center">{% if current_lang == 'fr' %}Aucun paramètre SEO.{% else %}No SEO settings.{% endif %}</p>
+                <p class="text-slate-500 text-center py-8">{% if current_lang == 'fr' %}Aucun paramètre SEO.{% else %}No SEO settings.{% endif %}</p>
                 {% endif %}
             </div>
-            
-            <div class="flex gap-4">
-                <button type="submit" class="flex-1 py-3 bg-primary-600 text-white rounded-xl hover:bg-primary-700 transition font-medium">
-                    <i class="fas fa-save mr-2"></i>{{ _('save') }}
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="sticky bottom-0 bg-white rounded-2xl p-6 shadow-lg border-t-2 border-gray-100 flex gap-4">
+            <button type="submit" class="flex-1 py-3 px-6 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg hover:from-blue-700 hover:to-blue-800 transition font-semibold flex items-center justify-center gap-2 shadow-md">
+                <i class="fas fa-save"></i>{{ _('save') }}
+            </button>
+            <button type="button" onclick="resetForm()" class="flex-1 py-3 px-6 bg-slate-100 text-slate-700 rounded-lg hover:bg-slate-200 transition font-semibold flex items-center justify-center gap-2">
+                <i class="fas fa-undo"></i>{% if current_lang == 'fr' %}Réinitialiser{% else %}Reset{% endif %}
+            </button>
+            <form action="{{ url_for('settings.initialize') }}" method="POST" class="flex-1">
+                <button type="submit" class="w-full py-3 px-6 bg-amber-100 text-amber-700 rounded-lg hover:bg-amber-200 transition font-semibold flex items-center justify-center gap-2">
+                    <i class="fas fa-magic"></i>{% if current_lang == 'fr' %}Défauts{% else %}Defaults{% endif %}
                 </button>
-            </div>
-        </form>
-        
-        <style>
-            .custom-param-section { display: none; }
-        </style>
-    </div>
+            </form>
+        </div>
+    </form>
 </div>
+
+<style>
+    .tab-btn {
+        background-color: #f1f5f9;
+        color: #475569;
+        border: 2px solid #e2e8f0;
+    }
+    
+    .tab-btn.active {
+        background-color: #3b82f6;
+        color: white;
+        border-color: #3b82f6;
+    }
+    
+    .tab-content {
+        display: none;
+    }
+    
+    .tab-content.active {
+        display: block;
+        animation: fadeIn 0.3s ease-in;
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    input[type="checkbox"] {
+        accent-color: currentColor;
+    }
+
+    select, input[type="text"], input[type="number"], textarea {
+        font-family: inherit;
+    }
+</style>
+
 {% endblock %}
 
 {% block scripts %}
 <script>
+let currentTab = 'api-status';
+
+function switchTab(tabName) {
+    // Hide all tabs
+    document.querySelectorAll('.tab-content').forEach(el => {
+        el.classList.remove('active');
+    });
+    
+    // Remove active state from all buttons
+    document.querySelectorAll('.tab-btn').forEach(el => {
+        el.classList.remove('active');
+    });
+    
+    // Show selected tab
+    const tabElement = document.getElementById(tabName);
+    if (tabElement) {
+        tabElement.classList.add('active');
+    }
+    
+    // Mark button as active
+    document.querySelector(`[data-tab="${tabName}"]`).classList.add('active');
+    currentTab = tabName;
+}
+
+// Initialize first tab
+document.addEventListener('DOMContentLoaded', function() {
+    switchTab('api-status');
+});
+
+function resetForm() {
+    if (confirm('{% if current_lang == "fr" %}Êtes-vous sûr de vouloir réinitialiser ?{% else %}Are you sure you want to reset?{% endif %}')) {
+        document.querySelector('form').reset();
+    }
+}
+
 function testApi(apiType) {
     const resultDiv = document.getElementById('testResult');
     const icon = document.getElementById('testIcon');
@@ -352,8 +438,8 @@ function testApi(apiType) {
     const details = document.getElementById('testDetails');
     
     resultDiv.classList.remove('hidden');
-    icon.innerHTML = '<i class="fas fa-spinner fa-spin text-blue-500"></i>';
-    icon.className = 'w-10 h-10 rounded-full flex items-center justify-center bg-blue-100';
+    icon.innerHTML = '<i class="fas fa-spinner fa-spin text-blue-500 text-2xl"></i>';
+    icon.className = 'w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0 bg-blue-100';
     message.textContent = '{% if current_lang == "fr" %}Test en cours...{% else %}Testing...{% endif %}';
     details.textContent = '';
     
@@ -373,8 +459,8 @@ function testApi(apiType) {
     }
     
     if (!url) {
-        icon.innerHTML = '<i class="fas fa-times text-red-500"></i>';
-        icon.className = 'w-10 h-10 rounded-full flex items-center justify-center bg-red-100';
+        icon.innerHTML = '<i class="fas fa-times text-red-500 text-2xl"></i>';
+        icon.className = 'w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0 bg-red-100';
         message.textContent = '{% if current_lang == "fr" %}Erreur{% else %}Error{% endif %}';
         details.textContent = 'API endpoint not found';
         return;
@@ -387,22 +473,22 @@ function testApi(apiType) {
         })
         .then(data => {
             if (data.success) {
-                icon.innerHTML = '<i class="fas fa-check text-green-500"></i>';
-                icon.className = 'w-10 h-10 rounded-full flex items-center justify-center bg-green-100';
+                icon.innerHTML = '<i class="fas fa-check text-green-500 text-2xl"></i>';
+                icon.className = 'w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0 bg-green-100';
                 message.textContent = data.message;
                 if (data.response) {
                     details.textContent = data.response;
                 }
             } else {
-                icon.innerHTML = '<i class="fas fa-times text-red-500"></i>';
-                icon.className = 'w-10 h-10 rounded-full flex items-center justify-center bg-red-100';
+                icon.innerHTML = '<i class="fas fa-times text-red-500 text-2xl"></i>';
+                icon.className = 'w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0 bg-red-100';
                 message.textContent = '{% if current_lang == "fr" %}Erreur{% else %}Error{% endif %}';
                 details.textContent = data.message;
             }
         })
         .catch(err => {
-            icon.innerHTML = '<i class="fas fa-times text-red-500"></i>';
-            icon.className = 'w-10 h-10 rounded-full flex items-center justify-center bg-red-100';
+            icon.innerHTML = '<i class="fas fa-times text-red-500 text-2xl"></i>';
+            icon.className = 'w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0 bg-red-100';
             message.textContent = '{% if current_lang == "fr" %}Erreur de connexion{% else %}Connection error{% endif %}';
             details.textContent = err.message;
         });
