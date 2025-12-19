@@ -116,10 +116,12 @@ class Journalist(db.Model):
     eleven_labs_voice_id = db.Column(db.String(100))
     ai_provider = db.Column(db.String(20), default="gemini")  # gemini, perplexity, openai, openrouter
     ai_model = db.Column(db.String(100), default="auto")  # Specific model name for the provider
+    fetch_time = db.Column(db.String(5), default="02:00")
+    summary_time = db.Column(db.String(5), default="08:00")
+    send_time = db.Column(db.String(5), default="08:00")
     is_active = db.Column(db.Boolean, default=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     last_summary_at = db.Column(db.DateTime)
-    summary_time = db.Column(db.String(5), default="08:00")
     
     sources = db.relationship('Source', backref='journalist', lazy=True, cascade='all, delete-orphan')
     articles = db.relationship('Article', backref='journalist', lazy=True, cascade='all, delete-orphan')

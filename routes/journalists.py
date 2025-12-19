@@ -60,7 +60,9 @@ def create():
             eleven_labs_voice_id=request.form.get('eleven_labs_voice_id'),
             ai_provider=request.form.get('ai_provider', 'gemini'),
             ai_model=request.form.get('ai_model', 'auto'),
-            summary_time=request.form.get('summary_time', '08:00')
+            fetch_time=request.form.get('fetch_time', '02:00'),
+            summary_time=request.form.get('summary_time', '08:00'),
+            send_time=request.form.get('send_time', '08:00')
         )
         db.session.add(journalist)
         db.session.commit()
@@ -109,7 +111,9 @@ def edit(id):
         journalist.eleven_labs_voice_id = request.form.get('eleven_labs_voice_id')
         journalist.ai_provider = request.form.get('ai_provider', journalist.ai_provider)
         journalist.ai_model = request.form.get('ai_model', journalist.ai_model)
+        journalist.fetch_time = request.form.get('fetch_time', journalist.fetch_time)
         journalist.summary_time = request.form.get('summary_time', journalist.summary_time)
+        journalist.send_time = request.form.get('send_time', journalist.send_time)
         journalist.is_active = 'is_active' in request.form
         
         if 'photo' in request.files:

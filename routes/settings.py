@@ -3,6 +3,7 @@ from flask import Blueprint, render_template, request, redirect, url_for, flash,
 from security.auth import admin_required
 from security.logging import log_activity
 from models import db, Settings
+from models.journalist import TIMEZONES
 
 settings_bp = Blueprint('settings', __name__)
 
@@ -107,7 +108,8 @@ def index():
     return render_template('admin/settings/index.html', 
                          settings=all_settings,
                          api_status=api_status,
-                         default_settings=DEFAULT_SETTINGS)
+                         default_settings=DEFAULT_SETTINGS,
+                         timezones=TIMEZONES)
 
 @settings_bp.route('/initialize', methods=['POST'])
 @admin_required
