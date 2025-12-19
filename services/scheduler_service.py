@@ -160,8 +160,10 @@ class SchedulerService:
                     send_date = local_time.strftime('%d/%m/%Y')
                     
                     # Format complete message with greeting, summary, and journalist name
+                    from services.ai_service import clean_html
                     greeting = f"Bonjour,\n\nRésumé du {send_date}\n\n"
-                    summary_text = f"{greeting}{ai_summary}\n\n---\n{journalist.name}"
+                    cleaned_summary = clean_html(ai_summary)
+                    summary_text = f"{greeting}{cleaned_summary}\n\n---\n{journalist.name}"
                     
                     # Generate audio IN PARALLEL with summary
                     audio_path = generate_audio_async(ai_summary, journalist.eleven_labs_voice_id, journalist.id)

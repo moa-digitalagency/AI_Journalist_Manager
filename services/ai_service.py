@@ -7,16 +7,25 @@ logger = logging.getLogger(__name__)
 def clean_html(text: str) -> str:
     """Remove HTML tags and clean text for Telegram."""
     import re
-    # Remove HTML tags
-    text = re.sub(r'<[^>]+>', '', text)
-    # Remove multiple spaces
-    text = re.sub(r'\s+', ' ', text)
-    # Remove special characters that might be HTML-encoded
-    text = text.replace('&lt;', '<').replace('&gt;', '>').replace('&amp;', '&')
+    if not text:
+        return text
+    # First pass: remove all HTML tags (case-insensitive)
+    text = re.sub(r'<[^>]+>', '', text, flags=re.IGNORECASE | re.DOTALL)
+    # Remove common HTML entities
+    text = text.replace('&lt;', '').replace('&gt;', '').replace('&amp;', '&')
+    text = text.replace('&nbsp;', ' ').replace('&quot;', '"').replace('&#39;', "'")
+    # Remove leftover HTML-like patterns
+    text = re.sub(r'</?[a-z][a-z0-9]*[^>]*>', '', text, flags=re.IGNORECASE)
     text = text.replace('<b>', '').replace('</b>', '')
     text = text.replace('<i>', '').replace('</i>', '')
+    text = text.replace('<strong>', '').replace('</strong>', '')
+    text = text.replace('<em>', '').replace('</em>', '')
     text = text.replace('<br>', '\n').replace('<br/>', '\n').replace('<br />', '\n')
-    return text.strip()
+    text = text.replace('**', '').replace('__', '')
+    # Remove multiple consecutive spaces but preserve newlines
+    lines = text.split('\n')
+    lines = [re.sub(r' +', ' ', line.strip()) for line in lines if line.strip()]
+    return '\n'.join(lines)
 
 class AIService:
     _client = None

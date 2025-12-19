@@ -260,16 +260,20 @@ def generate_summary(id):
         model=journalist.ai_model
     )
     
+    # Clean HTML from summary before audio generation
+    from services.ai_service import clean_html
+    clean_summary = clean_html(summary_text)
+    
     audio_path = None
     if journalist.eleven_labs_voice_id and AudioService.is_available():
-        audio_data = AudioService.generate_audio(summary_text, journalist.eleven_labs_voice_id)
+        audio_data = AudioService.generate_audio(clean_summary, journalist.eleven_labs_voice_id)
         if audio_data:
             filename = f"summary_{id}_{datetime.utcnow().strftime('%Y%m%d_%H%M%S')}.mp3"
             audio_path = AudioService.save_audio(audio_data, filename)
     
     summary = DailySummary(
         journalist_id=id,
-        summary_text=summary_text,
+        summary_text=clean_summary,
         audio_url=audio_path,
         articles_count=len(articles)
     )
