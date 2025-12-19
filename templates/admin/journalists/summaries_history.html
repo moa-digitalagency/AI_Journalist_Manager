@@ -1,0 +1,59 @@
+{% extends "admin/base.html" %}
+
+{% block title %}{{ journalist.name }} - Historique{% endblock %}
+{% block header %}Historique des résumés{% endblock %}
+{% block subheader %}{{ journalist.name }}{% endblock %}
+
+{% block content %}
+<div class="mb-6">
+    <a href="{{ url_for('journalists.view', id=journalist.id) }}" class="px-4 py-2 text-gray-600 hover:text-gray-800">
+        <i class="fas fa-arrow-left mr-2"></i>Retour
+    </a>
+</div>
+
+<div class="space-y-4">
+    {% for summary in summaries %}
+    <div class="bg-white rounded-2xl p-6 border border-gray-100">
+        <div class="flex justify-between items-start mb-4">
+            <div>
+                <p class="text-sm text-gray-500">{{ format_datetime(summary.created_at) }}</p>
+                <p class="text-xs text-gray-400">{{ summary.articles_count }} articles</p>
+            </div>
+            <div class="flex gap-2">
+                {% if summary.audio_url %}
+                <span class="px-2 py-1 bg-green-100 text-green-600 text-xs rounded">Audio</span>
+                {% endif %}
+                {% if summary.sent_at %}
+                <span class="px-2 py-1 bg-blue-100 text-blue-600 text-xs rounded">Envoyé à {{ summary.sent_count }}</span>
+                {% else %}
+                <span class="px-2 py-1 bg-gray-100 text-gray-600 text-xs rounded">Non envoyé</span>
+                {% endif %}
+            </div>
+        </div>
+        
+        <p class="text-sm text-gray-700 mb-4 line-clamp-4">{{ summary.summary_text }}</p>
+        
+        {% if summary.audio_url %}
+        <div class="mb-4">
+            <audio controls class="w-full h-8">
+                <source src="{{ summary.audio_url }}" type="audio/mpeg">
+            </audio>
+        </div>
+        {% endif %}
+        
+        <div class="text-xs text-gray-500">
+            {% if summary.sent_at %}
+            Envoyé le {{ format_datetime(summary.sent_at) }}
+            {% else %}
+            En attente d'envoi
+            {% endif %}
+        </div>
+    </div>
+    {% else %}
+    <div class="bg-white rounded-2xl p-12 text-center border border-gray-100">
+        <i class="fas fa-history text-3xl text-gray-300 mb-4"></i>
+        <p class="text-gray-500">Aucun résumé généré</p>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

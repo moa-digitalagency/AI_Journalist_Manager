@@ -288,3 +288,10 @@ def generate_summary(id):
     
     log_activity('generate_summary', 'journalist', id, f'Sent to {sent} subscribers')
     return jsonify({'message': f'Résumé envoyé à {sent} abonnés', 'summary': summary_text})
+
+@journalists_bp.route('/<int:id>/summaries', methods=['GET'])
+@admin_required
+def summaries_history(id):
+    journalist = Journalist.query.get_or_404(id)
+    summaries = DailySummary.query.filter_by(journalist_id=id).order_by(DailySummary.created_at.desc()).all()
+    return render_template('admin/journalists/summaries_history.html', journalist=journalist, summaries=summaries)

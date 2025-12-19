@@ -111,6 +111,15 @@ class SchedulerService:
         from services.ai_service import AIService
         from services.audio_service import AudioService
         
+        def generate_audio_async(text, voice_id, journalist_id):
+            """Generate audio in parallel."""
+            if voice_id and AudioService.is_available():
+                audio_data = AudioService.generate_audio(text, voice_id)
+                if audio_data:
+                    filename = f"summary_{journalist_id}_{datetime.utcnow().strftime('%Y%m%d_%H%M%S')}.mp3"
+                    return AudioService.save_audio(audio_data, filename)
+            return None
+        
         with app.app_context():
             journalists = Journalist.query.filter_by(is_active=True).all()
             
@@ -154,12 +163,8 @@ class SchedulerService:
                     greeting = f"Bonjour,\n\nRésumé du {send_date}\n\n"
                     summary_text = f"{greeting}{ai_summary}\n\n---\n{journalist.name}"
                     
-                    audio_path = None
-                    if journalist.eleven_labs_voice_id and AudioService.is_available():
-                        audio_data = AudioService.generate_audio(ai_summary, journalist.eleven_labs_voice_id)
-                        if audio_data:
-                            filename = f"summary_{journalist.id}_{datetime.utcnow().strftime('%Y%m%d')}.mp3"
-                            audio_path = AudioService.save_audio(audio_data, filename)
+                    # Generate audio IN PARALLEL with summary
+                    audio_path = generate_audio_async(ai_summary, journalist.eleven_labs_voice_id, journalist.id)
                     
                     daily_summary = DailySummary(
                         journalist_id=journalist.id,
@@ -171,7 +176,7 @@ class SchedulerService:
                     journalist.last_summary_at = datetime.utcnow()
                     db.session.commit()
                     
-                    logger.info(f"Summary generated for {journalist.name}")
+                    logger.info(f"Summary generated for {journalist.name} with audio: {bool(audio_path)}")
                     
                 except Exception as e:
                     logger.error(f"Error generating summary for {journalist.name}: {e}")

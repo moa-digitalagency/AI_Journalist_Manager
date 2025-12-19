@@ -175,7 +175,9 @@ def init_default_settings():
             {'key': 'openai_model', 'value': 'gpt-4o-mini', 'description': 'Modèle OpenAI à utiliser'},
             {'key': 'openrouter_model', 'value': 'openai/gpt-4-turbo', 'description': 'Modèle OpenRouter à utiliser'},
             {'key': 'eleven_labs_default_voice', 'value': '21m00Tcm4TlvDq8ikWAM', 'description': 'Voice ID Eleven Labs par défaut'},
-            {'key': 'summary_max_length', 'value': '2000', 'description': 'Longueur maximale des résumés'},
+            {'key': 'summary_max_length', 'value': '4500', 'description': 'Longueur maximale des résumés (augmentée)'},
+            {'key': 'summary_min_points', 'value': '5', 'description': 'Nombre minimum de points clés'},
+            {'key': 'summary_max_points', 'value': '15', 'description': 'Nombre maximum de points clés'},
             {'key': 'youtube_transcript_languages', 'value': 'fr,en,es,de', 'description': 'Langues de transcription YouTube'},
         ],
         'notifications': [
