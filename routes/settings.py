@@ -91,12 +91,6 @@ def get_api_status():
         }
     }
     
-    # Add a status message if no AI models are configured
-    status['ai_requirement'] = {
-        'required': ai_model_required,
-        'message': 'Au moins un modèle IA doit être configuré' if ai_model_required else 'Modèle IA configuré'
-    }
-    
     return status
 
 @settings_bp.route('/')
