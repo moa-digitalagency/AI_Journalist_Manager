@@ -276,19 +276,24 @@ Posez-moi n'importe quelle question sur l'actualite !"""
             for subscriber in subscribers:
                 if cls.is_active(subscriber):
                     try:
-                        await bot.send_message(
-                            chat_id=int(subscriber.telegram_user_id),
-                            text=text
-                        )
+                        tasks = [
+                            bot.send_message(
+                                chat_id=int(subscriber.telegram_user_id),
+                                text=text
+                            )
+                        ]
                         
                         if audio_path and os.path.exists(audio_path):
                             with open(audio_path, 'rb') as f:
-                                await bot.send_audio(
-                                    chat_id=int(subscriber.telegram_user_id),
-                                    audio=f,
-                                    title="Resume audio"
+                                tasks.append(
+                                    bot.send_audio(
+                                        chat_id=int(subscriber.telegram_user_id),
+                                        audio=f,
+                                        title="Resume audio"
+                                    )
                                 )
                         
+                        await asyncio.gather(*tasks)
                         sent_count += 1
                     except Exception as e:
                         logger.error(f"Error sending to {subscriber.telegram_user_id}: {e}")
