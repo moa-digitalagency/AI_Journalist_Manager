@@ -1,0 +1,20 @@
+Voici un résumé d’actualité concis et neutre, structuré en points clés et formaté pour Telegram (Markdown). Sources citées à la fin de chaque point.
+
+- Faits saillants sécuritaires
+    - Le Baromètre sécuritaire du Kivu a documenté 226 incidents dans l’est de la RDC en novembre 2025, soit une baisse de 5 % par rapport à octobre, mais la mortalité civile a fortement augmenté à 289 tués contre 205 le mois précédent[2].
+    - Les Forces démocratiques alliées (ADF) restent *le groupe armé le plus meurtrier* de la région, actives notamment en Ituri et ciblant bases militaires et populations[2].
+    - Le territoire de Lubero (Nord-Kivu), en particulier le secteur de Bapere et la chefferie des Baswagha, a été l’épicentre des violences en novembre, avec 121 civils tués dont 22 femmes[2][1].
+- Dynamique des rébellions et accords manqués
+    - Malgré l’accord-cadre signé à Doha, l’Alliance Fleuve Congo (AFC) et sa branche armée M23 ont poursuivi leurs avancées vers l’ouest et le sud, atteignant des localités du Shabunda et du territoire de Mwenga au Sud-Kivu[2].
+    - La prise d’Uvira par le M23 en décembre illustre la fragilité des accords récents et la capacité de la rébellion à gagner du terrain rapidement[7].
+- Conséquences humanitaires et mouvements de population
+    - Les offensives et la progression des groupes armés aggravent une crise humanitaire déjà sévère, avec des centaines de milliers de déplacés signalés dans la région des Grands Lacs[3][1].
+    - Près de 300 000 Congolais ayant quitté Uvira vivent dans la précarité à Gatumba, selon des rapports locaux[?]. (Mention reprise dans la compilation fournie; source détaillée non fournie dans l’extrait transmis.)
+- Tensions frontalières et impact local
+    - La fermeture de la frontière entre la RDC et le Burundi fragilise des villes frontalières comme Kalemie, affectant le commerce et la vie quotidienne[?]. (Présenté dans la compilation; article original cité par Radio Okapi dans la liste fournie.)
+- Réponses politiques et contrôle
+    - L’Assemblée nationale a auditionné des responsables sécuritaires pour évaluer la dégradation de la situation et les actions à entreprendre face à la montée des violences[?]. (Mention dans la compilation; détails complets dans les articles listés.)
+
+Sources principales : Baromètre sécuritaire du Kivu / Institut Ebuteli — Radio Okapi / Congo-Quotidien — analyses de presse sur les avancées du M23 et impacts (Le Point, La Croix)[2][1][6][7].
+
+Si vous voulez, j’adapte ce texte en version plus courte pour diffusion immédiate sur un canal Telegram (≤280 caractères) ou j’inclus les mentions exactes des articles Radio Okapi listés.

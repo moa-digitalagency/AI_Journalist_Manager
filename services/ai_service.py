@@ -74,7 +74,7 @@ class AIService:
 Génère un résumé d'actualités concis et engageant en {language} à partir des articles suivants. 
 Le résumé doit:
 - Être structuré avec les points clés
-- Mentionner les sources
+- Mentionner la source directement après chaque point clé entre crochets [Nom Source], pas de numéros
 - Être adapté pour une lecture Telegram (formatage Markdown)
 - Ne pas dépasser 2000 caractères
 
