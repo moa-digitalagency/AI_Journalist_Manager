@@ -35,6 +35,9 @@ def create():
             flash('Token déjà utilisé', 'error')
             return redirect(url_for('journalists.create'))
         
+        import logging
+        logger = logging.getLogger(__name__)
+        
         photo_url = None
         if 'photo' in request.files:
             photo = request.files['photo']
@@ -43,9 +46,15 @@ def create():
                 os.makedirs('static/uploads/journalists', exist_ok=True)
                 photo.save(os.path.join('static/uploads/journalists', filename))
                 photo_url = f"/static/uploads/journalists/{filename}"
+                logger.info(f"Photo uploaded: {photo_url}")
         
         if not photo_url:
+            logger.info(f"Attempting to fetch bot photo for token")
             photo_url = TelegramService.get_bot_photo_url(telegram_token)
+            if photo_url:
+                logger.info(f"Bot photo retrieved: {photo_url}")
+            else:
+                logger.warning(f"Could not retrieve bot photo, using default")
         
         journalist = Journalist(
             name=name,
@@ -123,7 +132,9 @@ def edit(id):
                 os.makedirs('static/uploads/journalists', exist_ok=True)
                 photo.save(os.path.join('static/uploads/journalists', filename))
                 journalist.photo_url = f"/static/uploads/journalists/{filename}"
+                logger.info(f"Updated journalist photo: {journalist.photo_url}")
         elif journalist.telegram_token != old_token:
+            logger.info(f"Telegram token changed, fetching new bot photo")
             bot_photo = TelegramService.get_bot_photo_url(journalist.telegram_token)
             if bot_photo:
                 journalist.photo_url = bot_photo
