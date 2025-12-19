@@ -37,17 +37,13 @@ class TelegramService:
                     file_id = user_profile_photos.photos[0][0].file_id
                     file_obj = await bot.get_file(file_id)
                     
-                    photo_url = f"https://api.telegram.org/file/bot{token}/{file_obj.file_path}"
-                    photo_data = requests.get(photo_url, timeout=30).content
-                    
                     filename = secure_filename(f"bot_{bot_info.username}_{datetime.utcnow().strftime('%Y%m%d%H%M%S')}.jpg")
                     os.makedirs('static/uploads/journalists', exist_ok=True)
                     filepath = os.path.join('static/uploads/journalists', filename)
                     
-                    with open(filepath, 'wb') as f:
-                        f.write(photo_data)
+                    await file_obj.download_to_drive(filepath)
                     
-                    logger.info(f"Bot photo saved for {bot_info.username}")
+                    logger.info(f"Bot photo saved for {bot_info.username} ({os.path.getsize(filepath)} bytes)")
                     return f"/static/uploads/journalists/{filename}"
                 finally:
                     await bot.close()
