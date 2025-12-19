@@ -81,3 +81,4 @@ psycopg2-binary
 python-telegram-bot
 requests
 youtube-transcript-api
+pytz

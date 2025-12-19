@@ -120,7 +120,44 @@
                             <option value="es" {% if setting.value == 'es' %}selected{% endif %}>🇪🇸 Español</option>
                             <option value="de" {% if setting.value == 'de' %}selected{% endif %}>🇩🇪 Deutsch</option>
                         </select>
-                        {% elif setting.key in ['trial_days', 'fetch_hour', 'summary_hour', 'max_login_attempts', 'session_timeout'] %}
+                        {% elif setting.key == 'default_timezone' %}
+                        <select name="setting_{{ setting.key }}" class="w-full px-4 py-3 border-2 border-amber-200 rounded-lg focus:border-amber-500 focus:ring-2 focus:ring-amber-200 bg-white font-medium transition-all">
+                            <option value="">{% if current_lang == 'fr' %}Sélectionner un fuseau horaire{% else %}Select a timezone{% endif %}</option>
+                            <option value="UTC" {% if setting.value == 'UTC' %}selected{% endif %}>UTC</option>
+                            <option value="Africa/Lagos" {% if setting.value == 'Africa/Lagos' %}selected{% endif %}>Africa/Lagos</option>
+                            <option value="America/New_York" {% if setting.value == 'America/New_York' %}selected{% endif %}>America/New_York</option>
+                            <option value="America/Los_Angeles" {% if setting.value == 'America/Los_Angeles' %}selected{% endif %}>America/Los_Angeles</option>
+                            <option value="Asia/Tokyo" {% if setting.value == 'Asia/Tokyo' %}selected{% endif %}>Asia/Tokyo</option>
+                            <option value="Asia/Bangkok" {% if setting.value == 'Asia/Bangkok' %}selected{% endif %}>Asia/Bangkok</option>
+                            <option value="Europe/Paris" {% if setting.value == 'Europe/Paris' %}selected{% endif %}>Europe/Paris</option>
+                            <option value="Europe/London" {% if setting.value == 'Europe/London' %}selected{% endif %}>Europe/London</option>
+                            <option value="Europe/Berlin" {% if setting.value == 'Europe/Berlin' %}selected{% endif %}>Europe/Berlin</option>
+                            <option value="Australia/Sydney" {% if setting.value == 'Australia/Sydney' %}selected{% endif %}>Australia/Sydney</option>
+                        </select>
+                        {% elif setting.key in ['fetch_hour', 'summary_hour'] %}
+                        <div class="flex gap-2 items-center">
+                            <input type="number" id="{{ setting.key }}_hours" min="0" max="23" value="{{ setting.value.split(':')[0] if ':' in setting.value else setting.value }}" 
+                                   class="w-20 px-3 py-3 border-2 border-amber-200 rounded-lg focus:border-amber-500 focus:ring-2 focus:ring-amber-200 font-medium transition-all text-center" placeholder="HH">
+                            <span class="text-slate-600 font-semibold">:</span>
+                            <input type="number" id="{{ setting.key }}_minutes" min="0" max="59" value="{{ setting.value.split(':')[1] if ':' in setting.value else '0' }}" 
+                                   class="w-20 px-3 py-3 border-2 border-amber-200 rounded-lg focus:border-amber-500 focus:ring-2 focus:ring-amber-200 font-medium transition-all text-center" placeholder="MM">
+                            <span class="text-slate-600 font-semibold">:</span>
+                            <input type="number" id="{{ setting.key }}_seconds" min="0" max="59" value="{{ setting.value.split(':')[2] if ':' in setting.value else '0' }}" 
+                                   class="w-20 px-3 py-3 border-2 border-amber-200 rounded-lg focus:border-amber-500 focus:ring-2 focus:ring-amber-200 font-medium transition-all text-center" placeholder="SS">
+                            <input type="hidden" name="setting_{{ setting.key }}" id="hidden_{{ setting.key }}" value="{{ setting.value }}">
+                            <script>
+                                document.getElementById('{{ setting.key }}_hours').addEventListener('change', function() {
+                                    updateTimeValue('{{ setting.key }}');
+                                });
+                                document.getElementById('{{ setting.key }}_minutes').addEventListener('change', function() {
+                                    updateTimeValue('{{ setting.key }}');
+                                });
+                                document.getElementById('{{ setting.key }}_seconds').addEventListener('change', function() {
+                                    updateTimeValue('{{ setting.key }}');
+                                });
+                            </script>
+                        </div>
+                        {% elif setting.key in ['trial_days', 'max_login_attempts', 'session_timeout'] %}
                         <input type="number" name="setting_{{ setting.key }}" value="{{ setting.value }}" 
                                class="w-full px-4 py-3 border-2 border-amber-200 rounded-lg focus:border-amber-500 focus:ring-2 focus:ring-amber-200 font-medium transition-all">
                         {% else %}
@@ -144,7 +181,7 @@
                     <span class="p-3 bg-purple-600 text-white rounded-lg"><i class="fas fa-brain"></i></span>
                     <div>
                         <h2 class="text-2xl font-bold text-slate-900">{% if current_lang == 'fr' %}Configuration Modèles IA{% else %}AI Model Configuration{% endif %}</h2>
-                        <p class="text-sm text-slate-600">{% if current_lang == 'fr' %}Modèles et paramètres d'intelligence artificielle{% else %}AI models and settings{% endif %}</p>
+                        <p class="text-sm text-slate-600">{% if current_lang == 'fr' %}Sélectionnez vos modèles IA préférés (les modèles supplémentaires apparaissent selon votre sélection){% else %}Select your preferred AI models (additional models appear based on your selection){% endif %}</p>
                     </div>
                 </div>
 
@@ -155,7 +192,7 @@
                         <i class="fas fa-star text-purple-600 mr-2"></i>{% if current_lang == 'fr' %}Modèle IA par défaut{% else %}Default AI Model{% endif %}
                     </label>
                     <div class="space-y-4">
-                        <select name="setting_{{ default_ai_setting.key }}" class="w-full px-4 py-3 border-2 border-purple-200 rounded-lg focus:border-purple-500 focus:ring-2 focus:ring-purple-200 bg-white font-medium transition-all">
+                        <select id="default_ai_model_select" name="setting_{{ default_ai_setting.key }}" class="w-full px-4 py-3 border-2 border-purple-200 rounded-lg focus:border-purple-500 focus:ring-2 focus:ring-purple-200 bg-white font-medium transition-all" onchange="updateDynamicModels()">
                             <option value="perplexity" {% if default_ai_setting.value == 'perplexity' %}selected{% endif %}>🔍 Perplexity AI</option>
                             <option value="gemini" {% if default_ai_setting.value == 'gemini' %}selected{% endif %}>✨ Google Gemini</option>
                             <option value="openai" {% if default_ai_setting.value == 'openai' %}selected{% endif %}>🤖 OpenAI</option>
@@ -177,10 +214,14 @@
                 </div>
                 {% endif %}
 
+                <h3 class="text-sm font-bold text-slate-700 mb-4 flex items-center gap-2">
+                    <i class="fas fa-cog text-purple-600"></i>{% if current_lang == 'fr' %}Paramètres des Modèles{% else %}Model Configuration{% endif %}
+                </h3>
+                
                 <div class="grid md:grid-cols-2 gap-6">
                     {% for setting in settings.api %}
                         {% if setting.key != 'default_ai_model' %}
-                        <div class="bg-white rounded-xl p-6 border-2 border-purple-100 hover:border-purple-300 transition-colors">
+                        <div class="bg-white rounded-xl p-6 border-2 border-purple-100 hover:border-purple-300 transition-colors model-setting" data-model="{{ 'gemini' if setting.key == 'gemini_model' else 'perplexity' if setting.key == 'perplexity_model' else 'openai' if setting.key == 'openai_model' else 'openrouter' if setting.key == 'openrouter_model' else 'all' }}">
                             <label class="block text-sm font-semibold text-slate-700 mb-3">
                                 {% if setting.description %}{{ setting.description }}{% else %}{{ setting.key }}{% endif %}
                             </label>
@@ -390,6 +431,14 @@
     select, input[type="text"], input[type="number"], textarea {
         font-family: inherit;
     }
+
+    .model-setting {
+        display: none;
+    }
+
+    .model-setting.visible {
+        display: block;
+    }
 </style>
 
 {% endblock %}
@@ -399,31 +448,49 @@
 let currentTab = 'api-status';
 
 function switchTab(tabName) {
-    // Hide all tabs
     document.querySelectorAll('.tab-content').forEach(el => {
         el.classList.remove('active');
     });
     
-    // Remove active state from all buttons
     document.querySelectorAll('.tab-btn').forEach(el => {
         el.classList.remove('active');
     });
     
-    // Show selected tab
     const tabElement = document.getElementById(tabName);
     if (tabElement) {
         tabElement.classList.add('active');
     }
     
-    // Mark button as active
     document.querySelector(`[data-tab="${tabName}"]`).classList.add('active');
     currentTab = tabName;
 }
 
-// Initialize first tab
 document.addEventListener('DOMContentLoaded', function() {
     switchTab('api-status');
+    updateDynamicModels();
 });
+
+function updateTimeValue(fieldName) {
+    const hours = document.getElementById(`${fieldName}_hours`).value || '0';
+    const minutes = document.getElementById(`${fieldName}_minutes`).value || '0';
+    const seconds = document.getElementById(`${fieldName}_seconds`).value || '0';
+    const timeValue = `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+    document.getElementById(`hidden_${fieldName}`).value = timeValue;
+}
+
+function updateDynamicModels() {
+    const selectedModel = document.getElementById('default_ai_model_select').value;
+    const modelSettings = document.querySelectorAll('.model-setting');
+    
+    modelSettings.forEach(setting => {
+        const dataModel = setting.getAttribute('data-model');
+        if (dataModel === 'all' || dataModel === selectedModel) {
+            setting.classList.add('visible');
+        } else {
+            setting.classList.remove('visible');
+        }
+    });
+}
 
 function resetForm() {
     if (confirm('{% if current_lang == "fr" %}Êtes-vous sûr de vouloir réinitialiser ?{% else %}Are you sure you want to reset?{% endif %}')) {
