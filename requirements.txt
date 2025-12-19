@@ -82,3 +82,8 @@ python-telegram-bot
 requests
 youtube-transcript-api
 pytz
+email_validator
+flask
+flask-sqlalchemy
+gunicorn
+psycopg2-binary
