@@ -65,6 +65,16 @@
                     {% endif %}
                 </div>
                 {% endfor %}
+                <!-- 7ème bloc optionnel -->
+                <div class="group relative bg-white rounded-xl p-6 border-2 transition-all hover:shadow-lg border-amber-200">
+                    <div class="absolute top-4 right-4">
+                        <span class="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold bg-amber-100 text-amber-700">
+                            <i class="fas fa-alert-circle"></i>{% if current_lang == 'fr' %}Optionnel{% else %}Optional{% endif %}
+                        </span>
+                    </div>
+                    <h4 class="font-bold text-slate-900 mb-2 pr-24">{% if current_lang == 'fr' %}Service personnalisé{% else %}Custom Service{% endif %}</h4>
+                    <p class="text-sm text-slate-600 mb-4 line-clamp-2">{% if current_lang == 'fr' %}Espace réservé pour services additionnels{% else %}Reserved for additional services{% endif %}</p>
+                </div>
             </div>
 
             <div id="testResult" class="hidden mb-6 p-6 bg-white rounded-xl border-2 border-blue-200">

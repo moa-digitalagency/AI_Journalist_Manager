@@ -169,7 +169,10 @@ def init_default_settings():
         ],
         'api': [
             {'key': 'default_ai_model', 'value': 'perplexity', 'description': 'Modèle IA par défaut (perplexity, gemini, openai, openrouter)'},
+            {'key': 'perplexity_model', 'value': 'sonar', 'description': 'Modèle Perplexity à utiliser'},
             {'key': 'gemini_model', 'value': 'gemini-2.5-flash', 'description': 'Modèle Gemini à utiliser'},
+            {'key': 'openai_model', 'value': 'gpt-4o-mini', 'description': 'Modèle OpenAI à utiliser'},
+            {'key': 'openrouter_model', 'value': 'openai/gpt-4-turbo', 'description': 'Modèle OpenRouter à utiliser'},
             {'key': 'eleven_labs_default_voice', 'value': '21m00Tcm4TlvDq8ikWAM', 'description': 'Voice ID Eleven Labs par défaut'},
             {'key': 'summary_max_length', 'value': '2000', 'description': 'Longueur maximale des résumés'},
             {'key': 'youtube_transcript_languages', 'value': 'fr,en,es,de', 'description': 'Langues de transcription YouTube'},
