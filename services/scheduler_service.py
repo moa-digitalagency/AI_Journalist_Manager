@@ -20,13 +20,34 @@ class SchedulerService:
             return datetime.now(ZoneInfo('Europe/Paris'))
     
     @staticmethod
+    def should_fetch(journalist):
+        """Check if it's time to fetch articles based on journalist's timezone."""
+        local_time = SchedulerService.get_journalist_local_time(journalist)
+        fetch_hour = int(journalist.fetch_time.split(':')[0]) if journalist.fetch_time else 2
+        fetch_minute = int(journalist.fetch_time.split(':')[1]) if journalist.fetch_time and ':' in journalist.fetch_time else 0
+        
+        # Execute at the configured hour:minute (within a 1-minute window)
+        return local_time.hour == fetch_hour and local_time.minute == fetch_minute
+    
+    @staticmethod
+    def should_generate_summary(journalist):
+        """Check if it's time to generate summary based on journalist's timezone."""
+        local_time = SchedulerService.get_journalist_local_time(journalist)
+        summary_hour = int(journalist.summary_time.split(':')[0]) if journalist.summary_time else 8
+        summary_minute = int(journalist.summary_time.split(':')[1]) if journalist.summary_time and ':' in journalist.summary_time else 0
+        
+        # Execute at the configured hour:minute (within a 1-minute window)
+        return local_time.hour == summary_hour and local_time.minute == summary_minute
+    
+    @staticmethod
     def should_send_summary(journalist):
         """Check if it's time to send summary based on journalist's timezone."""
         local_time = SchedulerService.get_journalist_local_time(journalist)
-        summary_hour = int(journalist.summary_time.split(':')[0]) if journalist.summary_time else 8
+        send_hour = int(journalist.send_time.split(':')[0]) if journalist.send_time else 8
+        send_minute = int(journalist.send_time.split(':')[1]) if journalist.send_time and ':' in journalist.send_time else 0
         
-        # Execute at the configured hour (within any minute of that hour)
-        return local_time.hour == summary_hour
+        # Execute at the configured hour:minute (within a 1-minute window)
+        return local_time.hour == send_hour and local_time.minute == send_minute
     
     @staticmethod
     def fetch_all_sources():
@@ -39,6 +60,9 @@ class SchedulerService:
             journalists = Journalist.query.filter_by(is_active=True).all()
             
             for journalist in journalists:
+                # Only fetch if it's the right time for this journalist's timezone
+                if not SchedulerService.should_fetch(journalist):
+                    continue
                 logger.info(f"Fetching for: {journalist.name}")
                 
                 for source in journalist.sources:
@@ -86,14 +110,13 @@ class SchedulerService:
         from models import db, Journalist, Article, DailySummary
         from services.ai_service import AIService
         from services.audio_service import AudioService
-        from services.telegram_service import TelegramService
         
         with app.app_context():
             journalists = Journalist.query.filter_by(is_active=True).all()
             
             for journalist in journalists:
                 try:
-                    if not SchedulerService.should_send_summary(journalist):
+                    if not SchedulerService.should_generate_summary(journalist):
                         continue
                     
                     local_time = SchedulerService.get_journalist_local_time(journalist)
@@ -148,10 +171,44 @@ class SchedulerService:
                     journalist.last_summary_at = datetime.utcnow()
                     db.session.commit()
                     
+                    logger.info(f"Summary generated for {journalist.name}")
+                    
+                except Exception as e:
+                    logger.error(f"Error generating summary for {journalist.name}: {e}")
+    
+    @staticmethod
+    def send_summaries():
+        """Send pending summaries respecting each journalist's send time."""
+        from app import app
+        from models import db, Journalist, DailySummary
+        from services.telegram_service import TelegramService
+        
+        with app.app_context():
+            journalists = Journalist.query.filter_by(is_active=True).all()
+            
+            for journalist in journalists:
+                try:
+                    if not SchedulerService.should_send_summary(journalist):
+                        continue
+                    
+                    local_time = SchedulerService.get_journalist_local_time(journalist)
+                    logger.info(f"Sending summary for {journalist.name} (local time: {local_time.strftime('%H:%M')} {journalist.timezone})")
+                    
+                    # Find today's unsent summary
+                    today = datetime.utcnow().date()
+                    daily_summary = DailySummary.query.filter(
+                        DailySummary.journalist_id == journalist.id,
+                        DailySummary.created_at >= datetime.combine(today, datetime.min.time()),
+                        DailySummary.created_at <= datetime.combine(today, datetime.max.time())
+                    ).first()
+                    
+                    if not daily_summary or daily_summary.sent_at:
+                        continue
+                    
                     loop = asyncio.new_event_loop()
                     asyncio.set_event_loop(loop)
                     sent = loop.run_until_complete(
-                        TelegramService.send_to_subscribers(journalist.id, summary_text, audio_path)
+                        TelegramService.send_to_subscribers(journalist.id, daily_summary.summary_text, daily_summary.audio_url)
                     )
                     loop.close()
                     
@@ -162,7 +219,7 @@ class SchedulerService:
                     logger.info(f"Summary sent for {journalist.name} to {sent} subscribers")
                     
                 except Exception as e:
-                    logger.error(f"Error for {journalist.name}: {e}")
+                    logger.error(f"Error sending summary for {journalist.name}: {e}")
     
     @classmethod
     def init(cls, fetch_hour=2, summary_hour=8):
@@ -170,24 +227,35 @@ class SchedulerService:
             logger.info("Scheduler already running, skipping init")
             return
         
+        # Run fetch every minute (checks journalist timezones internally)
         scheduler.add_job(
             cls.fetch_all_sources,
             'cron',
-            hour=fetch_hour,
+            minute='*',
             id='fetch_sources',
             replace_existing=True
         )
         
+        # Run generate every minute (checks journalist timezones internally)
         scheduler.add_job(
             cls.generate_summaries,
             'cron',
-            minute=0,
+            minute='*',
             id='generate_summaries',
             replace_existing=True
         )
         
+        # Run send every minute (checks journalist timezones internally)
+        scheduler.add_job(
+            cls.send_summaries,
+            'cron',
+            minute='*',
+            id='send_summaries',
+            replace_existing=True
+        )
+        
         scheduler.start()
-        logger.info(f"Scheduler: fetch at {fetch_hour}:00, summaries checked every hour (respects journalist timezones)")
+        logger.info(f"Scheduler: running every minute, respects individual journalist fetch/summary/send times and timezones")
     
     @classmethod
     def shutdown(cls):
