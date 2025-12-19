@@ -23,30 +23,34 @@ class TelegramService:
             async def fetch_bot_photo():
                 bot = Bot(token=token)
                 
-                bot_info = await bot.get_me()
-                if not bot_info or not bot_info.username:
-                    logger.warning(f"Could not get bot info for token")
-                    return None
-                
-                user_profile_photos = await bot.get_user_profile_photos(bot_info.id, limit=1)
-                if not user_profile_photos or not user_profile_photos.photos:
-                    logger.info(f"Bot {bot_info.username} has no profile photo")
-                    return None
-                
-                file_id = user_profile_photos.photos[0][0].file_id
-                file_obj = await bot.get_file(file_id)
-                
-                photo_data = requests.get(file_obj.file_path, timeout=30).content
-                
-                filename = secure_filename(f"bot_{bot_info.username}_{datetime.utcnow().strftime('%Y%m%d%H%M%S')}.jpg")
-                os.makedirs('static/uploads/journalists', exist_ok=True)
-                filepath = os.path.join('static/uploads/journalists', filename)
-                
-                with open(filepath, 'wb') as f:
-                    f.write(photo_data)
-                
-                logger.info(f"Bot photo saved for {bot_info.username}")
-                return f"/static/uploads/journalists/{filename}"
+                try:
+                    bot_info = await bot.get_me()
+                    if not bot_info or not bot_info.username:
+                        logger.warning(f"Could not get bot info for token")
+                        return None
+                    
+                    user_profile_photos = await bot.get_user_profile_photos(bot_info.id, limit=1)
+                    if not user_profile_photos or not user_profile_photos.photos:
+                        logger.info(f"Bot {bot_info.username} has no profile photo")
+                        return None
+                    
+                    file_id = user_profile_photos.photos[0][0].file_id
+                    file_obj = await bot.get_file(file_id)
+                    
+                    photo_url = f"https://api.telegram.org/file/bot{token}/{file_obj.file_path}"
+                    photo_data = requests.get(photo_url, timeout=30).content
+                    
+                    filename = secure_filename(f"bot_{bot_info.username}_{datetime.utcnow().strftime('%Y%m%d%H%M%S')}.jpg")
+                    os.makedirs('static/uploads/journalists', exist_ok=True)
+                    filepath = os.path.join('static/uploads/journalists', filename)
+                    
+                    with open(filepath, 'wb') as f:
+                        f.write(photo_data)
+                    
+                    logger.info(f"Bot photo saved for {bot_info.username}")
+                    return f"/static/uploads/journalists/{filename}"
+                finally:
+                    await bot.close()
             
             loop = asyncio.new_event_loop()
             asyncio.set_event_loop(loop)
