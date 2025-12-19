@@ -113,7 +113,7 @@ class SchedulerService:
                         for a in articles
                     ]
                     
-                    summary_text = AIService.generate_summary(
+                    ai_summary = AIService.generate_summary(
                         articles=articles_data,
                         personality=journalist.personality,
                         writing_style=journalist.writing_style,
@@ -123,9 +123,20 @@ class SchedulerService:
                         model=journalist.ai_model
                     )
                     
+                    # Get unique sources
+                    sources = list(set(a.get('source', 'Unknown') for a in articles_data))
+                    sources_text = "Sources: " + ", ".join(sources)
+                    
+                    # Get current time for footer
+                    local_time = SchedulerService.get_journalist_local_time(journalist)
+                    send_time = local_time.strftime('%d/%m/%Y %H:%M')
+                    
+                    # Format complete message with summary, sources, journalist name and time
+                    summary_text = f"{ai_summary}\n\n{sources_text}\n\n---\n{journalist.name} • {send_time}"
+                    
                     audio_path = None
                     if journalist.eleven_labs_voice_id and AudioService.is_available():
-                        audio_data = AudioService.generate_audio(summary_text, journalist.eleven_labs_voice_id)
+                        audio_data = AudioService.generate_audio(ai_summary, journalist.eleven_labs_voice_id)
                         if audio_data:
                             filename = f"summary_{journalist.id}_{datetime.utcnow().strftime('%Y%m%d')}.mp3"
                             audio_path = AudioService.save_audio(audio_data, filename)
