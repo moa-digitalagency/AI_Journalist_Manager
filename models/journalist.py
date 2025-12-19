@@ -31,6 +31,7 @@ class Journalist(db.Model):
     
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), nullable=False)
+    photo_url = db.Column(db.String(500))
     telegram_token = db.Column(db.String(255), nullable=False, unique=True)
     telegram_chat_id = db.Column(db.String(50))
     personality = db.Column(db.Text, default="Journaliste professionnel et concis")

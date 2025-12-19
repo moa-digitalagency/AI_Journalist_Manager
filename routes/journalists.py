@@ -7,7 +7,9 @@ from services.ai_service import AIService
 from services.audio_service import AudioService
 from services.telegram_service import TelegramService
 from datetime import datetime, timedelta
+from werkzeug.utils import secure_filename
 import asyncio
+import os
 
 journalists_bp = Blueprint('journalists', __name__)
 
@@ -32,9 +34,19 @@ def create():
             flash('Token déjà utilisé', 'error')
             return redirect(url_for('journalists.create'))
         
+        photo_url = None
+        if 'photo' in request.files:
+            photo = request.files['photo']
+            if photo and photo.filename:
+                filename = secure_filename(f"journalist_{datetime.utcnow().strftime('%Y%m%d%H%M%S')}_{photo.filename}")
+                os.makedirs('static/uploads/journalists', exist_ok=True)
+                photo.save(os.path.join('static/uploads/journalists', filename))
+                photo_url = f"/static/uploads/journalists/{filename}"
+        
         journalist = Journalist(
             name=name,
             telegram_token=telegram_token,
+            photo_url=photo_url,
             personality=request.form.get('personality', 'Journaliste professionnel'),
             writing_style=request.form.get('writing_style', 'Clair et engageant'),
             spelling_style=request.form.get('spelling_style', 'standard'),
@@ -95,6 +107,14 @@ def edit(id):
         journalist.ai_model = request.form.get('ai_model', journalist.ai_model)
         journalist.summary_time = request.form.get('summary_time', journalist.summary_time)
         journalist.is_active = 'is_active' in request.form
+        
+        if 'photo' in request.files:
+            photo = request.files['photo']
+            if photo and photo.filename:
+                filename = secure_filename(f"journalist_{datetime.utcnow().strftime('%Y%m%d%H%M%S')}_{photo.filename}")
+                os.makedirs('static/uploads/journalists', exist_ok=True)
+                photo.save(os.path.join('static/uploads/journalists', filename))
+                journalist.photo_url = f"/static/uploads/journalists/{filename}"
         
         db.session.commit()
         
