@@ -95,9 +95,13 @@
             {% for j in recent_journalists %}
             <div class="flex items-center justify-between p-3 bg-gray-50 rounded-xl">
                 <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 rounded-xl bg-primary-100 flex items-center justify-center">
-                        <i class="fas fa-robot text-primary-600"></i>
-                    </div>
+                    {% if j.photo_url %}
+                        <img src="{{ j.photo_url }}" alt="{{ j.name }}" class="w-10 h-10 rounded-xl object-cover">
+                    {% else %}
+                        <div class="w-10 h-10 rounded-xl bg-primary-100 flex items-center justify-center">
+                            <i class="fas fa-robot text-primary-600"></i>
+                        </div>
+                    {% endif %}
                     <div>
                         <p class="font-medium text-gray-800">{{ j.name }}</p>
                         <p class="text-xs text-gray-500">{{ j.sources|length }} {{ _('sources') | lower }}</p>

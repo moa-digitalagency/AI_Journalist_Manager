@@ -23,9 +23,13 @@
     <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 hover:shadow-md transition">
         <div class="flex items-start justify-between mb-4">
             <div class="flex items-center gap-3">
-                <div class="w-12 h-12 rounded-xl bg-primary-100 flex items-center justify-center">
-                    <i class="fas fa-robot text-xl text-primary-600"></i>
-                </div>
+                {% if journalist.photo_url %}
+                    <img src="{{ journalist.photo_url }}" alt="{{ journalist.name }}" class="w-12 h-12 rounded-xl object-cover">
+                {% else %}
+                    <div class="w-12 h-12 rounded-xl bg-primary-100 flex items-center justify-center">
+                        <i class="fas fa-robot text-xl text-primary-600"></i>
+                    </div>
+                {% endif %}
                 <div>
                     <h3 class="font-semibold text-gray-800">{{ journalist.name }}</h3>
                     <p class="text-xs text-gray-500">{{ journalist.language|upper }} - {{ journalist.tone }}</p>
