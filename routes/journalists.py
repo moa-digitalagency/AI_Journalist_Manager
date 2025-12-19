@@ -307,7 +307,7 @@ def generate_summary_audio(id):
         return jsonify({'message': 'Service Eleven Labs non disponible'})
     
     # Generate audio from the summary text
-    audio_data = AudioService.generate_audio(latest_summary.summary_text, journalist.eleven_labs_voice_id)
+    audio_data, error_msg = AudioService.generate_audio(latest_summary.summary_text, journalist.eleven_labs_voice_id)
     
     if audio_data:
         filename = f"summary_{id}_{datetime.utcnow().strftime('%Y%m%d_%H%M%S')}.mp3"
@@ -320,7 +320,7 @@ def generate_summary_audio(id):
         log_activity('generate_summary_audio', 'journalist', id, f'Generated audio summary')
         return jsonify({'message': 'Audio généré et sauvegardé avec succès'})
     else:
-        return jsonify({'message': 'Erreur lors de la génération audio'})
+        return jsonify({'message': error_msg or 'Erreur lors de la génération audio'})
 
 @journalists_bp.route('/<int:id>/summary', methods=['POST'])
 @admin_required
