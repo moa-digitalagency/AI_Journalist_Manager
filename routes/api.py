@@ -3,6 +3,7 @@ from models import db, Journalist, Article, Subscriber, DailySummary
 from datetime import datetime, timedelta
 from sqlalchemy import func
 from functools import wraps
+from services.telegram_service import TelegramService
 
 api_bp = Blueprint('api', __name__)
 
@@ -199,6 +200,38 @@ def test_ai_model():
                 'success': False,
                 'error': response or 'Model test failed'
             }), 500
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
+@api_bp.route('/journalist/fetch-bot-photo', methods=['POST'])
+def fetch_bot_photo():
+    """Fetch and save bot photo from Telegram."""
+    try:
+        data = request.get_json()
+        telegram_token = data.get('telegram_token')
+        
+        if not telegram_token:
+            return jsonify({
+                'success': False,
+                'error': 'Telegram token is required'
+            }), 400
+        
+        photo_url = TelegramService.get_bot_photo_url(telegram_token)
+        
+        if photo_url:
+            return jsonify({
+                'success': True,
+                'photo_url': photo_url
+            })
+        else:
+            return jsonify({
+                'success': False,
+                'error': 'Could not fetch bot photo. Make sure the bot has a profile picture.'
+            }), 400
+            
     except Exception as e:
         return jsonify({
             'success': False,
