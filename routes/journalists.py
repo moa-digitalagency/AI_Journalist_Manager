@@ -242,9 +242,10 @@ def fetch_sources(id):
     log_activity('fetch_sources', 'journalist', id, f'Fetched {fetched} articles')
     return jsonify({'message': f'{fetched} articles récupérés'})
 
-@journalists_bp.route('/<int:id>/summary', methods=['POST'])
+@journalists_bp.route('/<int:id>/summary/text', methods=['POST'])
 @admin_required
-def generate_summary(id):
+def generate_summary_text(id):
+    """Generate text summary only (no audio)."""
     journalist = Journalist.query.get_or_404(id)
     
     yesterday = datetime.utcnow() - timedelta(days=1)
@@ -271,38 +272,61 @@ def generate_summary(id):
         model=journalist.ai_model
     )
     
-    # Clean HTML from summary before audio generation
     from services.ai_service import clean_html
     clean_summary = clean_html(summary_text)
-    
-    audio_path = None
-    if journalist.eleven_labs_voice_id and AudioService.is_available():
-        audio_data = AudioService.generate_audio(clean_summary, journalist.eleven_labs_voice_id)
-        if audio_data:
-            filename = f"summary_{id}_{datetime.utcnow().strftime('%Y%m%d_%H%M%S')}.mp3"
-            audio_path = AudioService.save_audio(audio_data, filename)
     
     summary = DailySummary(
         journalist_id=id,
         summary_text=clean_summary,
-        audio_url=audio_path,
+        audio_url=None,
         articles_count=len(articles)
     )
     db.session.add(summary)
     journalist.last_summary_at = datetime.utcnow()
     db.session.commit()
     
-    loop = asyncio.new_event_loop()
-    asyncio.set_event_loop(loop)
-    sent = loop.run_until_complete(TelegramService.send_to_subscribers(id, summary_text, audio_path))
-    loop.close()
+    log_activity('generate_summary_text', 'journalist', id, f'Generated text summary from {len(articles)} articles')
+    return jsonify({'message': f'Résumé texte généré avec {len(articles)} articles', 'summary': summary_text})
+
+@journalists_bp.route('/<int:id>/summary/audio', methods=['POST'])
+@admin_required
+def generate_summary_audio(id):
+    """Generate audio for the most recent text summary."""
+    journalist = Journalist.query.get_or_404(id)
     
-    summary.sent_count = sent
-    summary.sent_at = datetime.utcnow()
-    db.session.commit()
+    # Get the most recent summary
+    latest_summary = DailySummary.query.filter_by(journalist_id=id).order_by(DailySummary.created_at.desc()).first()
     
-    log_activity('generate_summary', 'journalist', id, f'Sent to {sent} subscribers')
-    return jsonify({'message': f'Résumé envoyé à {sent} abonnés', 'summary': summary_text})
+    if not latest_summary:
+        return jsonify({'message': 'Aucun résumé texte trouvé. Générez d\'abord un résumé texte.'})
+    
+    if not journalist.eleven_labs_voice_id:
+        return jsonify({'message': 'Veuillez configurer une voix Eleven Labs pour ce journaliste'})
+    
+    if not AudioService.is_available():
+        return jsonify({'message': 'Service Eleven Labs non disponible'})
+    
+    # Generate audio from the summary text
+    audio_data = AudioService.generate_audio(latest_summary.summary_text, journalist.eleven_labs_voice_id)
+    
+    if audio_data:
+        filename = f"summary_{id}_{datetime.utcnow().strftime('%Y%m%d_%H%M%S')}.mp3"
+        audio_path = AudioService.save_audio(audio_data, filename)
+        
+        # Update the summary with audio
+        latest_summary.audio_url = audio_path
+        db.session.commit()
+        
+        log_activity('generate_summary_audio', 'journalist', id, f'Generated audio summary')
+        return jsonify({'message': 'Audio généré et sauvegardé avec succès'})
+    else:
+        return jsonify({'message': 'Erreur lors de la génération audio'})
+
+@journalists_bp.route('/<int:id>/summary', methods=['POST'])
+@admin_required
+def generate_summary(id):
+    """Legacy endpoint - generates text summary only."""
+    return generate_summary_text(id)
 
 @journalists_bp.route('/<int:id>/summaries', methods=['GET'])
 @admin_required

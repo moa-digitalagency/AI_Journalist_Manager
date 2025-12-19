@@ -15,8 +15,11 @@
     <button onclick="fetchSources()" class="px-4 py-2 bg-blue-100 text-blue-700 rounded-xl hover:bg-blue-200 transition">
         <i class="fas fa-sync mr-2"></i>{{ _('fetch_articles') }}
     </button>
-    <button onclick="generateSummary()" class="px-4 py-2 bg-green-100 text-green-700 rounded-xl hover:bg-green-200 transition">
-        <i class="fas fa-paper-plane mr-2"></i>{{ _('generate_summary') }}
+    <button onclick="generateSummaryText()" class="px-4 py-2 bg-green-100 text-green-700 rounded-xl hover:bg-green-200 transition">
+        <i class="fas fa-file-alt mr-2"></i>{% if current_lang == 'fr' %}Générer résumé texte{% else %}Generate text summary{% endif %}
+    </button>
+    <button onclick="generateSummaryAudio()" class="px-4 py-2 bg-purple-100 text-purple-700 rounded-xl hover:bg-purple-200 transition">
+        <i class="fas fa-volume-up mr-2"></i>{% if current_lang == 'fr' %}Générer résumé audio{% else %}Generate audio summary{% endif %}
     </button>
 </div>
 
@@ -235,15 +238,41 @@ function fetchSources() {
         });
 }
 
-function generateSummary() {
-    fetch('{{ url_for("journalists.generate_summary", id=journalist.id) }}', { method: 'POST' })
+function generateSummaryText() {
+    fetch('{{ url_for("journalists.generate_summary_text", id=journalist.id) }}', { method: 'POST' })
         .then(r => r.json())
         .then(data => {
-            document.getElementById('resultTitle').textContent = '{% if current_lang == "fr" %}Résumé généré{% else %}Summary Generated{% endif %}';
+            document.getElementById('resultTitle').textContent = '{% if current_lang == "fr" %}Résumé texte généré{% else %}Text Summary Generated{% endif %}';
             document.getElementById('resultContent').innerHTML = '<p class="mb-2">' + data.message + '</p>' + 
                 (data.summary ? '<div class="p-4 bg-gray-50 rounded-xl text-sm max-h-64 overflow-y-auto">' + data.summary + '</div>' : '');
             document.getElementById('resultModal').classList.remove('hidden');
+        })
+        .catch(e => {
+            document.getElementById('resultTitle').textContent = '{% if current_lang == "fr" %}Erreur{% else %}Error{% endif %}';
+            document.getElementById('resultContent').textContent = e.message;
+            document.getElementById('resultModal').classList.remove('hidden');
         });
+}
+
+function generateSummaryAudio() {
+    fetch('{{ url_for("journalists.generate_summary_audio", id=journalist.id) }}', { method: 'POST' })
+        .then(r => r.json())
+        .then(data => {
+            document.getElementById('resultTitle').textContent = '{% if current_lang == "fr" %}Audio généré{% else %}Audio Generated{% endif %}';
+            document.getElementById('resultContent').textContent = data.message;
+            document.getElementById('resultModal').classList.remove('hidden');
+            // Reload page after 2 seconds to see the new audio
+            setTimeout(() => location.reload(), 2000);
+        })
+        .catch(e => {
+            document.getElementById('resultTitle').textContent = '{% if current_lang == "fr" %}Erreur{% else %}Error{% endif %}';
+            document.getElementById('resultContent').textContent = e.message;
+            document.getElementById('resultModal').classList.remove('hidden');
+        });
+}
+
+function generateSummary() {
+    generateSummaryText();
 }
 </script>
 {% endblock %}
