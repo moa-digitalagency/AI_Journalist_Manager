@@ -2,6 +2,7 @@ from flask import Blueprint, render_template, request, redirect, url_for, flash,
 from security.auth import admin_required
 from security.logging import log_activity
 from models import db, Journalist, Source, Article, DailySummary
+from models.journalist import TIMEZONES
 from services.scraper_service import ScraperService
 from services.ai_service import AIService
 from services.audio_service import AudioService
@@ -72,7 +73,7 @@ def create():
         flash('Journaliste créé', 'success')
         return redirect(url_for('journalists.view', id=journalist.id))
     
-    return render_template('admin/journalists/form.html', journalist=None)
+    return render_template('admin/journalists/form.html', journalist=None, timezones=TIMEZONES)
 
 @journalists_bp.route('/<int:id>')
 @admin_required
@@ -139,7 +140,7 @@ def edit(id):
         flash('Journaliste mis à jour', 'success')
         return redirect(url_for('journalists.view', id=id))
     
-    return render_template('admin/journalists/form.html', journalist=journalist)
+    return render_template('admin/journalists/form.html', journalist=journalist, timezones=TIMEZONES)
 
 @journalists_bp.route('/<int:id>/delete', methods=['POST'])
 @admin_required
