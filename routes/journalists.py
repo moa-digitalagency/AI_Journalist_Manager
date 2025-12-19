@@ -43,6 +43,9 @@ def create():
                 photo.save(os.path.join('static/uploads/journalists', filename))
                 photo_url = f"/static/uploads/journalists/{filename}"
         
+        if not photo_url:
+            photo_url = TelegramService.get_bot_photo_url(telegram_token)
+        
         journalist = Journalist(
             name=name,
             telegram_token=telegram_token,
@@ -115,6 +118,10 @@ def edit(id):
                 os.makedirs('static/uploads/journalists', exist_ok=True)
                 photo.save(os.path.join('static/uploads/journalists', filename))
                 journalist.photo_url = f"/static/uploads/journalists/{filename}"
+        elif journalist.telegram_token != old_token:
+            bot_photo = TelegramService.get_bot_photo_url(journalist.telegram_token)
+            if bot_photo:
+                journalist.photo_url = bot_photo
         
         db.session.commit()
         

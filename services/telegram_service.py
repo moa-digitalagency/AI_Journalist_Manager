@@ -2,9 +2,11 @@ import os
 import logging
 import asyncio
 import threading
+import requests
 from datetime import datetime, timedelta
 from telegram import Update, Bot
 from telegram.ext import Application, CommandHandler, MessageHandler, filters, ContextTypes
+from werkzeug.utils import secure_filename
 
 logger = logging.getLogger(__name__)
 
@@ -13,6 +15,46 @@ class TelegramService:
     _thread = None
     active_bots = {}
     running = False
+    
+    @classmethod
+    def get_bot_photo_url(cls, token: str) -> str:
+        """Retrieve and save bot profile photo from Telegram."""
+        try:
+            bot = Bot(token=token)
+            loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(loop)
+            
+            bot_info = loop.run_until_complete(bot.get_me())
+            loop.close()
+            
+            if not bot_info or not bot_info.username:
+                logger.warning(f"Could not get bot info for token")
+                return None
+            
+            user_profile_photos = loop.run_until_complete(bot.get_user_profile_photos(bot_info.id, limit=1))
+            
+            if not user_profile_photos or not user_profile_photos.photos:
+                logger.info(f"Bot {bot_info.username} has no profile photo")
+                return None
+            
+            file_id = user_profile_photos.photos[0][0].file_id
+            file_obj = loop.run_until_complete(bot.get_file(file_id))
+            
+            photo_data = requests.get(file_obj.file_path, timeout=30).content
+            
+            filename = secure_filename(f"bot_{bot_info.username}_{datetime.utcnow().strftime('%Y%m%d%H%M%S')}.jpg")
+            os.makedirs('static/uploads/journalists', exist_ok=True)
+            filepath = os.path.join('static/uploads/journalists', filename)
+            
+            with open(filepath, 'wb') as f:
+                f.write(photo_data)
+            
+            logger.info(f"Bot photo saved for {bot_info.username}")
+            return f"/static/uploads/journalists/{filename}"
+            
+        except Exception as e:
+            logger.error(f"Error retrieving bot photo: {e}")
+            return None
     
     @classmethod
     def _get_event_loop(cls):
