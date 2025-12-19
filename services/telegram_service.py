@@ -18,7 +18,7 @@ class TelegramService:
     
     @classmethod
     def get_bot_photo_url(cls, token: str) -> str:
-        """Retrieve and save bot profile photo from Telegram."""
+        """Retrieve and save bot profile photo from Telegram. Returns None if bot has no photo."""
         if not token:
             logger.warning("No token provided for bot photo retrieval")
             return None
@@ -35,7 +35,7 @@ class TelegramService:
                     
                     user_profile_photos = await bot.get_user_profile_photos(bot_info.id, limit=1)
                     if not user_profile_photos or not user_profile_photos.photos:
-                        logger.info(f"Bot {bot_info.username} has no profile photo")
+                        logger.info(f"Bot {bot_info.username} has no profile photo - this is optional")
                         return None
                     
                     file_id = user_profile_photos.photos[0][0].file_id

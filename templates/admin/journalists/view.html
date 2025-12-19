@@ -131,7 +131,7 @@
         </div>
         
         <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
-            <h4 class="font-semibold text-gray-800 mb-4">{% if current_lang == 'fr' %}Résumés récents{% else %}Recent Summaries{% endif %}</h4>
+            <h4 class="font-semibold text-gray-800 mb-4">{% if current_lang == 'fr' %}Résumés récents (texte){% else %}Recent Summaries (text){% endif %}</h4>
             <div class="space-y-4">
                 {% for summary in recent_summaries %}
                 <div class="p-4 bg-gray-50 rounded-xl">
@@ -140,17 +140,37 @@
                         <span class="px-2 py-1 bg-blue-100 text-blue-600 rounded-full text-xs">{{ summary.articles_count }} {{ _('articles') | lower }}</span>
                     </div>
                     <p class="text-sm text-gray-700 line-clamp-3">{{ truncate(summary.summary_text, 200) }}</p>
-                    {% if summary.audio_url %}
-                    <div class="mt-2">
-                        <audio controls class="w-full h-8">
-                            <source src="{{ summary.audio_url }}" type="audio/mpeg">
-                        </audio>
-                    </div>
-                    {% endif %}
                     <p class="text-xs text-gray-500 mt-2">{% if current_lang == 'fr' %}Envoyé à{% else %}Sent to{% endif %} {{ summary.sent_count }} {{ _('subscribers') | lower }}</p>
                 </div>
                 {% else %}
                 <p class="text-center text-gray-500 py-8">{% if current_lang == 'fr' %}Aucun résumé généré{% else %}No summaries generated{% endif %}</p>
+                {% endfor %}
+            </div>
+        </div>
+        
+        <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+            <h4 class="font-semibold text-gray-800 mb-4">{% if current_lang == 'fr' %}Résumés récents (audio){% else %}Recent Summaries (audio){% endif %}</h4>
+            <div class="space-y-4">
+                {% set audio_summaries = recent_summaries|selectattr('audio_url')|list %}
+                {% for summary in audio_summaries %}
+                <div class="p-4 bg-gray-50 rounded-xl">
+                    <div class="flex justify-between items-start mb-3">
+                        <span class="text-xs text-gray-500">{{ format_datetime(summary.created_at) }}</span>
+                        <span class="px-2 py-1 bg-purple-100 text-purple-600 rounded-full text-xs">
+                            <i class="fas fa-volume-up mr-1"></i>
+                            {% if current_lang == 'fr' %}Audio Eleven Labs{% else %}Eleven Labs Audio{% endif %}
+                        </span>
+                    </div>
+                    <audio controls class="w-full h-8 mb-2">
+                        <source src="{{ summary.audio_url }}" type="audio/mpeg">
+                    </audio>
+                    <p class="text-xs text-gray-500">{{ summary.articles_count }} {{ _('articles') | lower }} - {% if current_lang == 'fr' %}Envoyé à{% else %}Sent to{% endif %} {{ summary.sent_count }} {{ _('subscribers') | lower }}</p>
+                </div>
+                {% else %}
+                <p class="text-center text-gray-500 py-8">
+                    <i class="fas fa-volume-mute text-2xl text-gray-300 mb-2 block"></i>
+                    {% if current_lang == 'fr' %}Aucun résumé audio généré{% else %}No audio summaries generated{% endif %}
+                </p>
                 {% endfor %}
             </div>
         </div>
