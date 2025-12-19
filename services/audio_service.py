@@ -20,6 +20,13 @@ class AudioService:
             logger.warning("ELEVEN_LABS_API_KEY not set")
             return None
         
+        if not text or len(text.strip()) == 0:
+            logger.warning("Empty text provided for audio generation")
+            return None
+        
+        # Limit text to 2000 chars for Eleven Labs (it has strict limits)
+        text_limited = text[:2000]
+        
         voice_id = voice_id or cls.DEFAULT_VOICE
         url = f"{cls.API_URL}/{voice_id}"
         
@@ -30,7 +37,7 @@ class AudioService:
         }
         
         data = {
-            "text": text,
+            "text": text_limited,
             "model_id": "eleven_multilingual_v2",
             "voice_settings": {
                 "stability": 0.5,
@@ -41,9 +48,13 @@ class AudioService:
         try:
             response = requests.post(url, json=data, headers=headers, timeout=60)
             response.raise_for_status()
+            logger.info(f"Audio generated successfully ({len(response.content)} bytes)")
             return response.content
+        except requests.exceptions.HTTPError as e:
+            logger.error(f"HTTP Error generating audio: {e.response.status_code} - {e.response.text}")
+            return None
         except Exception as e:
-            logger.error(f"Error generating audio: {e}")
+            logger.error(f"Error generating audio: {e}", exc_info=True)
             return None
     
     @classmethod

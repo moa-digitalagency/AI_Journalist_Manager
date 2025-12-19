@@ -65,10 +65,12 @@ class OpenAIService:
 
 Génère un résumé d'actualités concis et engageant en {language} à partir des articles suivants. 
 Le résumé doit:
-- Être structuré avec les points clés
-- Mentionner les sources
-- Être adapté pour une lecture Telegram (formatage Markdown)
+- Être structuré avec les points clés (5-10 points)
+- Mentionner la source après chaque point [Nom Source]
+- Utiliser du MARKDOWN pour le formatage (gras: *texte*, italique: _texte_)
+- Être optimisé pour Telegram (pas de HTML, uniquement Markdown)
 - Ne pas dépasser 2000 caractères
+- Aller directement au contenu sans introduction
 
 Articles à résumer:
 {articles_text}

@@ -19,6 +19,10 @@ class TelegramService:
     @classmethod
     def get_bot_photo_url(cls, token: str) -> str:
         """Retrieve and save bot profile photo from Telegram."""
+        if not token:
+            logger.warning("No token provided for bot photo retrieval")
+            return None
+            
         try:
             async def fetch_bot_photo():
                 bot = Bot(token=token)
@@ -45,17 +49,24 @@ class TelegramService:
                     
                     logger.info(f"Bot photo saved for {bot_info.username} ({os.path.getsize(filepath)} bytes)")
                     return f"/static/uploads/journalists/{filename}"
+                except Exception as e:
+                    logger.error(f"Error in async bot photo fetch: {e}", exc_info=True)
+                    return None
                 finally:
                     await bot.close()
             
-            loop = asyncio.new_event_loop()
-            asyncio.set_event_loop(loop)
-            result = loop.run_until_complete(fetch_bot_photo())
-            loop.close()
-            return result
+            try:
+                loop = asyncio.new_event_loop()
+                asyncio.set_event_loop(loop)
+                result = loop.run_until_complete(fetch_bot_photo())
+                loop.close()
+                return result
+            except Exception as e:
+                logger.error(f"Error running event loop for bot photo: {e}", exc_info=True)
+                return None
             
         except Exception as e:
-            logger.error(f"Error retrieving bot photo: {e}")
+            logger.error(f"Error retrieving bot photo: {e}", exc_info=True)
             return None
     
     @classmethod

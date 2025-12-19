@@ -5,26 +5,33 @@ from google import genai
 logger = logging.getLogger(__name__)
 
 def clean_html(text: str) -> str:
-    """Remove HTML tags and clean text for Telegram."""
+    """Convert HTML to Markdown and clean for Telegram."""
     import re
     if not text:
         return text
-    # First pass: remove all HTML tags (case-insensitive)
+    
+    # Convert HTML tags to Markdown equivalents
+    text = re.sub(r'<b>(.*?)</b>', r'*\1*', text, flags=re.IGNORECASE | re.DOTALL)
+    text = re.sub(r'<strong>(.*?)</strong>', r'*\1*', text, flags=re.IGNORECASE | re.DOTALL)
+    text = re.sub(r'<i>(.*?)</i>', r'_\1_', text, flags=re.IGNORECASE | re.DOTALL)
+    text = re.sub(r'<em>(.*?)</em>', r'_\1_', text, flags=re.IGNORECASE | re.DOTALL)
+    text = re.sub(r'<u>(.*?)</u>', r'__\1__', text, flags=re.IGNORECASE | re.DOTALL)
+    text = re.sub(r'<br\s*/?>', '\n', text, flags=re.IGNORECASE)
+    text = re.sub(r'<p>(.*?)</p>', r'\1\n', text, flags=re.IGNORECASE | re.DOTALL)
+    text = re.sub(r'<li>(.*?)</li>', r'• \1\n', text, flags=re.IGNORECASE | re.DOTALL)
+    
+    # Remove remaining HTML tags
     text = re.sub(r'<[^>]+>', '', text, flags=re.IGNORECASE | re.DOTALL)
-    # Remove common HTML entities
-    text = text.replace('&lt;', '').replace('&gt;', '').replace('&amp;', '&')
-    text = text.replace('&nbsp;', ' ').replace('&quot;', '"').replace('&#39;', "'")
-    # Remove leftover HTML-like patterns
-    text = re.sub(r'</?[a-z][a-z0-9]*[^>]*>', '', text, flags=re.IGNORECASE)
-    text = text.replace('<b>', '').replace('</b>', '')
-    text = text.replace('<i>', '').replace('</i>', '')
-    text = text.replace('<strong>', '').replace('</strong>', '')
-    text = text.replace('<em>', '').replace('</em>', '')
-    text = text.replace('<br>', '\n').replace('<br/>', '\n').replace('<br />', '\n')
-    text = text.replace('**', '').replace('__', '')
-    # Remove multiple consecutive spaces but preserve newlines
+    
+    # Decode HTML entities
+    text = text.replace('&lt;', '<').replace('&gt;', '>')
+    text = text.replace('&amp;', '&').replace('&nbsp;', ' ')
+    text = text.replace('&quot;', '"').replace('&#39;', "'")
+    
+    # Clean up whitespace while preserving formatting
     lines = text.split('\n')
-    lines = [re.sub(r' +', ' ', line.strip()) for line in lines if line.strip()]
+    lines = [line.rstrip() for line in lines]
+    lines = [line for line in lines if line.strip()]
     return '\n'.join(lines)
 
 class AIService:
@@ -98,11 +105,11 @@ Génère un résumé d'actualités détaillé et engageant en {language} à part
 Le résumé doit:
 - Être structuré avec les points clés (5-15 points)
 - Mentionner la source directement après chaque point clé entre crochets [Nom Source], sans aucun chiffre
-- Utiliser UNIQUEMENT du texte brut, JAMAIS de balises HTML ou Markdown
+- Utiliser du MARKDOWN pour le formatage (gras: *texte*, italique: _texte_)
+- Être optimisé pour Telegram (pas de HTML, uniquement Markdown)
 - Ne pas dépasser 4500 caractères
 - NE PAS inclure d'introduction comme "Voici un résumé..."
 - NE PAS inclure de notes pratiques ou sections d'explication
-- NE PAS utiliser de balises HTML comme <b>, </b>, <i>, </i>, etc
 - Aller directement au contenu du résumé
 
 Articles à résumer:
