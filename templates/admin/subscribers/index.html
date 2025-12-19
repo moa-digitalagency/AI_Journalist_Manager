@@ -56,7 +56,16 @@
                     </div>
                 </td>
                 <td class="py-4 px-6">
-                    <span class="text-gray-700">{{ subscriber.journalist.name if subscriber.journalist else 'N/A' }}</span>
+                    <div class="flex items-center gap-3">
+                        {% if subscriber.journalist and subscriber.journalist.photo_url %}
+                            <img src="{{ subscriber.journalist.photo_url }}" alt="{{ subscriber.journalist.name }}" class="w-8 h-8 rounded-lg object-cover">
+                        {% elif subscriber.journalist %}
+                            <div class="w-8 h-8 rounded-lg bg-primary-100 flex items-center justify-center">
+                                <i class="fas fa-robot text-sm text-primary-600"></i>
+                            </div>
+                        {% endif %}
+                        <span class="text-gray-700">{{ subscriber.journalist.name if subscriber.journalist else 'N/A' }}</span>
+                    </div>
                 </td>
                 <td class="py-4 px-6">
                     <span class="text-gray-700">{{ subscriber.plan.name if subscriber.plan else (_('no') if current_lang == 'en' else 'Aucun') }}</span>

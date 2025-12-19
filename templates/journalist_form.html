@@ -11,6 +11,16 @@
         </a>
     </div>
 
+    {% if journalist and journalist.photo_url %}
+    <div class="mb-8 flex items-center gap-4 p-4 bg-indigo-50 rounded-xl border border-indigo-100">
+        <img src="{{ journalist.photo_url }}" alt="{{ journalist.name }}" class="w-16 h-16 rounded-lg object-cover">
+        <div>
+            <h2 class="text-lg font-semibold text-gray-800">{{ journalist.name }}</h2>
+            <p class="text-sm text-gray-600">{{ journalist.language.upper() }} - {{ journalist.tone }}</p>
+        </div>
+    </div>
+    {% endif %}
+
     <div class="bg-white rounded-xl shadow-md p-8">
         <h1 class="text-2xl font-bold text-gray-800 mb-6">
             {% if journalist %}{{ _('edit_journalist') }}{% else %}{{ _('create_journalist') }}{% endif %}
