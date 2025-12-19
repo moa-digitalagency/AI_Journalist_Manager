@@ -24,9 +24,9 @@ class SchedulerService:
         """Check if it's time to send summary based on journalist's timezone."""
         local_time = SchedulerService.get_journalist_local_time(journalist)
         summary_hour = int(journalist.summary_time.split(':')[0]) if journalist.summary_time else 8
-        summary_minute = int(journalist.summary_time.split(':')[1]) if journalist.summary_time and ':' in journalist.summary_time else 0
         
-        return local_time.hour == summary_hour and local_time.minute < 30
+        # Execute at the configured hour (within any minute of that hour)
+        return local_time.hour == summary_hour
     
     @staticmethod
     def fetch_all_sources():

@@ -164,7 +164,8 @@ def init_default_settings():
             {'key': 'default_language', 'value': 'fr', 'description': 'Langue par défaut'},
             {'key': 'trial_days', 'value': '7', 'description': 'Durée de la période d\'essai en jours'},
             {'key': 'fetch_hour', 'value': '2', 'description': 'Heure de collecte automatique (0-23)'},
-            {'key': 'summary_hour', 'value': '8', 'description': 'Heure d\'envoi des résumés (0-23)'},
+            {'key': 'fetch_minute', 'value': '0', 'description': 'Minute de collecte (0-59)'},
+            {'key': 'summary_check_interval', 'value': 'hourly', 'description': 'Intervalle de vérification des résumés (hourly)'},
             {'key': 'default_timezone', 'value': 'Europe/Paris', 'description': 'Fuseau horaire par défaut'},
         ],
         'api': [
