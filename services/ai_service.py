@@ -4,6 +4,20 @@ from google import genai
 
 logger = logging.getLogger(__name__)
 
+def clean_html(text: str) -> str:
+    """Remove HTML tags and clean text for Telegram."""
+    import re
+    # Remove HTML tags
+    text = re.sub(r'<[^>]+>', '', text)
+    # Remove multiple spaces
+    text = re.sub(r'\s+', ' ', text)
+    # Remove special characters that might be HTML-encoded
+    text = text.replace('&lt;', '<').replace('&gt;', '>').replace('&amp;', '&')
+    text = text.replace('<b>', '').replace('</b>', '')
+    text = text.replace('<i>', '').replace('</i>', '')
+    text = text.replace('<br>', '\n').replace('<br/>', '\n').replace('<br />', '\n')
+    return text.strip()
+
 class AIService:
     _client = None
     
@@ -92,7 +106,8 @@ Résumé:"""
                 model="gemini-2.5-flash",
                 contents=prompt
             )
-            return response.text or "Erreur lors de la génération du résumé."
+            summary_text = response.text or "Erreur lors de la génération du résumé."
+            return clean_html(summary_text)
         except Exception as e:
             logger.error(f"Error generating summary: {e}")
             return f"Erreur lors de la génération du résumé: {str(e)}"
