@@ -71,14 +71,15 @@ class AIService:
 - Style d'écriture: {writing_style}
 - Ton: {tone}
 
-Génère un résumé d'actualités concis et engageant en {language} à partir des articles suivants. 
+Génère un résumé d'actualités détaillé et engageant en {language} à partir des articles suivants. 
 Le résumé doit:
-- Être structuré avec les points clés
+- Être structuré avec les points clés (5-15 points)
 - Mentionner la source directement après chaque point clé entre crochets [Nom Source], sans aucun chiffre
-- Être adapté pour une lecture Telegram (formatage Markdown)
-- Ne pas dépasser 2000 caractères
+- Utiliser UNIQUEMENT du texte brut, JAMAIS de balises HTML ou Markdown
+- Ne pas dépasser 4500 caractères
 - NE PAS inclure d'introduction comme "Voici un résumé..."
 - NE PAS inclure de notes pratiques ou sections d'explication
+- NE PAS utiliser de balises HTML comme <b>, </b>, <i>, </i>, etc
 - Aller directement au contenu du résumé
 
 Articles à résumer:
