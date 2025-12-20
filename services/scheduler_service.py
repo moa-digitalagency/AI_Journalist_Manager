@@ -114,10 +114,16 @@ class SchedulerService:
         def generate_audio_async(text, voice_id, journalist_id):
             """Generate audio in parallel."""
             if voice_id and AudioService.is_available():
-                audio_data = AudioService.generate_audio(text, voice_id)
-                if audio_data:
+                # generate_audio returns a tuple (audio_bytes, error_message)
+                audio_bytes, error = AudioService.generate_audio(text, voice_id)
+                if audio_bytes:
                     filename = f"summary_{journalist_id}_{datetime.utcnow().strftime('%Y%m%d_%H%M%S')}.mp3"
-                    return AudioService.save_audio(audio_data, filename)
+                    audio_url = AudioService.save_audio(audio_bytes, filename)
+                    if audio_url:
+                        logger.info(f"Audio generated and saved for journalist {journalist_id}: {audio_url}")
+                    return audio_url
+                else:
+                    logger.warning(f"Failed to generate audio for journalist {journalist_id}: {error}")
             return None
         
         with app.app_context():
