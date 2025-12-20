@@ -67,6 +67,7 @@ def create():
             language=request.form.get('language', 'fr'),
             timezone=request.form.get('timezone', 'Europe/Paris'),
             eleven_labs_voice_id=request.form.get('eleven_labs_voice_id'),
+            enable_eleven_labs='enable_eleven_labs' in request.form,
             ai_provider=request.form.get('ai_provider', 'gemini'),
             ai_model=request.form.get('ai_model', 'auto'),
             fetch_time=request.form.get('fetch_time', '02:00'),
@@ -118,6 +119,7 @@ def edit(id):
         journalist.language = request.form.get('language', journalist.language)
         journalist.timezone = request.form.get('timezone', journalist.timezone)
         journalist.eleven_labs_voice_id = request.form.get('eleven_labs_voice_id')
+        journalist.enable_eleven_labs = 'enable_eleven_labs' in request.form
         journalist.ai_provider = request.form.get('ai_provider', journalist.ai_provider)
         journalist.ai_model = request.form.get('ai_model', journalist.ai_model)
         journalist.fetch_time = request.form.get('fetch_time', journalist.fetch_time)
@@ -299,6 +301,9 @@ def generate_summary_audio(id):
     
     if not latest_summary:
         return jsonify({'message': 'Aucun résumé texte trouvé. Générez d\'abord un résumé texte.'})
+    
+    if not journalist.enable_eleven_labs:
+        return jsonify({'message': 'Eleven Labs n\'est pas activé pour ce journaliste'})
     
     if not journalist.eleven_labs_voice_id:
         return jsonify({'message': 'Veuillez configurer une voix Eleven Labs pour ce journaliste'})

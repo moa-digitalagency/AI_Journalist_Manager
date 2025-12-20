@@ -114,6 +114,7 @@ class Journalist(db.Model):
     language = db.Column(db.String(10), default="fr")
     timezone = db.Column(db.String(50), default="Europe/Paris")
     eleven_labs_voice_id = db.Column(db.String(100))
+    enable_eleven_labs = db.Column(db.Boolean, default=False)
     ai_provider = db.Column(db.String(20), default="gemini")  # gemini, perplexity, openai, openrouter
     ai_model = db.Column(db.String(100), default="auto")  # Specific model name for the provider
     fetch_time = db.Column(db.String(5), default="02:00")
