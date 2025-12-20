@@ -41,3 +41,65 @@ def dashboard():
                          recent_activities=recent_activities,
                          recent_journalists=recent_journalists,
                          recent_subscribers=recent_subscribers)
+
+@admin_bp.route('/statistics')
+@admin_required
+def statistics():
+    # Global stats
+    total_journalists = Journalist.query.count()
+    active_bots = Journalist.query.filter_by(is_active=True).count()
+    total_subscribers = Subscriber.query.count()
+    approved_subscribers = Subscriber.query.filter_by(is_approved=True).count()
+    
+    # Summary stats
+    total_summaries = DailySummary.query.count()
+    text_summaries = DailySummary.query.filter(DailySummary.audio_url.is_(None)).count()
+    audio_summaries = DailySummary.query.filter(DailySummary.audio_url.isnot(None)).count()
+    total_sent = DailySummary.query.filter(DailySummary.sent_at.isnot(None)).count()
+    
+    # Per-journalist stats
+    journalists = Journalist.query.all()
+    journalist_stats = []
+    for j in journalists:
+        subs = Subscriber.query.filter_by(journalist_id=j.id).count()
+        approved_subs = Subscriber.query.filter_by(journalist_id=j.id, is_approved=True).count()
+        summaries = DailySummary.query.filter_by(journalist_id=j.id).count()
+        audio = DailySummary.query.filter_by(journalist_id=j.id).filter(DailySummary.audio_url.isnot(None)).count()
+        sent = sum([s.sent_count for s in DailySummary.query.filter_by(journalist_id=j.id).all()])
+        journalist_stats.append({
+            'name': j.name,
+            'ai_provider': j.ai_provider or 'N/A',
+            'subscribers': subs,
+            'approved_subscribers': approved_subs,
+            'summaries': summaries,
+            'audio_summaries': audio,
+            'messages_sent': sent
+        })
+    
+    # Per-subscriber stats (top subscribers)
+    top_subscribers = Subscriber.query.order_by(Subscriber.messages_count.desc()).limit(10).all()
+    subscriber_stats = []
+    for s in top_subscribers:
+        journalist = Journalist.query.get(s.journalist_id)
+        subscriber_stats.append({
+            'username': s.telegram_username or f'User {s.telegram_user_id}',
+            'journalist': journalist.name if journalist else 'Unknown',
+            'plan': s.plan.name if s.plan else 'Trial',
+            'messages': s.messages_count,
+            'approved': s.is_approved,
+            'joined': s.created_at
+        })
+    
+    return render_template('admin/statistics.html',
+                         global_stats={
+                             'total_journalists': total_journalists,
+                             'active_bots': active_bots,
+                             'total_subscribers': total_subscribers,
+                             'approved_subscribers': approved_subscribers,
+                             'total_summaries': total_summaries,
+                             'text_summaries': text_summaries,
+                             'audio_summaries': audio_summaries,
+                             'total_sent': total_sent
+                         },
+                         journalist_stats=journalist_stats,
+                         subscriber_stats=subscriber_stats)

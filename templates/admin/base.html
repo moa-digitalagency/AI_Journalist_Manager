@@ -30,6 +30,10 @@
                     <i class="fas fa-chart-pie w-5 text-center"></i>
                     <span class="nav-text">{{ _('dashboard') }}</span>
                 </a>
+                <a href="{{ url_for('admin.statistics') }}" class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-primary-800 transition {% if request.endpoint == 'admin.statistics' %}bg-primary-800{% endif %}">
+                    <i class="fas fa-bar-chart w-5 text-center"></i>
+                    <span class="nav-text">{{ _('statistics') | default('Statistics') }}</span>
+                </a>
                 <a href="{{ url_for('journalists.index') }}" class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-primary-800 transition {% if 'journalists' in request.endpoint %}bg-primary-800{% endif %}">
                     <i class="fas fa-robot w-5 text-center"></i>
                     <span class="nav-text">{{ _('journalists') }}</span>
