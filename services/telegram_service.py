@@ -191,6 +191,14 @@ Posez-moi n'importe quelle question sur l'actualite !"""
                 await update.message.reply_text("Votre acces a expire.")
                 return
             
+            # Check if subscriber account is approved
+            if not subscriber.is_approved:
+                await update.message.reply_text(
+                    "Votre compte est en attente d'approbation. "
+                    "Veuillez contacter l'administrateur pour approuver votre compte."
+                )
+                return
+            
             summary = DailySummary.query.filter_by(
                 journalist_id=journalist_id
             ).order_by(DailySummary.created_at.desc()).first()
@@ -222,6 +230,14 @@ Posez-moi n'importe quelle question sur l'actualite !"""
             
             if not cls.is_active(subscriber):
                 await update.message.reply_text("Votre acces a expire.")
+                return
+            
+            # Check if subscriber account is approved
+            if not subscriber.is_approved:
+                await update.message.reply_text(
+                    "Votre compte est en attente d'approbation. "
+                    "Veuillez contacter l'administrateur pour approuver votre compte."
+                )
                 return
             
             subscriber.messages_count += 1
@@ -284,7 +300,8 @@ Posez-moi n'importe quelle question sur l'actualite !"""
             sent_count = 0
             
             for subscriber in subscribers:
-                if cls.is_active(subscriber):
+                # Only send to active AND approved subscribers
+                if cls.is_active(subscriber) and subscriber.is_approved:
                     try:
                         # Send message first
                         await bot.send_message(
