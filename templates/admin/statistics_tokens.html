@@ -1,0 +1,195 @@
+{% extends "admin/base.html" %}
+
+{% block title %}{{ _('statistics') | default('Statistics') }}{% endblock %}
+{% block header %}{{ _('statistics') | default('Statistics') }}{% endblock %}
+{% block subheader %}{{ _('overview') }} - {{ _('bots') | default('Bots') }}, {{ _('subscribers') | default('Subscribers') }}, Token Usage & Costs{% endblock %}
+
+{% block content %}
+<!-- Global Statistics -->
+<div class="mb-8">
+    <h2 class="text-xl font-semibold text-gray-800 mb-4">{{ _('global_stats') | default('Global Statistics') }}</h2>
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <!-- Bots -->
+        <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-sm text-gray-500">{{ _('total_bots') | default('Total Bots') }}</p>
+                    <p class="text-3xl font-bold text-gray-800 mt-1">{{ global_stats.total_journalists }}</p>
+                    <p class="text-xs text-green-600 mt-2"><i class="fas fa-check-circle mr-1"></i>{{ global_stats.active_bots }} {{ _('active') | lower }}</p>
+                </div>
+                <div class="w-14 h-14 rounded-2xl bg-primary-100 flex items-center justify-center">
+                    <i class="fas fa-robot text-2xl text-primary-600"></i>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Subscribers -->
+        <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-sm text-gray-500">{{ _('total_subscribers') | default('Total Subscribers') }}</p>
+                    <p class="text-3xl font-bold text-gray-800 mt-1">{{ global_stats.total_subscribers }}</p>
+                    <p class="text-xs text-green-600 mt-2"><i class="fas fa-check-circle mr-1"></i>{{ global_stats.approved_subscribers }} {{ _('approved') | lower }}</p>
+                </div>
+                <div class="w-14 h-14 rounded-2xl bg-green-100 flex items-center justify-center">
+                    <i class="fas fa-users text-2xl text-green-600"></i>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Text Summaries -->
+        <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-sm text-gray-500">{{ _('text_summaries') | default('Text Summaries') }}</p>
+                    <p class="text-3xl font-bold text-gray-800 mt-1">{{ global_stats.text_summaries }}</p>
+                    <p class="text-xs text-blue-600 mt-2"><i class="fas fa-file-alt mr-1"></i>{{ global_stats.total_summaries }} {{ _('total') | lower }}</p>
+                </div>
+                <div class="w-14 h-14 rounded-2xl bg-blue-100 flex items-center justify-center">
+                    <i class="fas fa-file-lines text-2xl text-blue-600"></i>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Audio Summaries -->
+        <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-sm text-gray-500">{{ _('audio_summaries') | default('Audio Summaries') }}</p>
+                    <p class="text-3xl font-bold text-gray-800 mt-1">{{ global_stats.audio_summaries }}</p>
+                    <p class="text-xs text-purple-600 mt-2"><i class="fas fa-volume-up mr-1"></i>{{ global_stats.total_sent }} {{ _('sent') | lower }}</p>
+                </div>
+                <div class="w-14 h-14 rounded-2xl bg-purple-100 flex items-center justify-center">
+                    <i class="fas fa-headphones text-2xl text-purple-600"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Journalist Stats with Token Costs -->
+<div class="mb-8">
+    <h2 class="text-xl font-semibold text-gray-800 mb-4">🤖 {{ _('bots') | default('Bots') }} - Token Usage & Costs</h2>
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="w-full text-sm">
+                <thead class="bg-gray-50 border-b border-gray-200">
+                    <tr>
+                        <th class="px-6 py-3 text-left font-semibold text-gray-700">{{ _('name') }}</th>
+                        <th class="px-6 py-3 text-left font-semibold text-gray-700">AI Provider</th>
+                        <th class="px-6 py-3 text-center font-semibold text-gray-700">👥 Subs</th>
+                        <th class="px-6 py-3 text-center font-semibold text-gray-700">📝 Summaries</th>
+                        <th class="px-6 py-3 text-center font-semibold text-gray-700">🎙️ Audio</th>
+                        <th class="px-6 py-3 text-center font-semibold text-gray-700">🔢 Tokens</th>
+                        <th class="px-6 py-3 text-center font-semibold text-gray-700">💰 Cost ($)</th>
+                        <th class="px-6 py-3 text-left font-semibold text-gray-700">Provider Details</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-200">
+                    {% for stat in journalist_stats %}
+                    <tr class="hover:bg-gray-50 transition">
+                        <td class="px-6 py-4 font-medium text-gray-800">{{ stat.name }}</td>
+                        <td class="px-6 py-4 text-gray-700">{{ stat.ai_provider }}</td>
+                        <td class="px-6 py-4 text-center">
+                            <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800">
+                                {{ stat.subscribers }}
+                            </span>
+                        </td>
+                        <td class="px-6 py-4 text-center">
+                            <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800">
+                                {{ stat.summaries }}
+                            </span>
+                        </td>
+                        <td class="px-6 py-4 text-center">
+                            <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-orange-100 text-orange-800">
+                                {{ stat.audio_summaries }}
+                            </span>
+                        </td>
+                        <td class="px-6 py-4 text-center">
+                            <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-indigo-100 text-indigo-800">
+                                {{ "{:,.0f}".format(stat.total_tokens) }}
+                            </span>
+                        </td>
+                        <td class="px-6 py-4 text-center font-semibold text-red-600">
+                            ${{ "%.4f" | format(stat.total_cost) }}
+                        </td>
+                        <td class="px-6 py-4 text-sm">
+                            {% if stat.provider_costs %}
+                                <div class="space-y-1">
+                                    {% for provider, costs in stat.provider_costs.items() %}
+                                        <div class="text-gray-600">
+                                            <span class="font-medium">{{ provider | upper }}</span>: {{ "{:,.0f}".format(costs.tokens) }} tokens = ${{ "%.4f" | format(costs.cost) }}
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                            {% else %}
+                                <span class="text-gray-400">No usage</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="8" class="px-6 py-8 text-center text-gray-500">{{ _('no_data') | default('No bots available') }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Top Subscribers -->
+<div class="mb-8">
+    <h2 class="text-xl font-semibold text-gray-800 mb-4">{{ _('top_subscribers') | default('Top Subscribers') }}</h2>
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="w-full text-sm">
+                <thead class="bg-gray-50 border-b border-gray-200">
+                    <tr>
+                        <th class="px-6 py-3 text-left font-semibold text-gray-700">{{ _('username') }}</th>
+                        <th class="px-6 py-3 text-left font-semibold text-gray-700">{{ _('bot') | default('Bot') }}</th>
+                        <th class="px-6 py-3 text-left font-semibold text-gray-700">{{ _('plan') }}</th>
+                        <th class="px-6 py-3 text-center font-semibold text-gray-700">💬 {{ _('messages') }}</th>
+                        <th class="px-6 py-3 text-center font-semibold text-gray-700">{{ _('approved') | capitalize }}</th>
+                        <th class="px-6 py-3 text-left font-semibold text-gray-700">{{ _('joined') | capitalize }}</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-200">
+                    {% for stat in subscriber_stats %}
+                    <tr class="hover:bg-gray-50 transition">
+                        <td class="px-6 py-4 font-medium text-gray-800">{{ stat.username }}</td>
+                        <td class="px-6 py-4 text-gray-700">{{ stat.journalist }}</td>
+                        <td class="px-6 py-4">
+                            <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-cyan-100 text-cyan-800">
+                                {{ stat.plan }}
+                            </span>
+                        </td>
+                        <td class="px-6 py-4 text-center">
+                            <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-pink-100 text-pink-800">
+                                {{ stat.messages }}
+                            </span>
+                        </td>
+                        <td class="px-6 py-4 text-center">
+                            {% if stat.approved %}
+                                <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800">
+                                    <i class="fas fa-check-circle mr-1"></i>{{ _('yes') | default('Yes') }}
+                                </span>
+                            {% else %}
+                                <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-gray-100 text-gray-800">
+                                    <i class="fas fa-clock mr-1"></i>{{ _('pending') | default('Pending') }}
+                                </span>
+                            {% endif %}
+                        </td>
+                        <td class="px-6 py-4 text-gray-700">{{ format_datetime(stat.joined, 'short') }}</td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="6" class="px-6 py-8 text-center text-gray-500">{{ _('no_data') | default('No subscribers available') }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

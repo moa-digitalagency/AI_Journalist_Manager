@@ -1,6 +1,6 @@
 from flask import Blueprint, render_template
 from security.auth import admin_required
-from models import Journalist, Subscriber, Article, DailySummary, User, ActivityLog
+from models import Journalist, Subscriber, Article, DailySummary, User, ActivityLog, TokenUsage
 from datetime import datetime, timedelta
 from sqlalchemy import func
 
@@ -57,15 +57,37 @@ def statistics():
     audio_summaries = DailySummary.query.filter(DailySummary.audio_url.isnot(None)).count()
     total_sent = DailySummary.query.filter(DailySummary.sent_at.isnot(None)).count()
     
-    # Per-journalist stats
+    # Per-journalist stats with token costs
     journalists = Journalist.query.all()
     journalist_stats = []
+    total_cost_by_provider = {}
+    
     for j in journalists:
         subs = Subscriber.query.filter_by(journalist_id=j.id).count()
         approved_subs = Subscriber.query.filter_by(journalist_id=j.id, is_approved=True).count()
         summaries = DailySummary.query.filter_by(journalist_id=j.id).count()
         audio = DailySummary.query.filter_by(journalist_id=j.id).filter(DailySummary.audio_url.isnot(None)).count()
         sent = sum([s.sent_count for s in DailySummary.query.filter_by(journalist_id=j.id).all()])
+        
+        # Token usage by provider
+        token_usages = TokenUsage.query.filter_by(journalist_id=j.id).all()
+        provider_costs = {}
+        total_tokens = 0
+        total_cost = 0.0
+        
+        for token_use in token_usages:
+            provider = token_use.provider
+            if provider not in provider_costs:
+                provider_costs[provider] = {'tokens': 0, 'cost': 0.0}
+            provider_costs[provider]['tokens'] += token_use.total_tokens
+            provider_costs[provider]['cost'] += token_use.estimated_cost
+            total_tokens += token_use.total_tokens
+            total_cost += token_use.estimated_cost
+            
+            if provider not in total_cost_by_provider:
+                total_cost_by_provider[provider] = 0.0
+            total_cost_by_provider[provider] += token_use.estimated_cost
+        
         journalist_stats.append({
             'name': j.name,
             'ai_provider': j.ai_provider or 'N/A',
@@ -73,7 +95,10 @@ def statistics():
             'approved_subscribers': approved_subs,
             'summaries': summaries,
             'audio_summaries': audio,
-            'messages_sent': sent
+            'messages_sent': sent,
+            'total_tokens': total_tokens,
+            'total_cost': round(total_cost, 4),
+            'provider_costs': provider_costs
         })
     
     # Per-subscriber stats (top subscribers)
@@ -90,7 +115,7 @@ def statistics():
             'joined': s.created_at
         })
     
-    return render_template('admin/statistics.html',
+    return render_template('admin/statistics_tokens.html',
                          global_stats={
                              'total_journalists': total_journalists,
                              'active_bots': active_bots,
@@ -102,4 +127,5 @@ def statistics():
                              'total_sent': total_sent
                          },
                          journalist_stats=journalist_stats,
-                         subscriber_stats=subscriber_stats)
+                         subscriber_stats=subscriber_stats,
+                         total_cost_by_provider=total_cost_by_provider)

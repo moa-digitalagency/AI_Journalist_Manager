@@ -11,3 +11,4 @@ from models.subscription_plan import SubscriptionPlan
 from models.daily_summary import DailySummary
 from models.activity_log import ActivityLog
 from models.settings import Settings
+from models.token_usage import TokenUsage
