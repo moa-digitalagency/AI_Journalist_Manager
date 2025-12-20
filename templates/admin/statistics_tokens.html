@@ -1,19 +1,19 @@
 {% extends "admin/base.html" %}
 
-{% block title %}{{ _('statistics') | default('Statistics') }}{% endblock %}
-{% block header %}{{ _('statistics') | default('Statistics') }}{% endblock %}
-{% block subheader %}{{ _('overview') }} - {{ _('bots') | default('Bots') }}, {{ _('subscribers') | default('Subscribers') }}, Token Usage & Costs{% endblock %}
+{% block title %}{{ _('statistics') }}{% endblock %}
+{% block header %}{{ _('statistics') }}{% endblock %}
+{% block subheader %}{{ _('overview') }} - {{ _('journalists') }}, {{ _('subscribers') }}, {{ _('tokens') }} & {{ _('cost') }}{% endblock %}
 
 {% block content %}
 <!-- Global Statistics -->
 <div class="mb-8">
-    <h2 class="text-xl font-semibold text-gray-800 mb-4">{{ _('global_stats') | default('Global Statistics') }}</h2>
+    <h2 class="text-xl font-semibold text-gray-800 mb-4">{{ _('global_stats') }}</h2>
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <!-- Bots -->
         <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
             <div class="flex items-center justify-between">
                 <div>
-                    <p class="text-sm text-gray-500">{{ _('total_bots') | default('Total Bots') }}</p>
+                    <p class="text-sm text-gray-500">{{ _('total_bots') }}</p>
                     <p class="text-3xl font-bold text-gray-800 mt-1">{{ global_stats.total_journalists }}</p>
                     <p class="text-xs text-green-600 mt-2"><i class="fas fa-check-circle mr-1"></i>{{ global_stats.active_bots }} {{ _('active') | lower }}</p>
                 </div>
@@ -27,7 +27,7 @@
         <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
             <div class="flex items-center justify-between">
                 <div>
-                    <p class="text-sm text-gray-500">{{ _('total_subscribers') | default('Total Subscribers') }}</p>
+                    <p class="text-sm text-gray-500">{{ _('total_subscribers') }}</p>
                     <p class="text-3xl font-bold text-gray-800 mt-1">{{ global_stats.total_subscribers }}</p>
                     <p class="text-xs text-green-600 mt-2"><i class="fas fa-check-circle mr-1"></i>{{ global_stats.approved_subscribers }} {{ _('approved') | lower }}</p>
                 </div>
@@ -41,7 +41,7 @@
         <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
             <div class="flex items-center justify-between">
                 <div>
-                    <p class="text-sm text-gray-500">{{ _('text_summaries') | default('Text Summaries') }}</p>
+                    <p class="text-sm text-gray-500">{{ _('text_summaries') }}</p>
                     <p class="text-3xl font-bold text-gray-800 mt-1">{{ global_stats.text_summaries }}</p>
                     <p class="text-xs text-blue-600 mt-2"><i class="fas fa-file-alt mr-1"></i>{{ global_stats.total_summaries }} {{ _('total') | lower }}</p>
                 </div>
@@ -55,7 +55,7 @@
         <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
             <div class="flex items-center justify-between">
                 <div>
-                    <p class="text-sm text-gray-500">{{ _('audio_summaries') | default('Audio Summaries') }}</p>
+                    <p class="text-sm text-gray-500">{{ _('audio_summaries') }}</p>
                     <p class="text-3xl font-bold text-gray-800 mt-1">{{ global_stats.audio_summaries }}</p>
                     <p class="text-xs text-purple-600 mt-2"><i class="fas fa-volume-up mr-1"></i>{{ global_stats.total_sent }} {{ _('sent') | lower }}</p>
                 </div>
@@ -67,22 +67,22 @@
     </div>
 </div>
 
-<!-- Journalist Stats with Token Costs -->
+<!-- Journalist Stats with Detailed Token Costs by Model -->
 <div class="mb-8">
-    <h2 class="text-xl font-semibold text-gray-800 mb-4">🤖 {{ _('bots') | default('Bots') }} - Token Usage & Costs</h2>
+    <h2 class="text-xl font-semibold text-gray-800 mb-4">🤖 {{ _('journalists') }} - {{ _('tokens') }} & {{ _('cost') }}</h2>
     <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
         <div class="overflow-x-auto">
             <table class="w-full text-sm">
                 <thead class="bg-gray-50 border-b border-gray-200">
                     <tr>
                         <th class="px-6 py-3 text-left font-semibold text-gray-700">{{ _('name') }}</th>
-                        <th class="px-6 py-3 text-left font-semibold text-gray-700">AI Provider</th>
-                        <th class="px-6 py-3 text-center font-semibold text-gray-700">👥 Subs</th>
-                        <th class="px-6 py-3 text-center font-semibold text-gray-700">📝 Summaries</th>
-                        <th class="px-6 py-3 text-center font-semibold text-gray-700">🎙️ Audio</th>
-                        <th class="px-6 py-3 text-center font-semibold text-gray-700">🔢 Tokens</th>
-                        <th class="px-6 py-3 text-center font-semibold text-gray-700">💰 Cost ($)</th>
-                        <th class="px-6 py-3 text-left font-semibold text-gray-700">Provider Details</th>
+                        <th class="px-6 py-3 text-left font-semibold text-gray-700">{{ _('ai_provider') }}</th>
+                        <th class="px-6 py-3 text-center font-semibold text-gray-700">👥 {{ _('subscribers') }}</th>
+                        <th class="px-6 py-3 text-center font-semibold text-gray-700">📝 {{ _('summaries') }}</th>
+                        <th class="px-6 py-3 text-center font-semibold text-gray-700">🎙️ {{ _('audio') }}</th>
+                        <th class="px-6 py-3 text-center font-semibold text-gray-700">🔢 {{ _('tokens') }}</th>
+                        <th class="px-6 py-3 text-center font-semibold text-gray-700">💰 {{ _('cost') }}</th>
+                        <th class="px-6 py-3 text-left font-semibold text-gray-700">{{ _('cost_breakdown') }}</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-200">
@@ -113,23 +113,34 @@
                         <td class="px-6 py-4 text-center font-semibold text-red-600">
                             ${{ "%.4f" | format(stat.total_cost) }}
                         </td>
-                        <td class="px-6 py-4 text-sm">
-                            {% if stat.provider_costs %}
-                                <div class="space-y-1">
-                                    {% for provider, costs in stat.provider_costs.items() %}
-                                        <div class="text-gray-600">
-                                            <span class="font-medium">{{ provider | upper }}</span>: {{ "{:,.0f}".format(costs.tokens) }} tokens = ${{ "%.4f" | format(costs.cost) }}
+                        <td class="px-6 py-4 text-xs">
+                            {% if stat.provider_model_costs %}
+                                <div class="space-y-2">
+                                    {% for provider, models in stat.provider_model_costs.items() %}
+                                        <div class="border-l-2 border-gray-300 pl-2">
+                                            <div class="font-semibold text-gray-700 mb-1">{{ provider | upper }}</div>
+                                            {% for model, costs in models.items() %}
+                                                <div class="text-gray-600 text-xs mb-1">
+                                                    <div class="font-medium">{{ model }}</div>
+                                                    {% if costs.text_tokens > 0 %}
+                                                        <div class="ml-2">📄 {{ _('text') }}: {{ "{:,.0f}".format(costs.text_tokens) }} tk = ${{ "%.4f" | format(costs.text_cost) }}</div>
+                                                    {% endif %}
+                                                    {% if costs.audio_tokens > 0 %}
+                                                        <div class="ml-2">🔊 {{ _('audio') }}: {{ "{:,.0f}".format(costs.audio_tokens) }} tk = ${{ "%.4f" | format(costs.audio_cost) }}</div>
+                                                    {% endif %}
+                                                </div>
+                                            {% endfor %}
                                         </div>
                                     {% endfor %}
                                 </div>
                             {% else %}
-                                <span class="text-gray-400">No usage</span>
+                                <span class="text-gray-400">{{ _('no_usage') }}</span>
                             {% endif %}
                         </td>
                     </tr>
                     {% else %}
                     <tr>
-                        <td colspan="8" class="px-6 py-8 text-center text-gray-500">{{ _('no_data') | default('No bots available') }}</td>
+                        <td colspan="8" class="px-6 py-8 text-center text-gray-500">{{ _('no_data') }}</td>
                     </tr>
                     {% endfor %}
                 </tbody>
@@ -140,14 +151,14 @@
 
 <!-- Top Subscribers -->
 <div class="mb-8">
-    <h2 class="text-xl font-semibold text-gray-800 mb-4">{{ _('top_subscribers') | default('Top Subscribers') }}</h2>
+    <h2 class="text-xl font-semibold text-gray-800 mb-4">{{ _('top_subscribers') }}</h2>
     <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
         <div class="overflow-x-auto">
             <table class="w-full text-sm">
                 <thead class="bg-gray-50 border-b border-gray-200">
                     <tr>
                         <th class="px-6 py-3 text-left font-semibold text-gray-700">{{ _('username') }}</th>
-                        <th class="px-6 py-3 text-left font-semibold text-gray-700">{{ _('bot') | default('Bot') }}</th>
+                        <th class="px-6 py-3 text-left font-semibold text-gray-700">{{ _('bot') }}</th>
                         <th class="px-6 py-3 text-left font-semibold text-gray-700">{{ _('plan') }}</th>
                         <th class="px-6 py-3 text-center font-semibold text-gray-700">💬 {{ _('messages') }}</th>
                         <th class="px-6 py-3 text-center font-semibold text-gray-700">{{ _('approved') | capitalize }}</th>
@@ -172,11 +183,11 @@
                         <td class="px-6 py-4 text-center">
                             {% if stat.approved %}
                                 <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800">
-                                    <i class="fas fa-check-circle mr-1"></i>{{ _('yes') | default('Yes') }}
+                                    <i class="fas fa-check-circle mr-1"></i>{{ _('yes') }}
                                 </span>
                             {% else %}
                                 <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-gray-100 text-gray-800">
-                                    <i class="fas fa-clock mr-1"></i>{{ _('pending') | default('Pending') }}
+                                    <i class="fas fa-clock mr-1"></i>{{ _('pending') }}
                                 </span>
                             {% endif %}
                         </td>
@@ -184,7 +195,7 @@
                     </tr>
                     {% else %}
                     <tr>
-                        <td colspan="6" class="px-6 py-8 text-center text-gray-500">{{ _('no_data') | default('No subscribers available') }}</td>
+                        <td colspan="6" class="px-6 py-8 text-center text-gray-500">{{ _('no_data') }}</td>
                     </tr>
                     {% endfor %}
                 </tbody>

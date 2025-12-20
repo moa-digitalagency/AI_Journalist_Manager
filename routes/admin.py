@@ -69,18 +69,38 @@ def statistics():
         audio = DailySummary.query.filter_by(journalist_id=j.id).filter(DailySummary.audio_url.isnot(None)).count()
         sent = sum([s.sent_count for s in DailySummary.query.filter_by(journalist_id=j.id).all()])
         
-        # Token usage by provider
+        # Token usage by provider and model, separated by text/audio
         token_usages = TokenUsage.query.filter_by(journalist_id=j.id).all()
-        provider_costs = {}
+        provider_model_costs = {}
         total_tokens = 0
         total_cost = 0.0
         
         for token_use in token_usages:
             provider = token_use.provider
-            if provider not in provider_costs:
-                provider_costs[provider] = {'tokens': 0, 'cost': 0.0}
-            provider_costs[provider]['tokens'] += token_use.total_tokens
-            provider_costs[provider]['cost'] += token_use.estimated_cost
+            model = token_use.model
+            usage_type = token_use.usage_type  # 'summary', 'question', 'audio', etc.
+            
+            if provider not in provider_model_costs:
+                provider_model_costs[provider] = {}
+            if model not in provider_model_costs[provider]:
+                provider_model_costs[provider][model] = {
+                    'text_tokens': 0, 'text_cost': 0.0,
+                    'audio_tokens': 0, 'audio_cost': 0.0,
+                    'total_tokens': 0, 'total_cost': 0.0
+                }
+            
+            # Categorize as text or audio
+            is_audio = 'audio' in usage_type.lower()
+            if is_audio:
+                provider_model_costs[provider][model]['audio_tokens'] += token_use.total_tokens
+                provider_model_costs[provider][model]['audio_cost'] += token_use.estimated_cost
+            else:
+                provider_model_costs[provider][model]['text_tokens'] += token_use.total_tokens
+                provider_model_costs[provider][model]['text_cost'] += token_use.estimated_cost
+            
+            provider_model_costs[provider][model]['total_tokens'] += token_use.total_tokens
+            provider_model_costs[provider][model]['total_cost'] += token_use.estimated_cost
+            
             total_tokens += token_use.total_tokens
             total_cost += token_use.estimated_cost
             
@@ -98,7 +118,7 @@ def statistics():
             'messages_sent': sent,
             'total_tokens': total_tokens,
             'total_cost': round(total_cost, 4),
-            'provider_costs': provider_costs
+            'provider_model_costs': provider_model_costs
         })
     
     # Per-subscriber stats (top subscribers)
