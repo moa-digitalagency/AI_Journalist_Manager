@@ -57,7 +57,7 @@ def statistics():
     audio_summaries = DailySummary.query.filter(DailySummary.audio_url.isnot(None)).count()
     total_sent = DailySummary.query.filter(DailySummary.sent_at.isnot(None)).count()
     
-    # Per-journalist stats with token costs
+    # Per-journalist stats with separate rows for each model/usage combination
     journalists = Journalist.query.all()
     journalist_stats = []
     total_cost_by_provider = {}
@@ -71,55 +71,64 @@ def statistics():
         
         # Token usage by provider and model, separated by text/audio
         token_usages = TokenUsage.query.filter_by(journalist_id=j.id).all()
-        provider_model_costs = {}
-        total_tokens = 0
-        total_cost = 0.0
+        model_usage_breakdown = {}  # {provider: {model: {usage_type: data}}}
         
         for token_use in token_usages:
             provider = token_use.provider
             model = token_use.model
             usage_type = token_use.usage_type  # 'summary', 'question', 'audio', etc.
+            is_audio = 'audio' in usage_type.lower()
             
-            if provider not in provider_model_costs:
-                provider_model_costs[provider] = {}
-            if model not in provider_model_costs[provider]:
-                provider_model_costs[provider][model] = {
-                    'text_tokens': 0, 'text_cost': 0.0,
-                    'audio_tokens': 0, 'audio_cost': 0.0,
-                    'total_tokens': 0, 'total_cost': 0.0
+            if provider not in model_usage_breakdown:
+                model_usage_breakdown[provider] = {}
+            if model not in model_usage_breakdown[provider]:
+                model_usage_breakdown[provider][model] = {
+                    'text': {'tokens': 0, 'cost': 0.0},
+                    'audio': {'tokens': 0, 'cost': 0.0}
                 }
             
-            # Categorize as text or audio
-            is_audio = 'audio' in usage_type.lower()
-            if is_audio:
-                provider_model_costs[provider][model]['audio_tokens'] += token_use.total_tokens
-                provider_model_costs[provider][model]['audio_cost'] += token_use.estimated_cost
-            else:
-                provider_model_costs[provider][model]['text_tokens'] += token_use.total_tokens
-                provider_model_costs[provider][model]['text_cost'] += token_use.estimated_cost
-            
-            provider_model_costs[provider][model]['total_tokens'] += token_use.total_tokens
-            provider_model_costs[provider][model]['total_cost'] += token_use.estimated_cost
-            
-            total_tokens += token_use.total_tokens
-            total_cost += token_use.estimated_cost
+            key = 'audio' if is_audio else 'text'
+            model_usage_breakdown[provider][model][key]['tokens'] += token_use.total_tokens
+            model_usage_breakdown[provider][model][key]['cost'] += token_use.estimated_cost
             
             if provider not in total_cost_by_provider:
                 total_cost_by_provider[provider] = 0.0
             total_cost_by_provider[provider] += token_use.estimated_cost
         
-        journalist_stats.append({
-            'name': j.name,
-            'ai_provider': j.ai_provider or 'N/A',
-            'subscribers': subs,
-            'approved_subscribers': approved_subs,
-            'summaries': summaries,
-            'audio_summaries': audio,
-            'messages_sent': sent,
-            'total_tokens': total_tokens,
-            'total_cost': round(total_cost, 4),
-            'provider_model_costs': provider_model_costs
-        })
+        # Create separate rows for each provider + model + usage type combination
+        for provider, models in model_usage_breakdown.items():
+            for model, usage_types in models.items():
+                # Add row for text usage if exists
+                if usage_types['text']['tokens'] > 0:
+                    journalist_stats.append({
+                        'journalist_id': j.id,
+                        'name': j.name,
+                        'ai_provider': provider,
+                        'model': model,
+                        'usage_type': 'text',
+                        'subscribers': subs,
+                        'approved_subscribers': approved_subs,
+                        'summaries': summaries,
+                        'audio_summaries': audio,
+                        'tokens': usage_types['text']['tokens'],
+                        'cost': round(usage_types['text']['cost'], 4)
+                    })
+                
+                # Add row for audio usage if exists
+                if usage_types['audio']['tokens'] > 0:
+                    journalist_stats.append({
+                        'journalist_id': j.id,
+                        'name': j.name,
+                        'ai_provider': provider,
+                        'model': model,
+                        'usage_type': 'audio',
+                        'subscribers': subs,
+                        'approved_subscribers': approved_subs,
+                        'summaries': summaries,
+                        'audio_summaries': audio,
+                        'tokens': usage_types['audio']['tokens'],
+                        'cost': round(usage_types['audio']['cost'], 4)
+                    })
     
     # Per-subscriber stats (top subscribers)
     top_subscribers = Subscriber.query.order_by(Subscriber.messages_count.desc()).limit(10).all()
