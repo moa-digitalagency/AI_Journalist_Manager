@@ -48,6 +48,13 @@ def create():
                 photo_url = f"/static/uploads/journalists/{filename}"
                 logger.info(f"Photo uploaded: {photo_url}")
         
+        # Check if a photo URL was provided from the form (fetched via API)
+        if not photo_url:
+            photo_url = request.form.get('photo_url')
+            if photo_url:
+                logger.info(f"Using photo URL from form: {photo_url}")
+        
+        # If still no photo, try to auto-fetch from Telegram
         if not photo_url:
             logger.info(f"Attempting to fetch bot photo for token")
             photo_url = TelegramService.get_bot_photo_url(telegram_token)
@@ -135,11 +142,17 @@ def edit(id):
                 photo.save(os.path.join('static/uploads/journalists', filename))
                 journalist.photo_url = f"/static/uploads/journalists/{filename}"
                 logger.info(f"Updated journalist photo: {journalist.photo_url}")
-        elif journalist.telegram_token != old_token:
-            logger.info(f"Telegram token changed, fetching new bot photo")
-            bot_photo = TelegramService.get_bot_photo_url(journalist.telegram_token)
-            if bot_photo:
-                journalist.photo_url = bot_photo
+        else:
+            # Check if a photo URL was provided from the form (fetched via API)
+            new_photo_url = request.form.get('photo_url')
+            if new_photo_url and new_photo_url != journalist.photo_url:
+                journalist.photo_url = new_photo_url
+                logger.info(f"Updated journalist photo URL from form: {new_photo_url}")
+            elif journalist.telegram_token != old_token:
+                logger.info(f"Telegram token changed, fetching new bot photo")
+                bot_photo = TelegramService.get_bot_photo_url(journalist.telegram_token)
+                if bot_photo:
+                    journalist.photo_url = bot_photo
         
         db.session.commit()
         
