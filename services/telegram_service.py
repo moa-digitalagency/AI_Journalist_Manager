@@ -292,18 +292,22 @@ Posez-moi n'importe quelle question sur l'actualite !"""
                             text=text
                         )
                         
-                        # Send audio if available
-                        if audio_path and os.path.exists(audio_path):
-                            try:
-                                with open(audio_path, 'rb') as f:
-                                    await bot.send_audio(
-                                        chat_id=int(subscriber.telegram_user_id),
-                                        audio=f,
-                                        title="Resume audio"
-                                    )
-                                logger.info(f"Audio sent to {subscriber.telegram_user_id}")
-                            except Exception as audio_error:
-                                logger.error(f"Error sending audio to {subscriber.telegram_user_id}: {audio_error}")
+                        # Send audio if available - remove leading slash for file path
+                        if audio_path:
+                            filepath = audio_path.lstrip('/') if audio_path.startswith('/') else audio_path
+                            if os.path.exists(filepath):
+                                try:
+                                    with open(filepath, 'rb') as f:
+                                        await bot.send_audio(
+                                            chat_id=int(subscriber.telegram_user_id),
+                                            audio=f,
+                                            title="Resume audio"
+                                        )
+                                    logger.info(f"Audio sent to {subscriber.telegram_user_id}")
+                                except Exception as audio_error:
+                                    logger.error(f"Error sending audio to {subscriber.telegram_user_id}: {audio_error}")
+                            else:
+                                logger.warning(f"Audio file not found: {filepath}")
                         
                         sent_count += 1
                     except Exception as e:
