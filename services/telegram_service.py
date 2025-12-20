@@ -53,7 +53,10 @@ class TelegramService:
                     logger.error(f"Error in async bot photo fetch: {e}", exc_info=True)
                     return None
                 finally:
-                    await bot.close()
+                    try:
+                        await bot.close()
+                    except Exception as e:
+                        logger.debug(f"Error closing bot connection (non-critical): {e}")
             
             try:
                 loop = asyncio.new_event_loop()

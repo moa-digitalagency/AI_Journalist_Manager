@@ -79,6 +79,7 @@ class AudioService:
     @classmethod
     def save_audio(cls, audio_data: bytes, filename: str) -> str:
         if not audio_data:
+            logger.warning("No audio data to save")
             return None
         
         audio_dir = "static/audio"
@@ -86,6 +87,7 @@ class AudioService:
         
         filepath = os.path.join(audio_dir, filename)
         with open(filepath, 'wb') as f:
-            f.write(audio_data)
+            bytes_written = f.write(audio_data)
         
-        return filepath
+        logger.info(f"Audio saved: {filepath} ({bytes_written} bytes)")
+        return f"/{filepath}"  # Return with leading slash for web access
