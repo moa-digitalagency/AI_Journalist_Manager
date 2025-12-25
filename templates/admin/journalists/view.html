@@ -21,6 +21,9 @@
     <button onclick="generateSummaryAudio()" class="px-4 py-2 bg-purple-100 text-purple-700 rounded-xl hover:bg-purple-200 transition">
         <i class="fas fa-volume-up mr-2"></i>{% if current_lang == 'fr' %}Générer résumé audio{% else %}Generate audio summary{% endif %}
     </button>
+    <a href="{{ url_for('journalist_stats.journalist_summary', journalist_id=journalist.id) }}" class="px-4 py-2 bg-yellow-100 text-yellow-700 rounded-xl hover:bg-yellow-200 transition">
+        <i class="fas fa-chart-bar mr-2"></i>{% if current_lang == 'fr' %}Statistiques{% else %}Statistics{% endif %}
+    </a>
 </div>
 
 <div class="grid lg:grid-cols-3 gap-6">
