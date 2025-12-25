@@ -97,16 +97,124 @@ def create():
 @journalists_bp.route('/<int:id>')
 @admin_required
 def view(id):
+    from zoneinfo import ZoneInfo
+    from sqlalchemy import func
+    
     journalist = Journalist.query.get_or_404(id)
     sources = Source.query.filter_by(journalist_id=id).all()
     recent_articles = Article.query.filter_by(journalist_id=id).order_by(Article.fetched_at.desc()).limit(20).all()
     recent_summaries = DailySummary.query.filter_by(journalist_id=id).order_by(DailySummary.created_at.desc()).limit(5).all()
     
+    # Get current time in journalist's timezone
+    try:
+        tz = ZoneInfo(journalist.timezone or 'Europe/Paris')
+    except:
+        tz = ZoneInfo('Europe/Paris')
+    
+    now_local = datetime.now(tz)
+    now_utc = datetime.utcnow()
+    
+    # Parse scheduled times
+    fetch_hour, fetch_minute = map(int, journalist.fetch_time.split(':'))
+    summary_hour, summary_minute = map(int, journalist.summary_time.split(':'))
+    send_hour, send_minute = map(int, journalist.send_time.split(':'))
+    
+    # Calculate next scheduled times
+    def get_next_time(hour, minute, reference_time):
+        next_time = reference_time.replace(hour=hour, minute=minute, second=0, microsecond=0)
+        if next_time <= reference_time:
+            next_time += timedelta(days=1)
+        return next_time
+    
+    next_fetch = get_next_time(fetch_hour, fetch_minute, now_local)
+    next_summary = get_next_time(summary_hour, summary_minute, now_local)
+    next_send = get_next_time(send_hour, send_minute, now_local)
+    
+    # Get last events
+    last_summary = DailySummary.query.filter_by(journalist_id=id).order_by(
+        DailySummary.created_at.desc()
+    ).first()
+    
+    last_summary_created = last_summary.created_at if last_summary else None
+    last_summary_sent = last_summary.sent_at if last_summary else None
+    
+    # Get last fetch time
+    last_fetch_source = Source.query.filter_by(journalist_id=id).order_by(
+        Source.last_fetched_at.desc()
+    ).first()
+    last_fetch_time = last_fetch_source.last_fetched_at if last_fetch_source else None
+    
+    # Get today's statistics
+    today = datetime.utcnow().date()
+    today_start = datetime.combine(today, datetime.min.time())
+    today_end = datetime.combine(today, datetime.max.time())
+    
+    # Articles fetched today by source
+    source_stats = []
+    week_ago = datetime.utcnow() - timedelta(days=7)
+    
+    for source in sources:
+        articles_today = Article.query.filter_by(
+            source_id=source.id
+        ).filter(Article.fetched_at >= today_start).count()
+        
+        articles_week = Article.query.filter_by(
+            source_id=source.id
+        ).filter(Article.fetched_at >= week_ago).count()
+        
+        source_stats.append({
+            'id': source.id,
+            'url': source.url,
+            'name': source.name,
+            'source_type': source.source_type,
+            'is_active': source.is_active,
+            'last_fetched_at': source.last_fetched_at,
+            'articles_today': articles_today,
+            'articles_week': articles_week,
+            'fetch_count': source.fetch_count,
+            'error_count': source.error_count,
+            'last_error': source.last_error
+        })
+    
+    total_articles_today = sum([s['articles_today'] for s in source_stats])
+    total_articles_week = Article.query.filter_by(
+        journalist_id=id
+    ).filter(Article.fetched_at >= week_ago).count()
+    
+    summaries_today = DailySummary.query.filter_by(journalist_id=id).filter(
+        DailySummary.created_at >= today_start
+    ).count()
+    
+    summaries_sent_today = DailySummary.query.filter_by(journalist_id=id).filter(
+        DailySummary.sent_at >= today_start,
+        DailySummary.sent_at.isnot(None)
+    ).count()
+    
+    stats_data = {
+        'now_local': now_local,
+        'next_fetch': next_fetch,
+        'next_summary': next_summary,
+        'next_send': next_send,
+        'last_fetch_time': last_fetch_time,
+        'last_summary_created': last_summary_created,
+        'last_summary_sent': last_summary_sent,
+        'fetch_time': journalist.fetch_time,
+        'summary_time': journalist.summary_time,
+        'send_time': journalist.send_time,
+        'source_stats': source_stats,
+        'total_articles_today': total_articles_today,
+        'total_articles_week': total_articles_week,
+        'summaries_today': summaries_today,
+        'summaries_sent_today': summaries_sent_today,
+        'timezone': journalist.timezone
+    }
+    
     return render_template('admin/journalists/view.html', 
                          journalist=journalist,
                          sources=sources,
                          recent_articles=recent_articles,
-                         recent_summaries=recent_summaries)
+                         recent_summaries=recent_summaries,
+                         stats=stats_data)
 
 @journalists_bp.route('/<int:id>/edit', methods=['GET', 'POST'])
 @admin_required
