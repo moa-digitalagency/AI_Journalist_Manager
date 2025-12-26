@@ -21,6 +21,7 @@
     {% endif %}
     
     <form action="{{ url_for('journalists.edit', id=journalist.id) if journalist else url_for('journalists.create') }}" method="POST" enctype="multipart/form-data" class="space-y-6">
+        <!-- GENERAL INFORMATION SECTION -->
         <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
             <h3 class="font-semibold text-gray-800 mb-4">{% if current_lang == 'fr' %}Informations générales{% else %}General Information{% endif %}</h3>
             
@@ -39,7 +40,7 @@
                     <div class="flex flex-col gap-3">
                         <div id="photoPreview">
                             {% if journalist and journalist.photo_url %}
-                            <div class="w-24 h-24 rounded-lg overflow-hidden border-2 border-gray-200">
+                            <div class="w-24 h-24 rounded-lg overflow-hidden border-2 border-gray-200 shadow-sm">
                                 <img id="photoImg" src="{{ journalist.photo_url }}" alt="{{ journalist.name }}" class="w-full h-full object-cover">
                             </div>
                             {% endif %}
@@ -48,10 +49,14 @@
                         <input type="file" name="photo" accept="image/*" 
                                class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500 cursor-pointer" 
                                placeholder="{% if current_lang == 'fr' %}Télécharger une photo...{% else %}Upload a photo...{% endif %}">
-                        <button type="button" onclick="fetchBotPhoto()" 
-                                class="w-full px-4 py-2 bg-blue-50 text-blue-600 border border-blue-200 rounded-xl hover:bg-blue-100 transition text-sm font-medium">
-                            <i class="fas fa-download mr-2"></i>{% if current_lang == 'fr' %}Récupérer la photo du bot{% else %}Fetch Bot Photo{% endif %}
+                        
+                        <!-- Fetch from Telegram - only visible and enabled when Telegram is enabled + token is set -->
+                        <button type="button" id="fetchPhotoBtn" onclick="fetchBotPhoto()" 
+                                class="w-full px-4 py-2 bg-blue-50 text-blue-600 border border-blue-200 rounded-xl hover:bg-blue-100 transition text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                                disabled>
+                            <i class="fas fa-download mr-2"></i>{% if current_lang == 'fr' %}Récupérer depuis Telegram{% else %}Fetch from Telegram{% endif %}
                         </button>
+                        
                         <small class="text-gray-500">{% if current_lang == 'fr' %}Formats acceptés: PNG, JPG, GIF. Taille max: 10MB{% else %}Supported: PNG, JPG, GIF. Max: 10MB{% endif %}</small>
                         <div id="photoStatus" class="hidden p-2 rounded-lg text-sm"></div>
                     </div>
@@ -100,76 +105,82 @@
             </div>
         </div>
 
-        <!-- DELIVERY CHANNELS SECTION -->
-        <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
-            <h3 class="font-semibold text-gray-800 mb-4">{% if current_lang == 'fr' %}Canaux de livraison{% else %}Delivery Channels{% endif %}</h3>
-            <p class="text-sm text-gray-600 mb-4">{% if current_lang == 'fr' %}Sélectionnez et configurez les canaux pour envoyer les résumés{% else %}Select and configure channels to deliver summaries{% endif %}</p>
+        <!-- DELIVERY CHANNELS SECTION - MOVED UP -->
+        <div class="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-2xl p-6 shadow-sm border border-blue-200">
+            <div class="flex items-center gap-2 mb-1">
+                <i class="fas fa-share-alt text-blue-600"></i>
+                <h3 class="font-semibold text-gray-800">{% if current_lang == 'fr' %}Canaux de livraison{% else %}Delivery Channels{% endif %}</h3>
+            </div>
+            <p class="text-sm text-gray-600 mb-6 ml-6">{% if current_lang == 'fr' %}Sélectionnez et configurez les canaux pour envoyer les résumés{% else %}Select and configure channels to deliver summaries{% endif %}</p>
 
             <!-- Telegram Channel -->
-            <div class="border border-gray-200 rounded-xl p-4 mb-4">
+            <div class="bg-white border border-blue-100 rounded-xl p-5 mb-4 hover:shadow-md transition">
                 <div class="flex items-center gap-3 mb-4">
-                    <input type="checkbox" name="enable_telegram" id="enable_telegram" class="w-4 h-4" 
+                    <input type="checkbox" name="enable_telegram" id="enable_telegram" class="w-4 h-4 text-blue-600 rounded focus:ring-blue-500" 
                            {% set tg_channel = journalist.delivery_channels|selectattr('channel_type', 'equalto', 'telegram')|first if journalist else none %}
                            {% if tg_channel %}checked{% endif %}>
-                    <label for="enable_telegram" class="font-medium text-gray-700">📱 Telegram (Bot Token)</label>
+                    <label for="enable_telegram" class="font-medium text-gray-700 cursor-pointer">📱 Telegram</label>
+                    <span class="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded-full ml-auto">{% if current_lang == 'fr' %}Bot Token{% else %}Bot Token{% endif %}</span>
                 </div>
                 <div class="ml-7 space-y-3 {% if not tg_channel %}hidden{% endif %}" id="telegram_fields">
-                    <input type="text" name="telegram_token" placeholder="123456:ABC-DEF..." 
+                    <input type="text" name="telegram_token" id="telegramTokenInput" placeholder="123456:ABC-DEF..." 
                            value="{% if tg_channel %}{{ tg_channel.telegram_token }}{% endif %}"
                            class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500">
-                    <small class="text-gray-600">{% if current_lang == 'fr' %}Token du bot Telegram - Tous les utilisateurs peuvent envoyer des messages au bot{% else %}Telegram bot token - All users can message the bot{% endif %}</small>
+                    <small class="text-gray-600 block">{% if current_lang == 'fr' %}Token du bot Telegram - Tous les utilisateurs peuvent envoyer des messages au bot{% else %}Telegram bot token - All users can message the bot{% endif %}</small>
                 </div>
             </div>
 
             <!-- Email Channel -->
-            <div class="border border-gray-200 rounded-xl p-4 mb-4">
+            <div class="bg-white border border-green-100 rounded-xl p-5 mb-4 hover:shadow-md transition">
                 <div class="flex items-center gap-3 mb-4">
-                    <input type="checkbox" name="enable_email" id="enable_email" class="w-4 h-4"
+                    <input type="checkbox" name="enable_email" id="enable_email" class="w-4 h-4 text-green-600 rounded focus:ring-green-500"
                            {% set email_channel = journalist.delivery_channels|selectattr('channel_type', 'equalto', 'email')|first if journalist else none %}
                            {% if email_channel %}checked{% endif %}>
-                    <label for="enable_email" class="font-medium text-gray-700">📧 Email (SMTP)</label>
+                    <label for="enable_email" class="font-medium text-gray-700 cursor-pointer">📧 Email</label>
+                    <span class="text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full ml-auto">SMTP</span>
                 </div>
                 <div class="ml-7 space-y-3 {% if not email_channel %}hidden{% endif %}" id="email_fields">
                     <input type="email" name="email_address" placeholder="recipient@example.com"
                            value="{% if email_channel %}{{ email_channel.email_address }}{% endif %}"
-                           class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500">
+                           class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-green-500">
                     <input type="text" name="smtp_server" placeholder="smtp.gmail.com"
                            value="{% if email_channel %}{{ email_channel.smtp_server }}{% endif %}"
-                           class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500">
+                           class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-green-500">
                     <div class="grid grid-cols-2 gap-3">
                         <input type="number" name="smtp_port" placeholder="587"
                                value="{% if email_channel %}{{ email_channel.smtp_port }}{% else %}587{% endif %}"
-                               class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500">
+                               class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-green-500">
                         <input type="text" name="smtp_username" placeholder="username@gmail.com"
                                value="{% if email_channel %}{{ email_channel.smtp_username }}{% endif %}"
-                               class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500">
+                               class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-green-500">
                     </div>
                     <input type="password" name="smtp_password" placeholder="password"
                            value="{% if email_channel %}{{ email_channel.smtp_password }}{% endif %}"
-                           class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500">
-                    <small class="text-gray-600">{% if current_lang == 'fr' %}Configuration SMTP pour envoyer des résumés par email{% else %}SMTP configuration to send summaries by email{% endif %}</small>
+                           class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-green-500">
+                    <small class="text-gray-600 block">{% if current_lang == 'fr' %}Configuration SMTP pour envoyer des résumés par email{% else %}SMTP configuration to send summaries by email{% endif %}</small>
                 </div>
             </div>
 
             <!-- WhatsApp Channel -->
-            <div class="border border-gray-200 rounded-xl p-4">
+            <div class="bg-white border border-emerald-100 rounded-xl p-5 hover:shadow-md transition">
                 <div class="flex items-center gap-3 mb-4">
-                    <input type="checkbox" name="enable_whatsapp" id="enable_whatsapp" class="w-4 h-4"
+                    <input type="checkbox" name="enable_whatsapp" id="enable_whatsapp" class="w-4 h-4 text-emerald-600 rounded focus:ring-emerald-500"
                            {% set wa_channel = journalist.delivery_channels|selectattr('channel_type', 'equalto', 'whatsapp')|first if journalist else none %}
                            {% if wa_channel %}checked{% endif %}>
-                    <label for="enable_whatsapp" class="font-medium text-gray-700">💬 WhatsApp</label>
+                    <label for="enable_whatsapp" class="font-medium text-gray-700 cursor-pointer">💬 WhatsApp</label>
+                    <span class="text-xs bg-emerald-100 text-emerald-700 px-2 py-1 rounded-full ml-auto">API</span>
                 </div>
                 <div class="ml-7 space-y-3 {% if not wa_channel %}hidden{% endif %}" id="whatsapp_fields">
                     <input type="tel" name="whatsapp_phone_number" placeholder="+1234567890"
                            value="{% if wa_channel %}{{ wa_channel.whatsapp_phone_number }}{% endif %}"
-                           class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500">
+                           class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-emerald-500">
                     <input type="text" name="whatsapp_api_key" placeholder="API Key (e.g., Twilio)"
                            value="{% if wa_channel %}{{ wa_channel.whatsapp_api_key }}{% endif %}"
-                           class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500">
+                           class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-emerald-500">
                     <input type="text" name="whatsapp_account_id" placeholder="Account/SID"
                            value="{% if wa_channel %}{{ wa_channel.whatsapp_account_id }}{% endif %}"
-                           class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500">
-                    <small class="text-gray-600">{% if current_lang == 'fr' %}Numéro WhatsApp unique pour ce journaliste{% else %}Unique WhatsApp number for this journalist{% endif %}</small>
+                           class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-emerald-500">
+                    <small class="text-gray-600 block">{% if current_lang == 'fr' %}Numéro WhatsApp unique pour ce journaliste{% else %}Unique WhatsApp number for this journalist{% endif %}</small>
                 </div>
             </div>
         </div>
@@ -295,20 +306,45 @@
 {% endif %}
 
 <script>
+// Function to update fetch button state based on Telegram configuration
+function updateFetchButtonState() {
+    const telegramCheckbox = document.getElementById('enable_telegram');
+    const telegramTokenInput = document.getElementById('telegramTokenInput');
+    const fetchBtn = document.getElementById('fetchPhotoBtn');
+    
+    const isTelegramEnabled = telegramCheckbox && telegramCheckbox.checked;
+    const hasToken = telegramTokenInput && telegramTokenInput.value.trim() !== '';
+    
+    if (fetchBtn) {
+        fetchBtn.disabled = !(isTelegramEnabled && hasToken);
+    }
+}
+
 // Toggle delivery channel fields
 document.getElementById('enable_telegram')?.addEventListener('change', function() {
     document.getElementById('telegram_fields').classList.toggle('hidden', !this.checked);
+    updateFetchButtonState();
 });
+
+document.getElementById('telegramTokenInput')?.addEventListener('input', function() {
+    updateFetchButtonState();
+});
+
 document.getElementById('enable_email')?.addEventListener('change', function() {
     document.getElementById('email_fields').classList.toggle('hidden', !this.checked);
 });
+
 document.getElementById('enable_whatsapp')?.addEventListener('change', function() {
     document.getElementById('whatsapp_fields').classList.toggle('hidden', !this.checked);
 });
 
+// Initialize fetch button state on page load
+document.addEventListener('DOMContentLoaded', updateFetchButtonState);
+
 async function fetchBotPhoto() {
-    const token = document.querySelector('input[name="telegram_token"]').value;
+    const token = document.getElementById('telegramTokenInput')?.value || '';
     const statusDiv = document.getElementById('photoStatus');
+    const fetchBtn = document.getElementById('fetchPhotoBtn');
     
     if (!token) {
         statusDiv.textContent = '{% if current_lang == "fr" %}Entrez d\'abord un token Telegram{% else %}Enter a Telegram token first{% endif %}';
@@ -318,6 +354,7 @@ async function fetchBotPhoto() {
     
     statusDiv.textContent = '{% if current_lang == "fr" %}Récupération...{% else %}Fetching...{% endif %}';
     statusDiv.className = 'block p-2 rounded-lg text-sm bg-blue-50 border border-blue-200 text-blue-700';
+    fetchBtn.disabled = true;
     
     try {
         const response = await fetch('/api/journalist/fetch-bot-photo', {
