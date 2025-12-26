@@ -194,7 +194,7 @@ class SchedulerService:
         """Send pending summaries respecting each journalist's send time."""
         from app import app
         from models import db, Journalist, DailySummary
-        from services.telegram_service import TelegramService
+        from services.delivery_service import DeliveryService
         
         with app.app_context():
             journalists = Journalist.query.filter_by(is_active=True).all()
@@ -218,18 +218,17 @@ class SchedulerService:
                     if not daily_summary or daily_summary.sent_at:
                         continue
                     
-                    loop = asyncio.new_event_loop()
-                    asyncio.set_event_loop(loop)
-                    sent = loop.run_until_complete(
-                        TelegramService.send_to_subscribers(journalist.id, daily_summary.summary_text, daily_summary.audio_url)
+                    # Send via all configured channels
+                    success = DeliveryService.send_summary_to_channels(
+                        journalist, 
+                        daily_summary.summary_text, 
+                        daily_summary.audio_url
                     )
-                    loop.close()
                     
-                    daily_summary.sent_count = sent
-                    daily_summary.sent_at = datetime.utcnow()
-                    db.session.commit()
-                    
-                    logger.info(f"Summary sent for {journalist.name} to {sent} subscribers")
+                    if success:
+                        daily_summary.sent_at = datetime.utcnow()
+                        db.session.commit()
+                        logger.info(f"Summary sent for {journalist.name} via delivery channels")
                     
                 except Exception as e:
                     logger.error(f"Error sending summary for {journalist.name}: {e}")

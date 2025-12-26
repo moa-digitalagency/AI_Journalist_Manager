@@ -4,6 +4,7 @@ db = SQLAlchemy()
 
 from models.user import User, Role
 from models.journalist import Journalist
+from models.delivery_channel import DeliveryChannel
 from models.source import Source
 from models.article import Article
 from models.subscriber import Subscriber

@@ -105,8 +105,6 @@ class Journalist(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), nullable=False)
     photo_url = db.Column(db.String(500))
-    telegram_token = db.Column(db.String(255), nullable=False, unique=True)
-    telegram_chat_id = db.Column(db.String(50))
     personality = db.Column(db.Text, default="Journaliste professionnel et concis")
     writing_style = db.Column(db.Text, default="Clair, factuel et engageant")
     spelling_style = db.Column(db.String(50), default="standard")
@@ -128,3 +126,4 @@ class Journalist(db.Model):
     articles = db.relationship('Article', backref='journalist', lazy=True, cascade='all, delete-orphan')
     subscribers = db.relationship('Subscriber', backref='journalist', lazy=True, cascade='all, delete-orphan')
     summaries = db.relationship('DailySummary', backref='journalist', lazy=True, cascade='all, delete-orphan')
+    delivery_channels = db.relationship('DeliveryChannel', backref='journalist', lazy=True, cascade='all, delete-orphan')

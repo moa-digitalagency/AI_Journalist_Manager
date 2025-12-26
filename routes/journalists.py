@@ -24,15 +24,12 @@ def index():
 @admin_required
 def create():
     if request.method == 'POST':
+        from models import DeliveryChannel
+        
         name = request.form.get('name')
-        telegram_token = request.form.get('telegram_token')
         
-        if not name or not telegram_token:
-            flash('Nom et token requis', 'error')
-            return redirect(url_for('journalists.create'))
-        
-        if Journalist.query.filter_by(telegram_token=telegram_token).first():
-            flash('Token déjà utilisé', 'error')
+        if not name:
+            flash('Nom requis', 'error')
             return redirect(url_for('journalists.create'))
         
         import logging
@@ -48,24 +45,11 @@ def create():
                 photo_url = f"/static/uploads/journalists/{filename}"
                 logger.info(f"Photo uploaded: {photo_url}")
         
-        # Check if a photo URL was provided from the form (fetched via API)
         if not photo_url:
             photo_url = request.form.get('photo_url')
-            if photo_url:
-                logger.info(f"Using photo URL from form: {photo_url}")
-        
-        # If still no photo, try to auto-fetch from Telegram
-        if not photo_url:
-            logger.info(f"Attempting to fetch bot photo for token")
-            photo_url = TelegramService.get_bot_photo_url(telegram_token)
-            if photo_url:
-                logger.info(f"Bot photo retrieved: {photo_url}")
-            else:
-                logger.warning(f"Could not retrieve bot photo, using default")
         
         journalist = Journalist(
             name=name,
-            telegram_token=telegram_token,
             photo_url=photo_url,
             personality=request.form.get('personality', 'Journaliste professionnel'),
             writing_style=request.form.get('writing_style', 'Clair et engageant'),
@@ -84,12 +68,48 @@ def create():
         db.session.add(journalist)
         db.session.commit()
         
-        # Automatically start Telegram bot if token is provided
-        if journalist.telegram_token:
-            TelegramService.start_bot(journalist.id, journalist.telegram_token)
+        # Handle delivery channels - Telegram
+        if request.form.get('telegram_token'):
+            telegram_channel = DeliveryChannel(
+                journalist_id=journalist.id,
+                channel_type='telegram',
+                telegram_token=request.form.get('telegram_token'),
+                telegram_chat_id=request.form.get('telegram_chat_id'),
+                is_active=True
+            )
+            db.session.add(telegram_channel)
+            TelegramService.start_bot(journalist.id, request.form.get('telegram_token'))
+        
+        # Handle Email
+        if request.form.get('email_address'):
+            email_channel = DeliveryChannel(
+                journalist_id=journalist.id,
+                channel_type='email',
+                email_address=request.form.get('email_address'),
+                smtp_server=request.form.get('smtp_server'),
+                smtp_port=int(request.form.get('smtp_port', 587)),
+                smtp_username=request.form.get('smtp_username'),
+                smtp_password=request.form.get('smtp_password'),
+                is_active=True
+            )
+            db.session.add(email_channel)
+        
+        # Handle WhatsApp
+        if request.form.get('whatsapp_phone_number'):
+            whatsapp_channel = DeliveryChannel(
+                journalist_id=journalist.id,
+                channel_type='whatsapp',
+                whatsapp_phone_number=request.form.get('whatsapp_phone_number'),
+                whatsapp_api_key=request.form.get('whatsapp_api_key'),
+                whatsapp_account_id=request.form.get('whatsapp_account_id'),
+                is_active=True
+            )
+            db.session.add(whatsapp_channel)
+        
+        db.session.commit()
         
         log_activity('create_journalist', 'journalist', journalist.id, f'Created: {name}')
-        flash('Journaliste créé', 'success')
+        flash('Journaliste créé avec canaux de livraison', 'success')
         return redirect(url_for('journalists.view', id=journalist.id))
     
     return render_template('admin/journalists/form.html', journalist=None, timezones=TIMEZONES)
