@@ -141,6 +141,63 @@ Enregistre un nouvel abonne.
 
 ---
 
+## Delivery Service (`services/delivery_service.py`)
+
+Service de distribution des resumes via plusieurs canaux.
+
+### Fonctionnalites
+
+- Envoi via Telegram (bot public)
+- Envoi par Email (SMTP)
+- Envoi WhatsApp (API Twilio)
+- Gestion d'erreurs robuste
+- Logging detaille
+
+### Methodes principales
+
+```python
+def send_via_telegram(channel: DeliveryChannel, summary_text: str, audio_url: str = None) -> bool
+```
+Envoie le resume via bot Telegram public.
+
+```python
+def send_via_email(channel: DeliveryChannel, summary_text: str, audio_url: str = None, journalist_name: str = "Journalist") -> bool
+```
+Envoie le resume par email (HTML + texte brut).
+
+```python
+def send_via_whatsapp(channel: DeliveryChannel, summary_text: str, audio_url: str = None, journalist_name: str = "Journalist") -> bool
+```
+Envoie le resume via WhatsApp (requiert Twilio).
+
+```python
+def send_summary_to_channels(journalist: Journalist, summary_text: str, audio_url: str = None) -> dict
+```
+Envoie le resume a tous les canaux actifs du journaliste.
+
+### Gestion d'erreurs
+
+- Validation des credentials
+- Timeout SMTP configurable (10s)
+- Gestion d'authentification (SMTP)
+- Truncature des messages WhatsApp (1500 chars max)
+- Logging detaille avec emojis pour clarté
+
+### Exemple d'utilisation
+
+```python
+from services.delivery_service import DeliveryService
+journalist = Journalist.query.get(1)
+results = DeliveryService.send_summary_to_channels(
+    journalist, 
+    summary_text="Resume du jour...", 
+    audio_url="https://..."
+)
+# results = {'telegram': True, 'email': True, 'whatsapp': False}
+```
+
+---
+
 ## Integration des services
 
 ### Flux de collecte quotidien

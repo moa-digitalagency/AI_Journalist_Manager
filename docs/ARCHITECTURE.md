@@ -11,6 +11,7 @@
 │   ├── activity_log.py    # Logs d'activite
 │   ├── article.py         # Articles collectes
 │   ├── daily_summary.py   # Resumes quotidiens
+│   ├── delivery_channel.py # Canaux de livraison
 │   ├── journalist.py      # Journalistes IA
 │   ├── settings.py        # Parametres systeme
 │   ├── source.py          # Sources d'information
@@ -36,6 +37,7 @@
 │   ├── __init__.py
 │   ├── ai_service.py      # Integration Gemini
 │   ├── audio_service.py   # Integration Eleven Labs
+│   ├── delivery_service.py # Distribution multi-canal
 │   ├── scheduler_service.py # Planification taches
 │   ├── scraper_service.py # Collecte articles
 │   └── telegram_service.py # Integration Telegram
@@ -63,7 +65,10 @@ Sources (Web/RSS/Twitter)
         ↓
    Base de donnees (daily_summary)
         ↓
-[Telegram Service] ← Envoi aux abonnes
+[Delivery Service] ← Distribution multi-canal
+   ├─ Telegram (bot public)
+   ├─ Email (SMTP)
+   └─ WhatsApp (Twilio)
 ```
 
 ### Interaction utilisateur
@@ -91,6 +96,7 @@ La base de donnees PostgreSQL contient les tables suivantes :
 - **sources** : Sources d'information par journaliste
 - **articles** : Articles collectes
 - **daily_summaries** : Resumes generes
+- **delivery_channels** : Canaux de distribution (Telegram/Email/WhatsApp)
 - **subscribers** : Abonnes des bots
 - **subscription_plans** : Forfaits disponibles
 - **activity_logs** : Historique d'activite

@@ -128,6 +128,28 @@ Historique des actions sur la plateforme.
 | level | String(20) | Niveau (info/warning/error) |
 | created_at | DateTime | Date de l'action |
 
+## DeliveryChannel (Canal de livraison)
+
+Canaux de distribution des resumes (Telegram, Email, WhatsApp).
+
+| Champ | Type | Description |
+|-------|------|-------------|
+| id | Integer | Identifiant unique |
+| journalist_id | Integer | FK vers Journalist |
+| channel_type | String(20) | Type (telegram/email/whatsapp) |
+| is_active | Boolean | Canal actif |
+| telegram_token | String(255) | Token bot Telegram |
+| email_address | String(255) | Email destinataire |
+| smtp_server | String(255) | Serveur SMTP (ex: smtp.gmail.com) |
+| smtp_port | Integer | Port SMTP (defaut: 587) |
+| smtp_username | String(255) | Identifiant SMTP |
+| smtp_password | String(255) | Mot de passe SMTP |
+| whatsapp_phone_number | String(20) | Numero WhatsApp (+1234567890) |
+| whatsapp_api_key | String(255) | Cle API WhatsApp |
+| whatsapp_account_id | String(255) | ID compte WhatsApp |
+| created_at | DateTime | Date creation |
+| updated_at | DateTime | Derniere modification |
+
 ## Settings (Parametres)
 
 Parametres de configuration systeme.
