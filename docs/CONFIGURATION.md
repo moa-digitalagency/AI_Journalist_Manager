@@ -58,9 +58,10 @@ Toutes les variables doivent être configurées dans le **Secrets** de Replit.
 - **Fuseau horaire** : Le résumé est envoyé à l'heure locale du journaliste
 - **Heure de résumé** : Heure d'envoi quotidien (ex: 08:00)
 
-**Bot Telegram:**
-- **Token** : Obtenu de @BotFather sur Telegram
-- **Chat ID** : ID du chat privé du bot
+**Canaux de livraison (Telegram, Email, WhatsApp):**
+- **Telegram Token** : Obtenu de @BotFather (bot public)
+- **Email SMTP** : Configuration serveur email (Gmail, Outlook, etc.)
+- **WhatsApp** : Numéro de téléphone + credentials Twilio
 
 **Audio (Optionnel):**
 - **Eleven Labs Voice ID** : ID de la voix pour la synthèse vocale TTS
@@ -229,10 +230,64 @@ Accessibles via `/admin/settings/` :
 
 ---
 
+## Configuration des canaux de livraison
+
+### Telegram (Bot Public)
+
+**Création du bot:**
+1. Ouvrir Telegram et chercher @BotFather
+2. Envoyer `/newbot`
+3. Suivre les instructions
+4. Copier le **token** fourni
+5. Utiliser ce token dans la création du journaliste
+
+**Fonctionnalités:**
+- ✅ Bot public (n'importe qui peut envoyer des messages)
+- ✅ Conversations naturelles
+- ✅ Recherche d'articles par date (`/articles DD/MM/YYYY`)
+- ✅ Résumés quotidiens
+
+### Email (SMTP)
+
+**Exemples de configuration:**
+
+**Gmail:**
+- Serveur: `smtp.gmail.com`
+- Port: `587`
+- Email: votre@gmail.com
+- Mot de passe: Mot de passe d'application (généré dans les paramètres Gmail)
+
+**Outlook:**
+- Serveur: `smtp-mail.outlook.com`
+- Port: `587`
+- Email: votre@outlook.com
+- Mot de passe: votre mot de passe
+
+**Entreprise (Exchange):**
+- Serveur: votre serveur SMTP
+- Port: généralement 587 ou 465
+- Email: votre email
+- Mot de passe: votre mot de passe
+
+### WhatsApp (Twilio)
+
+Voir le [guide complet WhatsApp avec Twilio](WHATSAPP_BOT.md) pour configuration détaillée.
+
+**Résumé:**
+1. Créer un compte Twilio
+2. Configurer WhatsApp Business
+3. Obtenir credentials
+4. Configurer webhook
+5. Ajouter à un journaliste
+
+---
+
 ## Notes importantes
 
 1. **Clés API sécurisées** - Toutes les clés sont stockées dans Secrets, jamais en .env
 2. **Chaque journaliste a son IA** - Vous pouvez mixer Gemini, Perplexity, etc. pour différents journalistes
 3. **Fuseaux horaires** - Chaque journaliste a son propre fuseau horaire, indépendant du serveur
 4. **Essai gratuit** - Dure 7 jours par défaut, configurable
-5. **Telegram requis** - Un token Telegram valide est nécessaire pour chaque journaliste
+5. **Multi-canal** - Un journaliste peut utiliser Telegram + Email + WhatsApp simultanément
+6. **Historique des articles** - Tous les articles sont conservés et consultables par date
+7. **Webhooks** - Les webhooks Telegram et WhatsApp doivent être accessibles publiquement

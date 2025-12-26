@@ -219,3 +219,66 @@ Webhook pour recevoir les messages Telegram.
 2. Identification de l'abonne
 3. Traitement du message
 4. Reponse via API Telegram
+
+---
+
+## Webhooks WhatsApp
+
+### GET /whatsapp/webhook/<journalist_id>
+
+Verification du webhook WhatsApp (Twilio).
+
+**Parametres query:**
+- `hub.verify_token` : Token de verification
+- `hub.challenge` : Challenge code
+- `hub.mode` : "subscribe"
+
+**Reponse:** Code challenge (200) ou 403 si token invalide
+
+### POST /whatsapp/webhook/<journalist_id>
+
+Webhook pour recevoir les messages WhatsApp.
+
+**Corps:** Message JSON de Twilio
+
+**Traitement:**
+1. Verification du token
+2. Identification de l'abonne
+3. Creation si nouvel utilisateur
+4. Validation de l'abonnement
+5. Traitement du message ou commande
+6. Envoi via API Twilio
+
+**Commandes supportees:**
+- `/latest` - Dernier resume
+- `/articles DD/MM/YYYY` - Articles par date
+- Texte libre - Reponse IA
+
+---
+
+## Routes de livraison
+
+### POST /api/send-summary/<journalist_id>
+
+Envoie un resume a tous les abonnes actifs.
+
+**Parametres (JSON):**
+- `summary_text` : Texte du resume
+- `audio_url` : URL audio (optionnel)
+
+**Distribution:**
+- Telegram : Envoi par bot
+- Email : SMTP
+- WhatsApp : Twilio
+
+**Reponse:** 
+```json
+{
+  "status": "success",
+  "results": {
+    "telegram": true,
+    "email": true,
+    "whatsapp": false
+  }
+}
+```

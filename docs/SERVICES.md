@@ -198,6 +198,59 @@ results = DeliveryService.send_summary_to_channels(
 
 ---
 
+## WhatsApp Service (`services/whatsapp_service.py`)
+
+Service de gestion des conversations et webhooks WhatsApp.
+
+### Fonctionnalites
+
+- Conversation naturelle avec abonnés
+- Validation des abonnements
+- Recherche d'articles par date
+- Gestion des commandes
+
+### Methodes principales
+
+```python
+def is_subscriber_approved(subscriber) -> (bool, str)
+```
+Vérifie si l'abonné est approuvé et actif. Retourne (bool, message).
+
+```python
+def handle_message(journalist, subscriber, message: str) -> str
+```
+Traite un message naturel et retourne une réponse IA.
+
+```python
+def search_articles_by_date(journalist_id: int, target_date: str) -> str
+```
+Recherche les articles d'une date (DD/MM/YYYY ou YYYY-MM-DD).
+
+```python
+def get_latest_summary(journalist_id: int) -> str
+```
+Récupère le dernier résumé généré.
+
+### Exemple d'utilisation
+
+```python
+from services.whatsapp_service import WhatsAppService
+
+# Vérifier l'abonnement
+is_approved, message = WhatsAppService.is_subscriber_approved(subscriber)
+if not is_approved:
+    send_message(subscriber.whatsapp_phone, message)
+    return
+
+# Traiter un message
+response = WhatsAppService.handle_message(journalist, subscriber, "Quelles sont les dernières nouvelles ?")
+
+# Rechercher par date
+articles = WhatsAppService.search_articles_by_date(journalist.id, "26/12/2025")
+```
+
+---
+
 ## Integration des services
 
 ### Flux de collecte quotidien

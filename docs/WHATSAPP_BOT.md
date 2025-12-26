@@ -1,129 +1,309 @@
-# WhatsApp Bot Documentation
+# Configuration WhatsApp Bot - Guide Complet
 
-## Overview
+## 🎯 Vue d'ensemble
 
-The WhatsApp bot provides multi-channel conversation handling similar to the Telegram bot, with natural language query support, subscription validation, and article history search.
+Le bot WhatsApp permet de distribuer des résumés et d'interagir avec les abonnés sur WhatsApp, similaire au bot Telegram. Les utilisateurs peuvent :
+- Recevoir les résumés quotidiens automatiquement
+- Poser des questions en langage naturel
+- Rechercher des articles par date
+- Être validés par un administrateur avant l'accès
 
-## Features
+---
 
-### 1. Conversation Handling
-- Natural language message processing
-- Automatic subscriber registration
-- Subscription validation with admin approval
+## 📋 Prérequis
 
-### 2. Subscription Validation
-- New subscribers automatically marked as pending
-- Admin must approve before access
-- Unapproved users receive notification message
-- Expiration date support
+- **Compte Twilio** (gratuit ou payant)
+- **Numéro de téléphone Twilio** (ou number WhatsApp Business)
+- **Credentials Twilio** (Account SID, Auth Token)
+- **URL publique** de votre app (pour le webhook)
 
-### 3. Article Search
-- Search articles by date (DD/MM/YYYY or YYYY-MM-DD format)
-- Natural language keyword search
-- Returns matching articles with source and time
+---
 
-### 4. Commands
-- `/latest` - Get the latest summary
-- `/articles DD/MM/YYYY` - Search articles by date
-- Any natural language query - AI-powered response using article context
+## 🚀 Étape 1 : Créer un compte Twilio
 
-## Configuration
+### 1.1 Inscription
 
-### Setup
+1. Aller sur [twilio.com](https://www.twilio.com)
+2. Cliquer sur **"Sign Up"** (gratuit)
+3. Remplir le formulaire avec :
+   - Email
+   - Mot de passe
+   - Nom complet
+4. Vérifier votre email et confirmer
 
-1. **Twilio Account**: Create WhatsApp Business Account
-2. **Delivery Channel**: Configure in journalist form
-   - Phone number: `+1234567890` format
-   - Account ID: Twilio Account SID
-   - API Key: Twilio Auth Token
+### 1.2 Vérification du téléphone
 
-3. **Webhook**: Configure Twilio webhook to:
+1. Twilio vous demandera de vérifier un numéro de téléphone
+2. Entrer votre numéro au format international : `+33612345678` (France)
+3. Recevoir un code par SMS
+4. Entrer le code pour confirmer
+
+### 1.3 Accéder au Tableau de bord Twilio
+
+1. Une fois connecté, vous arrivez sur le **Twilio Console**
+2. Vous verrez votre **Account SID** et **Auth Token** (les sauvegarder !)
+3. C'est ici qu'on configurera WhatsApp
+
+---
+
+## 📱 Étape 2 : Configurer WhatsApp sur Twilio
+
+### 2.1 Activer WhatsApp
+
+1. Sur le **Twilio Console**, chercher **"Messaging"** → **"Try it out"** ou **"Messaging"** → **"Services"**
+2. Ou directement : aller à [console.twilio.com/us/account/messaging/services](https://console.twilio.com/us/account/messaging/services)
+3. Cliquer sur **"Explore Products"** → **"Messaging"**
+4. Chercher **"WhatsApp"** dans le menu à gauche
+
+### 2.2 Configurer le sandbox WhatsApp (Gratuit - Pour test)
+
+**Pour tester rapidement :**
+
+1. Aller à **Messaging** → **Try it Out** → **WhatsApp**
+2. Vous verrez un **Sandbox WhatsApp** pré-configuré
+3. **Numéro Twilio WhatsApp** : quelque chose comme `+1(XXX) XXX-XXXX`
+4. Pour envoyer un message test :
+   - Ouvrir WhatsApp
+   - Envoyer `join <code>` au numéro Twilio
+   - Exemple : `join rapid-lion` (le code sera affiché dans Twilio)
+
+### 2.3 Configurer WhatsApp Business (Production)
+
+**Pour utiliser en production avec votre propre numéro :**
+
+1. Aller à **Messaging** → **WhatsApp Senders**
+2. Cliquer **"Create Sender"**
+3. Remplir les informations :
+   - Nom de l'entreprise
+   - Catégorie
+   - Numéro de téléphone (votre numéro business)
+4. Twilio vous guidera pour :
+   - Vérifier le numéro
+   - Obtenir l'approbation de Meta/WhatsApp
+5. Une fois approuvé, vous aurez accès à votre numéro business
+
+---
+
+## 🔑 Étape 3 : Obtenir les Credentials
+
+### 3.1 Account SID et Auth Token
+
+1. Aller au [Twilio Console](https://console.twilio.com)
+2. En haut, vous verrez :
    ```
-   https://yourapp.com/whatsapp/webhook/<journalist_id>
+   Account SID: ACxxxxxxxxxxxxxxxxxxxxxxxxx
+   Auth Token: (cliquer sur l'œil pour afficher)
    ```
+3. **Les copier et les sauvegarder** (vous les utiliserez dans la config)
 
-4. **Webhook Token**: Update `VERIFY_TOKEN` in `routes/whatsapp.py` (use environment variable in production)
+### 3.2 Numéro WhatsApp
 
-### Database
+1. Si vous utilisez le **Sandbox** : le numéro est affiché dans Messaging → WhatsApp
+2. Si vous avez **WhatsApp Business** : le numéro sera affiché après approbation
 
-Subscribers table now supports:
-- `channel_type` - 'telegram' or 'whatsapp'
-- `whatsapp_phone` - Phone number in +1234567890 format
-- `is_approved` - Admin approval status
-- `is_active` - Subscription active status
+---
 
-## Message Flow
+## 🔗 Étape 4 : Configurer le Webhook
 
+### 4.1 Obtenir votre URL publique
+
+Votre app doit être **accessible publiquement** depuis Internet.
+
+**Sur Replit :**
+- L'URL publique est automatiquement générée
+- Format : `https://[project-name].replit.dev`
+
+**Sur votre serveur :**
+- Utiliser votre domaine ou adresse IP publique
+- S'assurer que le port 5000 est exposé (ou votre port)
+
+### 4.2 URL du webhook
+
+L'URL du webhook pour le **journaliste N°1** serait :
 ```
-WhatsApp Message
-       ↓
-Webhook Handler (/whatsapp/webhook/<journalist_id>)
-       ↓
-Find/Create Subscriber
-       ↓
-Check Approval Status
-       ├─ Not Approved → Send Validation Message
-       └─ Approved → Process Message
-           ├─ /latest → Get Latest Summary
-           ├─ /articles <date> → Search by Date
-           └─ Natural Language → AI Response
-                    ↓
-              Search Articles
-                    ↓
-              AI Service Answer
-                    ↓
-          Send Response via Twilio
+https://[votre-domain]/whatsapp/webhook/1
 ```
 
-## WhatsAppService Methods
+Remplacer :
+- `[votre-domain]` par votre URL publique
+- `1` par l'ID du journaliste (visible dans l'admin)
 
-### `is_subscriber_approved(subscriber) -> (bool, str)`
-Check if subscriber is approved and active.
+### 4.3 Configurer dans Twilio
 
-### `handle_message(journalist, subscriber, message: str) -> str`
-Process natural language message with article context.
+1. Aller à **Messaging** → **Settings** → **WhatsApp**
+2. Ou **Phone Numbers** → sélectionner votre numéro → **Webhooks**
+3. Chercher **"When a message comes in"**
+4. Entrer votre URL du webhook :
+   ```
+   https://[votre-domain]/whatsapp/webhook/1
+   ```
+5. **Cocher** "Use webhook"
+6. Sauvegarder
 
-### `search_articles_by_date(journalist_id: int, target_date: str) -> str`
-Search articles by date and return formatted list.
+### 4.5 (Optionnel) Configurer les webhooks de statut
 
-### `get_latest_summary(journalist_id: int) -> str`
-Get most recent summary text.
+Pour suivre si les messages sont livrés/lus :
 
-## Error Handling
+1. **When message status changes** : entrer la même URL
+2. Sauvegarder
 
-- Missing subscriber - auto-register and notify
-- Unapproved account - send validation message
-- Expired subscription - notify user
-- Invalid date format - return format hint
-- Twilio errors - log and return error message
+---
 
-## Security
+## ⚙️ Étape 5 : Configurer dans AI Journalist Manager
 
-- Webhook verification with token
-- Subscription validation before access
-- Message from authorized phone only
-- Admin approval required for new users
+### 5.1 Créer/Modifier un Journaliste
 
-## Environment Variables
+1. Aller à `/admin/journalists/`
+2. Créer ou modifier un journaliste
+3. Aller à la section **"Canaux de livraison"**
+4. Cliquer **"Ajouter WhatsApp"**
+
+### 5.2 Remplir les informations WhatsApp
 
 ```
-WHATSAPP_VERIFY_TOKEN=<your-token>  # Webhook verification
+Numéro de téléphone WhatsApp : +1234567890
+    (Format international, avec le +)
+
+Account ID Twilio : ACxxxxxxxxxxxxxxxxxxxxxxxxx
+    (Votre Account SID du dashboard Twilio)
+
+API Key Twilio : 89xxxxxxxxxxxxxxxxxxxxxxxxx
+    (Votre Auth Token du dashboard Twilio)
 ```
 
-## Testing
+### 5.3 Tester
 
-Create test subscriber:
-```python
-from models import Subscriber
-sub = Subscriber(
-    journalist_id=1,
-    whatsapp_phone="+1234567890",
-    channel_type='whatsapp',
-    is_approved=True,
-    is_active=True
-)
-db.session.add(sub)
-db.session.commit()
+1. Depuis WhatsApp sur votre téléphone
+2. Envoyer un message au numéro Twilio WhatsApp
+3. Si bien configuré, le bot devrait répondre
+
+---
+
+## 💬 Utilisation du Bot WhatsApp
+
+### Commandes disponibles
+
+- **`/latest`** - Récupère le dernier résumé
+- **`/articles DD/MM/YYYY`** - Recherche les articles d'une date spécifique
+- **Texte libre** - Question en langage naturel
+
+### Exemples
+
+```
+Utilisateur : /latest
+Bot : [Envoie le dernier résumé généré]
+
+Utilisateur : /articles 26/12/2025
+Bot : [Affiche les articles du 26/12/2025]
+
+Utilisateur : Qu'y a-t-il de nouveau en intelligence artificielle ?
+Bot : [Recherche dans les articles et répond]
 ```
 
-Send test via Twilio API or webhook simulator.
+### Validation des abonnés
+
+- **Nouveau utilisateur** : Automatiquement créé comme "non approuvé"
+- **Message reçu** : Le bot notifie que l'accès est en attente d'approbation
+- **Admin approuve** : Va dans `/admin/subscribers/`, trouve l'utilisateur, marque "approuvé"
+- **Ensuite** : L'utilisateur peut utiliser le bot normalement
+
+---
+
+## 🛠️ Dépannage
+
+### "Le webhook ne reçoit pas de messages"
+
+1. Vérifier que l'URL du webhook est correcte dans Twilio
+2. Tester l'URL publiquement : aller sur `https://votre-domain/whatsapp/webhook/1`
+   - Devrait retourner `403 Forbidden` (c'est normal, pas de GET)
+3. Vérifier les logs de Twilio (Console → Message Logs)
+4. Vérifier les logs de votre app (`/admin/logs/`)
+
+### "Messages d'erreur 'Unauthorized' ou 'Forbidden'"
+
+1. Vérifier le token dans Twilio Console (peut avoir changé)
+2. Vérifier que le Account SID est correct
+3. Twilio peut regénérer l'Auth Token - utiliser le nouveau
+
+### "Le bot ne répond pas"
+
+1. Vérifier que le journaliste est **actif**
+2. Vérifier que le journaliste a au moins **1 source active**
+3. Vérifier que le modèle IA est configuré
+4. Regarder les logs : `/admin/logs/`
+
+### "Le webhook retourne une erreur 500"
+
+1. Regarder dans `/admin/logs/` pour l'erreur exacte
+2. Vérifier que tous les champs WhatsApp sont remplis
+3. Vérifier que le journaliste existe (id correct dans l'URL du webhook)
+
+---
+
+## 💰 Coûts Twilio
+
+### Gratuit (avec crédit d'essai)
+- Twilio donne $15 de crédit d'essai
+- Sandbox WhatsApp : **gratuit pour tester**
+- Idéal pour développement/test
+
+### Production
+- **WhatsApp Message Template** : ~$0.003 par message
+- **Inbound Message** : ~$0.0085 par message
+- **Coûts varient par région**
+
+Voir [Twilio Pricing](https://www.twilio.com/pricing) pour détails complets.
+
+---
+
+## 📊 Monitorer les messages
+
+### Via Twilio Console
+
+1. **Messaging** → **Logs** → **Message Logs**
+2. Vous verrez tous les messages envoyés/reçus
+3. Statuts : Queued, Failed, Sent, Delivered, Undelivered, Read
+
+### Via AI Journalist Manager
+
+1. `/admin/logs/` - Tous les logs d'activité
+2. Rechercher les messages WhatsApp
+3. Voir les erreurs et succès
+
+---
+
+## 🔒 Sécurité
+
+- **Ne jamais** partager votre Auth Token
+- **Stocker** dans Replit Secrets, pas en .env
+- **Webhooks** vérifiés par token (voir `routes/whatsapp.py`)
+- **Abonnés** doivent être approuvés par admin
+
+---
+
+## 📞 Support
+
+- **Twilio Help** : [support.twilio.com](https://support.twilio.com)
+- **Documentation Twilio WhatsApp** : [twilio.com/docs/whatsapp](https://www.twilio.com/docs/whatsapp)
+- **Vérifier les logs** : `/admin/logs/` dans votre app
+- **Contactez l'admin** de votre instance AI Journalist Manager
+
+---
+
+## 🎓 Résumé de la configuration
+
+| Étape | Action |
+|-------|--------|
+| 1 | Créer compte Twilio (gratuit) |
+| 2 | Activer WhatsApp (Sandbox ou Business) |
+| 3 | Copier Account SID et Auth Token |
+| 4 | Configurer webhook dans Twilio |
+| 5 | Ajouter WhatsApp à un journaliste |
+| 6 | Tester en envoyant un message |
+| 7 | Admin approuve le nouvel utilisateur |
+| 8 | Utilisateur peut utiliser le bot |
+
+---
+
+*Guide mis à jour : Décembre 2025*  
+*AI Journalist Manager v1.0 - WhatsApp Integration*

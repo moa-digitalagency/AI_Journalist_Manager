@@ -40,25 +40,54 @@ Chaque jour, à l'heure que vous avez choisie :
 
 ---
 
-## Utilisation de Telegram
+## Utilisation des canaux de communication
 
-### Pourquoi Telegram ?
+Votre journaliste virtuel peut vous contacter via **plusieurs canaux** selon votre préférence :
 
-Telegram est une application de messagerie gratuite, sécurisée et facile à utiliser. Elle permet à votre journaliste virtuel de vous contacter directement sur votre téléphone ou ordinateur.
+### Telegram
 
-### Comment ça fonctionne ?
+**Avantages:**
+- ✅ Gratuit
+- ✅ Sécurisé
+- ✅ Conversations naturelles
+- ✅ Recherche d'articles par date
 
-1. Téléchargez Telegram sur votre téléphone ou ordinateur
-2. Créez un compte (gratuit)
-3. Cherchez le bot de votre journaliste (son nom vous sera communiqué)
-4. Envoyez-lui un message pour commencer
+**Comment utiliser:**
+1. Téléchargez Telegram
+2. Cherchez le bot de votre journaliste
+3. Envoyez `/start` pour commencer
+
+### Email
+
+**Avantages:**
+- ✅ Format HTML beau et lisible
+- ✅ Archivage facile
+- ✅ Partage simple par email
+
+**Comment utiliser:**
+- Recevez automatiquement les résumés dans votre boîte email
+- Consultez à votre rythme
+
+### WhatsApp
+
+**Avantages:**
+- ✅ Direct sur votre téléphone
+- ✅ Conversations naturelles
+- ✅ Recherche d'articles par date
+- ✅ Notifications push
+
+**Comment utiliser:**
+1. Recevez un message WhatsApp de votre journaliste
+2. Répondez pour poser des questions
+3. Utilisez les commandes : `/latest`, `/articles DD/MM/YYYY`
 
 ### Ce que vous pouvez faire
 
-- **Recevoir les résumés quotidiens** : Automatiquement, chaque jour
+- **Recevoir les résumés quotidiens** : Automatiquement, chaque jour via vos canaux
 - **Poser des questions** : "Qu'as-tu lu sur l'intelligence artificielle cette semaine ?"
 - **Demander des précisions** : "Peux-tu me donner plus de détails sur cette nouvelle ?"
-- **Chercher une information** : "Y a-t-il eu des nouvelles sur [sujet] récemment ?"
+- **Chercher une information par date** : "Que s'est-il passé le 25/12/2025 ?"
+- **Rechercher un sujet** : "Y a-t-il eu des nouvelles sur [sujet] récemment ?"
 
 ---
 
