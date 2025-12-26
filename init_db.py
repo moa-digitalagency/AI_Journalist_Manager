@@ -50,13 +50,29 @@ def check_environment():
 
 def init_database():
     """Initialize database tables."""
-    from app import app
-    from models import db
+    from app import app, db
+    import models
     
     with app.app_context():
         logger.info("Creating database tables...")
+        # create_all() is idempotent, it only creates tables that don't exist
         db.create_all()
-        logger.info("Database tables created successfully")
+        
+        # Simple migration: check for specific columns if needed
+        # Example: check if 'is_superadmin' exists in 'user' table
+        try:
+            from sqlalchemy import inspect
+            inspector = inspect(db.engine)
+            columns = [c['name'] for c in inspector.get_columns('user')]
+            if 'is_superadmin' not in columns:
+                logger.info("Adding 'is_superadmin' column to 'user' table...")
+                db.session.execute(db.text('ALTER TABLE "user" ADD COLUMN is_superadmin BOOLEAN DEFAULT FALSE'))
+                db.session.commit()
+        except Exception as e:
+            logger.warning(f"Manual migration check failed (this is usually okay if it's the first run): {e}")
+            db.session.rollback()
+
+        logger.info("Database tables verified/created successfully")
 
 def init_roles():
     """Initialize default user roles."""
@@ -167,6 +183,7 @@ def init_default_settings():
             {'key': 'fetch_minute', 'value': '0', 'description': 'Minute de collecte (0-59)'},
             {'key': 'summary_check_interval', 'value': 'hourly', 'description': 'Intervalle de vérification des résumés (hourly)'},
             {'key': 'default_timezone', 'value': 'Europe/Paris', 'description': 'Fuseau horaire par défaut'},
+            {'key': 'maintenance_mode', 'value': 'false', 'description': 'Mode maintenance'},
         ],
         'api': [
             {'key': 'default_ai_model', 'value': 'perplexity', 'description': 'Modèle IA par défaut (perplexity, gemini, openai, openrouter)'},
