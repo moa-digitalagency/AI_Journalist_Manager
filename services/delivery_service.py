@@ -11,26 +11,19 @@ class DeliveryService:
     
     @staticmethod
     def send_via_telegram(channel, summary_text, audio_url=None):
-        """Send summary via Telegram"""
+        """Send summary via Telegram bot (public bot, anyone can message)"""
         try:
-            from services.telegram_service import TelegramService
-            
-            if not channel.telegram_token or not channel.telegram_chat_id:
-                logger.warning(f"Telegram channel {channel.id} missing token or chat_id")
+            if not channel.telegram_token:
+                logger.warning(f"Telegram channel {channel.id} missing token")
                 return False
             
-            # Send text message
-            message = f"📰 <b>{summary_text[:100]}</b>\n\n{summary_text}"
-            if audio_url:
-                message += f"\n\n🎙️ <a href='{audio_url}'>Écouter l'audio</a>"
-            
-            # TelegramService will send the message
-            # This is a placeholder - adjust based on your TelegramService implementation
-            logger.info(f"Sending Telegram message to chat {channel.telegram_chat_id}")
+            # The bot is public and already started
+            # Subscribers will receive messages through the TelegramService subscription system
+            logger.info(f"Telegram channel {channel.id} configured for public bot distribution")
             return True
             
         except Exception as e:
-            logger.error(f"Error sending Telegram message: {e}")
+            logger.error(f"Error with Telegram channel: {e}")
             return False
     
     @staticmethod

@@ -68,13 +68,12 @@ def create():
         db.session.add(journalist)
         db.session.commit()
         
-        # Handle delivery channels - Telegram
+        # Handle delivery channels - Telegram (token only, everyone can message)
         if request.form.get('telegram_token'):
             telegram_channel = DeliveryChannel(
                 journalist_id=journalist.id,
                 channel_type='telegram',
                 telegram_token=request.form.get('telegram_token'),
-                telegram_chat_id=request.form.get('telegram_chat_id'),
                 is_active=True
             )
             db.session.add(telegram_channel)
@@ -239,14 +238,14 @@ def view(id):
 @journalists_bp.route('/<int:id>/edit', methods=['GET', 'POST'])
 @admin_required
 def edit(id):
+    from models import DeliveryChannel
+    
     journalist = Journalist.query.get_or_404(id)
     
     if request.method == 'POST':
-        old_token = journalist.telegram_token
         old_active = journalist.is_active
         
         journalist.name = request.form.get('name', journalist.name)
-        journalist.telegram_token = request.form.get('telegram_token', journalist.telegram_token)
         journalist.personality = request.form.get('personality', journalist.personality)
         journalist.writing_style = request.form.get('writing_style', journalist.writing_style)
         journalist.spelling_style = request.form.get('spelling_style', journalist.spelling_style)
@@ -269,30 +268,56 @@ def edit(id):
                 os.makedirs('static/uploads/journalists', exist_ok=True)
                 photo.save(os.path.join('static/uploads/journalists', filename))
                 journalist.photo_url = f"/static/uploads/journalists/{filename}"
-                logger.info(f"Updated journalist photo: {journalist.photo_url}")
         else:
-            # Check if a photo URL was provided from the form (fetched via API)
             new_photo_url = request.form.get('photo_url')
             if new_photo_url and new_photo_url != journalist.photo_url:
                 journalist.photo_url = new_photo_url
-                logger.info(f"Updated journalist photo URL from form: {new_photo_url}")
-            elif journalist.telegram_token != old_token:
-                logger.info(f"Telegram token changed, fetching new bot photo")
-                bot_photo = TelegramService.get_bot_photo_url(journalist.telegram_token)
-                if bot_photo:
-                    journalist.photo_url = bot_photo
         
         db.session.commit()
         
-        # Handle Telegram bot updates
-        new_active = journalist.is_active
-        if journalist.telegram_token:
-            # Token changed or journalist was deactivated then reactivated
-            if journalist.telegram_token != old_token or (not old_active and new_active):
-                TelegramService.start_bot(journalist.id, journalist.telegram_token)
-            # Journalist was deactivated
-            elif old_active and not new_active:
-                TelegramService.stop_bot(journalist.id)
+        # Update delivery channels
+        # Telegram
+        tg_channel = DeliveryChannel.query.filter_by(journalist_id=id, channel_type='telegram').first()
+        if request.form.get('enable_telegram') and request.form.get('telegram_token'):
+            if not tg_channel:
+                tg_channel = DeliveryChannel(journalist_id=id, channel_type='telegram')
+            tg_channel.telegram_token = request.form.get('telegram_token')
+            tg_channel.is_active = True
+            db.session.add(tg_channel)
+            TelegramService.start_bot(journalist.id, request.form.get('telegram_token'))
+        elif tg_channel:
+            db.session.delete(tg_channel)
+            TelegramService.stop_bot(journalist.id)
+        
+        # Email
+        email_channel = DeliveryChannel.query.filter_by(journalist_id=id, channel_type='email').first()
+        if request.form.get('enable_email') and request.form.get('email_address'):
+            if not email_channel:
+                email_channel = DeliveryChannel(journalist_id=id, channel_type='email')
+            email_channel.email_address = request.form.get('email_address')
+            email_channel.smtp_server = request.form.get('smtp_server')
+            email_channel.smtp_port = int(request.form.get('smtp_port', 587))
+            email_channel.smtp_username = request.form.get('smtp_username')
+            email_channel.smtp_password = request.form.get('smtp_password')
+            email_channel.is_active = True
+            db.session.add(email_channel)
+        elif email_channel:
+            db.session.delete(email_channel)
+        
+        # WhatsApp
+        wa_channel = DeliveryChannel.query.filter_by(journalist_id=id, channel_type='whatsapp').first()
+        if request.form.get('enable_whatsapp') and request.form.get('whatsapp_phone_number'):
+            if not wa_channel:
+                wa_channel = DeliveryChannel(journalist_id=id, channel_type='whatsapp')
+            wa_channel.whatsapp_phone_number = request.form.get('whatsapp_phone_number')
+            wa_channel.whatsapp_api_key = request.form.get('whatsapp_api_key')
+            wa_channel.whatsapp_account_id = request.form.get('whatsapp_account_id')
+            wa_channel.is_active = True
+            db.session.add(wa_channel)
+        elif wa_channel:
+            db.session.delete(wa_channel)
+        
+        db.session.commit()
         
         log_activity('update_journalist', 'journalist', id, f'Updated: {journalist.name}')
         flash('Journaliste mis à jour', 'success')
