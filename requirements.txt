@@ -180,3 +180,8 @@ psycopg2-binary
 python-telegram-bot
 requests
 youtube-transcript-api
+email_validator
+flask
+flask-sqlalchemy
+gunicorn
+psycopg2-binary
