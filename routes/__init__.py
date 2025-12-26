@@ -8,6 +8,7 @@ from routes.users import users_bp
 from routes.settings import settings_bp
 from routes.api import api_bp
 from routes.journalist_stats import journalist_stats_bp
+from routes.whatsapp import whatsapp_bp
 
 def register_blueprints(app):
     app.register_blueprint(auth_bp)
@@ -20,3 +21,4 @@ def register_blueprints(app):
     app.register_blueprint(users_bp, url_prefix='/admin/users')
     app.register_blueprint(settings_bp, url_prefix='/admin/settings')
     app.register_blueprint(api_bp, url_prefix='/api')
+    app.register_blueprint(whatsapp_bp)

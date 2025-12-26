@@ -7,8 +7,10 @@ class Subscriber(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     journalist_id = db.Column(db.Integer, db.ForeignKey('journalists.id'), nullable=False)
     plan_id = db.Column(db.Integer, db.ForeignKey('subscription_plans.id'))
-    telegram_user_id = db.Column(db.String(50), nullable=False)
+    channel_type = db.Column(db.String(20), default='telegram')  # telegram, whatsapp
+    telegram_user_id = db.Column(db.String(50))
     telegram_username = db.Column(db.String(100))
+    whatsapp_phone = db.Column(db.String(20))  # Format: +1234567890
     first_name = db.Column(db.String(100))
     last_name = db.Column(db.String(100))
     is_approved = db.Column(db.Boolean, default=False)
@@ -22,5 +24,5 @@ class Subscriber(db.Model):
     plan = db.relationship('SubscriptionPlan', backref='subscribers')
     
     __table_args__ = (
-        db.UniqueConstraint('journalist_id', 'telegram_user_id', name='unique_subscriber'),
+        db.UniqueConstraint('journalist_id', 'telegram_user_id', name='unique_telegram_subscriber'),
     )

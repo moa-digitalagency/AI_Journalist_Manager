@@ -118,11 +118,13 @@ def create():
 def view(id):
     from zoneinfo import ZoneInfo
     from sqlalchemy import func
+    from models import DeliveryChannel
     
     journalist = Journalist.query.get_or_404(id)
     sources = Source.query.filter_by(journalist_id=id).all()
     recent_articles = Article.query.filter_by(journalist_id=id).order_by(Article.fetched_at.desc()).limit(20).all()
     recent_summaries = DailySummary.query.filter_by(journalist_id=id).order_by(DailySummary.created_at.desc()).limit(5).all()
+    delivery_channels = DeliveryChannel.query.filter_by(journalist_id=id).all()
     
     # Get current time in journalist's timezone
     try:
@@ -233,6 +235,7 @@ def view(id):
                          sources=sources,
                          recent_articles=recent_articles,
                          recent_summaries=recent_summaries,
+                         delivery_channels=delivery_channels,
                          stats=stats_data)
 
 @journalists_bp.route('/<int:id>/edit', methods=['GET', 'POST'])
