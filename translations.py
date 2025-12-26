@@ -26,9 +26,18 @@ load_translations()
 
 def get_translation(key, lang='fr'):
     """Get a translation for a given key and language."""
+    if not TRANSLATIONS:
+        load_translations()
+    
     if lang not in TRANSLATIONS:
         lang = 'fr'
-    return TRANSLATIONS.get(lang, {}).get(key, key)
+    
+    # Try to find the key, if not found return the key itself
+    val = TRANSLATIONS.get(lang, {}).get(key)
+    if val is None:
+        # Fallback to English if French key is missing
+        val = TRANSLATIONS.get('en', {}).get(key, key)
+    return val
 
 
 def get_all_translations(lang='fr'):

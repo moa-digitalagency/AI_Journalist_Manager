@@ -80,9 +80,15 @@ def init_roles():
     from models import db, Role
     
     with app.app_context():
-        if Role.query.first():
-            logger.info("Roles already exist, skipping...")
-            return
+        # Check if roles table exists and has data
+        try:
+            if Role.query.first():
+                logger.info("Roles already exist, skipping...")
+                return
+        except Exception as e:
+            logger.warning(f"Could not check roles (table might not exist yet): {e}")
+            # Ensure tables are created if they somehow weren't
+            db.create_all()
         
         logger.info("Creating default roles...")
         roles = [
@@ -130,9 +136,13 @@ def init_subscription_plans():
     from models import db, SubscriptionPlan
     
     with app.app_context():
-        if SubscriptionPlan.query.first():
-            logger.info("Subscription plans already exist, skipping...")
-            return
+        try:
+            if SubscriptionPlan.query.first():
+                logger.info("Subscription plans already exist, skipping...")
+                return
+        except Exception as e:
+            logger.warning(f"Could not check plans: {e}")
+            db.create_all()
         
         logger.info("Creating default subscription plans...")
         plans = [
